@@ -71,14 +71,12 @@ export default function AppointmentPage() {
                   <td className="px-6 py-3 border border-gray-700">
                     {a.date ? new Date(a.date).toLocaleString() : "N/A"}
                   </td>
+                  <td className="px-6 py-3 border border-gray-700">{a.time}</td>
                   <td className="px-6 py-3 border border-gray-700">
-                    {a.time || "—"}
+                    {a.amount}
                   </td>
                   <td className="px-6 py-3 border border-gray-700">
-                    {a.amount ?? "0"}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-700">
-                    {a.discount ?? "0"}
+                    {a.discount}
                   </td>
                   <td className="px-6 py-3 border border-gray-700">
                     {a.status}
