@@ -176,12 +176,12 @@ export default function EquipmentListView() {
   const [data, setData] = React.useState<EquipmentItem[]>([]);
 
   React.useEffect(() => {
-    fetchCustomers();
+    fetchEquipments();
   }, []);
 
-  const fetchCustomers = async () => {
-    const customers = await getAllEquipments();
-    setData(customers);
+  const fetchEquipments = async () => {
+    const equipments = await getAllEquipments();
+    setData(equipments);
   };
 
   const table = useReactTable({
