@@ -1,7 +1,10 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import axios from "axios";
 
-export async function getAllAppointments() {
-  const res = await fetch(`${BASE_URL}/appointments`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch appointments");
-  return res.json();
-}
+const API_URL =
+  "https://express-mongo-connection-sigma.vercel.app/api/appointments";
+
+export const getAllAppointments = async () => {
+  const response = await axios.get(API_URL);
+  console.log(response);
+  return response.data.appointments;
+};
