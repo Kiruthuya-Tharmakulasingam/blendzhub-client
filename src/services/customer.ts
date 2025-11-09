@@ -1,7 +1,10 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import axios from "axios";
 
-export async function getAllCustomers() {
-  const res = await fetch(`${BASE_URL}/customers`, { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch customers");
-  return res.json();
-}
+const API_URL =
+  "https://express-mongo-connection-sigma.vercel.app/api/customers";
+
+export const getAllCustomers = async () => {
+  const response = await axios.get(API_URL);
+  console.log(response);
+  return response.data.customers;
+};
