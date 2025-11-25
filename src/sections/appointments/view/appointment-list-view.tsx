@@ -13,6 +13,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
+
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -35,9 +36,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
 import { getAllAppointments } from "@/services/appointment";
 import { AppointmentItem } from "@/types/appointments";
-import { useRouter } from "next/router";
 
 export const columns: ColumnDef<AppointmentItem>[] = [
   {
@@ -63,75 +64,87 @@ export const columns: ColumnDef<AppointmentItem>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Name
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("name")}</div>,
+    id: "customerName",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Customer
+        <ArrowUpDown />
+      </Button>
+    ),
+    accessorFn: (row) => row.customerId?.name || "—",
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("customerName")}</div>
+    ),
   },
   {
-    accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown />
-        </Button>
-      );
-    },
+    id: "email",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Email
+        <ArrowUpDown />
+      </Button>
+    ),
+    accessorFn: (row) => row.customerId?.email || "—",
     cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
   },
   {
-    accessorKey: "createdAt",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          CreatedAt
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("createdAt")}</div>
-    ),
+    id: "staffName",
+    header: "Staff",
+    accessorFn: (row) => row.staffId?.name || "—",
   },
   {
-    accessorKey: "updatedAt",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          UpdatedAt
-          <ArrowUpDown />
-        </Button>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("updatedAt")}</div>
-    ),
+    id: "serviceName",
+    header: "Service",
+    accessorFn: (row) => row.serviceId?.name || "—",
+  },
+  {
+    id: "salonName",
+    header: "Salon",
+    accessorFn: (row) => row.salonId?.name || "—",
+  },
+  {
+    id: "date",
+    header: "Date",
+    accessorFn: (row) => row.date?.toString().slice(0, 10) || "—",
+  },
+  {
+    id: "time",
+    header: "Time",
+    accessorFn: (row) => row.time || "—",
+  },
+  {
+    id: "amount",
+    header: "Amount",
+    accessorFn: (row) => row.amount || 0,
+  },
+  {
+    id: "status",
+    header: "Status",
+    accessorFn: (row) => row.status || "—",
+  },
+  {
+    id: "createdAt",
+    header: "Created At",
+    accessorFn: (row) =>
+      row.createdAt ? new Date(row.createdAt).toLocaleString() : "—",
+  },
+  {
+    id: "updatedAt",
+    header: "Updated At",
+    accessorFn: (row) =>
+      row.updatedAt ? new Date(row.updatedAt).toLocaleString() : "—",
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const user = row.original;
-
+      const appointment = row.original;
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -143,19 +156,22 @@ export const columns: ColumnDef<AppointmentItem>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user._id)}
+              onClick={() => navigator.clipboard.writeText(appointment._id)}
             >
               View
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user._id)}
+              onClick={() => navigator.clipboard.writeText(appointment._id)}
             >
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user._id)}
-            >
-              <Button variant="destructive">Delete</Button>
+            <DropdownMenuItem>
+              <Button
+                variant="destructive"
+                onClick={() => navigator.clipboard.writeText(appointment._id)}
+              >
+                Delete
+              </Button>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -175,14 +191,19 @@ export default function AppointmentListView() {
 
   const [data, setData] = React.useState<AppointmentItem[]>([]);
 
+  // 🔥 FINAL FETCH — now works with token automatically
   React.useEffect(() => {
-    fetchAppointments();
-  }, []);
+    const loadData = async () => {
+      try {
+        const data = await getAllAppointments();
+        setData(data);
+      } catch (error) {
+        console.error("Error loading appointments:", error);
+      }
+    };
 
-  const fetchAppointments = async () => {
-    const appointments = await getAllAppointments();
-    setData(appointments);
-  };
+    loadData();
+  }, []);
 
   const table = useReactTable({
     data,
