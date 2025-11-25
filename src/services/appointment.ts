@@ -1,10 +1,12 @@
-import axios from "axios";
-
-const API_URL =
-  "https://express-mongo-connection-sigma.vercel.app/api/appointments";
+// services/appointment.ts
+import api from "../lib/axios"; // your axios instance
 
 export const getAllAppointments = async () => {
-  const response = await axios.get(API_URL);
-  console.log(response);
-  return response.data.appointments;
+  const res = await api.get("/appointments");
+  return res.data.data; // adjust based on your backend response
+};
+
+export const deleteAppointment = async (id: string) => {
+  const res = await api.delete(`/appointments/${id}`);
+  return res.data;
 };
