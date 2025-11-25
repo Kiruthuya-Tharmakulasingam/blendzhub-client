@@ -1,124 +1,97 @@
 "use client";
 
-import * as React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod";
+import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Field,
+  FieldLabel,
   FieldError,
   FieldGroup,
-  FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+const formSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+  password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
-function LoginPage() {
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+export default function LoginPage() {
+  const form = useForm({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = (data: z.infer<typeof loginSchema>) => {
-    toast("Login attempted with:", {
-      description: (
-        <pre className="bg-code text-code-foreground mt-2 w-[320px] overflow-x-auto rounded-md p-4">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-      position: "bottom-right",
-    });
+  const onSubmit = (data: any) => {
+    console.log("Login Data:", data);
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <Card className="w-full sm:max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black p-4">
+      <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Login</CardTitle>
           <CardDescription>
-            Enter your credentials to access your account.
+            Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
-              <Controller
-                name="email"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="email">Email</FieldLabel>
-                    <Input
-                      {...field}
-                      id="email"
-                      placeholder="you@example.com"
-                      aria-invalid={fieldState.invalid}
-                      autoComplete="email"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Controller
-                name="password"
-                control={form.control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input
-                      {...field}
-                      type="password"
-                      id="password"
-                      placeholder="Enter your password"
-                      aria-invalid={fieldState.invalid}
-                      autoComplete="current-password"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
+              <Field>
+                <FieldLabel>Email</FieldLabel>
+                <Input
+                  {...form.register("email")}
+                  type="email"
+                  placeholder="you@example.com"
+                />
+                <FieldError errors={[form.formState.errors.email]} />
+              </Field>
+
+              <Field>
+                <FieldLabel>Password</FieldLabel>
+                <Input
+                  {...form.register("password")}
+                  type="password"
+                  placeholder="Enter your password"
+                />
+                <FieldError errors={[form.formState.errors.password]} />
+              </Field>
             </FieldGroup>
-          </form>
-        </CardContent>
-        <CardFooter>
-          <Field orientation="horizontal">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => form.reset()}
-            >
-              Reset
-            </Button>
-            <Button type="submit" onClick={form.handleSubmit(onSubmit)}>
+
+            <Button type="submit" className="w-full mt-4">
               Login
             </Button>
-          </Field>
+          </form>
+        </CardContent>
+
+        <CardFooter className="flex justify-center">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            Don't have an account?{" "}
+            <Link
+              href="/auth/register/customer"
+              className="text-black font-semibold hover:underline dark:text-white"
+            >
+              Sign up
+            </Link>
+          </p>
         </CardFooter>
       </Card>
     </div>
   );
 }
-
-export default LoginPage;
