@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 import {
   Card,
@@ -28,6 +30,10 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,8 +42,23 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (data: any) => {
-    console.log("Login Data:", data);
+  const onSubmit = async (data: any) => {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await login(data);
+      // Redirection is handled by AuthContext
+    } catch (err: any) {
+      console.error("Login error:", err);
+      // Error is also displayed by toast in AuthContext, but we can show it here too if needed
+      // For now, let's rely on the toast or set a local error if strictly necessary for UI
+      // But based on the previous code, it seems they want an inline error.
+      // Let's see what AuthContext throws. It throws the error.
+      setError(err.response?.data?.message || err.message || "Login failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -51,6 +72,12 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent>
+          {error && (
+            <div className="mb-4 p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-md">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
@@ -74,8 +101,8 @@ export default function LoginPage() {
               </Field>
             </FieldGroup>
 
-            <Button type="submit" className="w-full mt-4">
-              Login
+            <Button type="submit" className="w-full mt-4" disabled={isSubmitting}>
+              {isSubmitting ? "Logging in..." : "Login"}
             </Button>
           </form>
         </CardContent>
@@ -95,3 +122,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
