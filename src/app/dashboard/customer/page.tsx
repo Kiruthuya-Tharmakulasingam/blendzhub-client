@@ -1,28 +1,60 @@
 "use client";
 
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Calendar, Clock, MapPin } from "lucide-react";
 
 export default function CustomerDashboard() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 dark:bg-black px-4">
-      <div className="bg-white dark:bg-zinc-900 shadow-lg rounded-2xl p-10 w-full max-w-lg text-center">
-        <h1 className="text-3xl font-bold text-black dark:text-white">
-          Customer Dashboard
-        </h1>
+    <ProtectedRoute allowedRoles={["customer"]}>
+      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
+        <Navbar />
+        
+        <main className="flex-1 py-12 px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-2">My Dashboard</h1>
+              <p className="text-zinc-600 dark:text-zinc-400">Manage your appointments and profile</p>
+            </div>
 
-        <p className="text-zinc-600 dark:text-zinc-400 mt-2">
-          Welcome to your dashboard!
-        </p>
+            <div className="grid gap-8 md:grid-cols-3">
+              <div className="md:col-span-2 space-y-6">
+                <h2 className="text-xl font-semibold">Upcoming Appointments</h2>
+                
+                {/* Placeholder for appointments */}
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12 text-center text-zinc-500">
+                    <Calendar className="h-12 w-12 mb-4 opacity-20" />
+                    <p className="mb-4">You have no upcoming appointments</p>
+                    <Button>Book Now</Button>
+                  </CardContent>
+                </Card>
+              </div>
 
-        <div className="mt-8">
-          <Link href="/auth/login">
-            <Button className="w-full py-3 text-lg font-semibold bg-black text-white hover:bg-black/90">
-              Logout
-            </Button>
-          </Link>
-        </div>
+              <div className="space-y-6">
+                <h2 className="text-xl font-semibold">Quick Actions</h2>
+                <Card>
+                  <CardContent className="p-6 space-y-4">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Clock className="mr-2 h-4 w-4" />
+                      History
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Saved Salons
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <Footer />
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
