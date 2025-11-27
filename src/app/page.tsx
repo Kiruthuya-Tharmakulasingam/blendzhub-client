@@ -3,62 +3,96 @@
 import * as React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { SignInModal } from "@/components/modals/SignInModal";
+import { SignUpModal } from "@/components/modals/SignUpModal";
+import { BecomeOwnerModal } from "@/components/modals/BecomeOwnerModal";
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const { isAuthenticated, user } = useAuth();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      router.push(`/dashboard/${user.role}`);
+    }
+  }, [isAuthenticated, user, router]);
+
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
-      <nav className="flex w-full items-center justify-between px-8 py-4 bg-white dark:bg-black shadow-md">
-        <h1 className="text-2xl font-bold text-black dark:text-white">
-          BlendzHub
-        </h1>
-        <div className="hidden sm:flex gap-6">
-          <Button variant="ghost">
-            <Link href="/auth/register/owner">Become a owner</Link>
-          </Button>
-          <Button variant="outline">
-            <Link href="/auth/register/customer">Signup</Link>
-          </Button>
-          <Button variant="default">
-            <Link href="/auth/login">Signin</Link>
-          </Button>
-        </div>
+      <Navbar />
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="sm:hidden">Menu</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-40">
-            <DropdownMenuItem>
-              <Link href="/auth/register/owner">Become a owner</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link href="/auth/register/customer">Signup</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Link href="/auth/login">Signin</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </nav>
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="relative py-20 px-8 sm:px-16 bg-white dark:bg-zinc-900 border-b">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="flex flex-col gap-6">
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-black dark:text-white leading-tight">
+                Book Your Next <br />
+                <span className="text-zinc-500">Salon Experience</span>
+              </h1>
+              <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-lg">
+                Discover top-rated salons and spas near you. Book appointments seamlessly and manage your beauty routine with BlendzHub.
+              </p>
+              <div className="flex flex-wrap gap-4 mt-4">
+                <SignInModal>
+                  <Button size="lg" className="text-base px-8">
+                    Get Started
+                  </Button>
+                </SignInModal>
+                <BecomeOwnerModal>
+                  <Button variant="outline" size="lg" className="text-base px-8">
+                    For Business
+                  </Button>
+                </BecomeOwnerModal>
+              </div>
+            </div>
+            <div className="relative h-[400px] bg-zinc-100 dark:bg-zinc-800 rounded-2xl overflow-hidden flex items-center justify-center">
+              <div className="text-zinc-400 text-xl">
+                {/* Placeholder for Hero Image */}
+                Hero Image
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <main className="flex flex-1 flex-col items-center justify-center px-8 py-16 sm:items-start sm:px-16">
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Public Page
-          </h1>
-          <p className="max-w-md text-black/70 dark:text-white/70">
-            Welcome to BlendzHub! Explore our services and book appointments
-            easily.
-          </p>
-          <Button variant="default">Get Started</Button>
-        </div>
+        {/* Features Section */}
+        <section className="py-20 px-8 sm:px-16">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold mb-4">Why Choose BlendzHub?</h2>
+              <p className="text-zinc-600 dark:text-zinc-400">Everything you need for a perfect salon experience</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Easy Booking",
+                  description: "Book appointments 24/7 with instant confirmation."
+                },
+                {
+                  title: "Top Professionals",
+                  description: "Connect with verified and rated beauty experts."
+                },
+                {
+                  title: "Manage Schedule",
+                  description: "Reschedule or cancel appointments with ease."
+                }
+              ].map((feature, i) => (
+                <div key={i} className="p-8 bg-white dark:bg-zinc-900 rounded-xl border shadow-sm hover:shadow-md transition-shadow">
+                  <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
+                  <p className="text-zinc-600 dark:text-zinc-400">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
+
+      <Footer />
     </div>
   );
 }
