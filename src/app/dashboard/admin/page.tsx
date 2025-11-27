@@ -33,7 +33,9 @@ export default function AdminDashboard() {
   const [pendingOwners, setPendingOwners] = useState<Owner[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionOwner, setActionOwner] = useState<Owner | null>(null);
-  const [actionType, setActionType] = useState<"approve" | "reject" | "delete" | null>(null);
+  const [actionType, setActionType] = useState<
+    "approve" | "reject" | "delete" | null
+  >(null);
   const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
@@ -67,16 +69,16 @@ export default function AdminDashboard() {
         await ownerService.deleteOwner(actionOwner._id);
         toast.success(`Deleted ${actionOwner.name}'s request`);
       }
-      
-      // Refresh list
+
       loadPendingOwners();
-      
-      // Reset state
+
       setActionOwner(null);
       setActionType(null);
       setRejectReason("");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || `Failed to ${actionType} owner`);
+      toast.error(
+        error.response?.data?.message || `Failed to ${actionType} owner`
+      );
     }
   };
 
@@ -112,7 +114,10 @@ export default function AdminDashboard() {
                   </TableRow>
                 ) : pendingOwners.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-zinc-500">
+                    <TableCell
+                      colSpan={6}
+                      className="text-center py-8 text-zinc-500"
+                    >
                       No pending approvals found.
                     </TableCell>
                   </TableRow>
@@ -126,7 +131,10 @@ export default function AdminDashboard() {
                       <TableCell>{owner.email}</TableCell>
                       <TableCell>{owner.phone || "N/A"}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">
+                        <Badge
+                          variant="secondary"
+                          className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                        >
                           {owner.status}
                         </Badge>
                       </TableCell>
@@ -171,28 +179,28 @@ export default function AdminDashboard() {
             </Table>
           </div>
 
-          {/* Confirmation Dialog */}
-          <AlertDialog open={!!actionOwner} onOpenChange={(open) => !open && setActionOwner(null)}>
+          <AlertDialog
+            open={!!actionOwner}
+            onOpenChange={(open) => !open && setActionOwner(null)}
+          >
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {actionType === "approve" 
-                    ? "Approve Owner Request" 
-                    : actionType === "reject" 
-                      ? "Reject Owner Request"
-                      : "Delete Owner Request"
-                  }
+                  {actionType === "approve"
+                    ? "Approve Owner Request"
+                    : actionType === "reject"
+                    ? "Reject Owner Request"
+                    : "Delete Owner Request"}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                  {actionType === "approve" 
+                  {actionType === "approve"
                     ? `Are you sure you want to approve ${actionOwner?.name}? They will be able to access their dashboard immediately.`
                     : actionType === "reject"
-                      ? `Are you sure you want to reject ${actionOwner?.name}? This action cannot be undone.`
-                      : `Are you sure you want to DELETE ${actionOwner?.name}? This will permanently remove the owner request and user account. This cannot be undone.`
-                  }
+                    ? `Are you sure you want to reject ${actionOwner?.name}? This action cannot be undone.`
+                    : `Are you sure you want to DELETE ${actionOwner?.name}? This will permanently remove the owner request and user account. This cannot be undone.`}
                 </AlertDialogDescription>
               </AlertDialogHeader>
-              
+
               {actionType === "reject" && (
                 <div className="py-2">
                   <Input
@@ -204,18 +212,20 @@ export default function AdminDashboard() {
               )}
 
               <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => {
-                  setActionOwner(null);
-                  setActionType(null);
-                  setRejectReason("");
-                }}>
+                <AlertDialogCancel
+                  onClick={() => {
+                    setActionOwner(null);
+                    setActionType(null);
+                    setRejectReason("");
+                  }}
+                >
                   Cancel
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleAction}
                   className={
-                    actionType === "approve" 
-                      ? "bg-green-600 hover:bg-green-700" 
+                    actionType === "approve"
+                      ? "bg-green-600 hover:bg-green-700"
                       : "bg-red-600 hover:bg-red-700"
                   }
                 >

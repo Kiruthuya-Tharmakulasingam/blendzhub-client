@@ -30,7 +30,9 @@ const formSchema = z.object({
   email: z.string().email("Enter a valid email"),
   phone: z.string().min(10, "Phone number must be at least 10 characters."),
   password: z.string().min(6, "Password must be at least 6 characters."),
-  businessName: z.string().min(3, "Business name must be at least 3 characters."),
+  businessName: z
+    .string()
+    .min(3, "Business name must be at least 3 characters."),
 });
 
 const registerOwner = async (data: any) => {
@@ -68,10 +70,7 @@ const registerOwner = async (data: any) => {
     }
 
     if (!res.ok) {
-      // Use the already parsed result for error message
-      throw new Error(
-        result.message || `Registration failed: ${res.status}`
-      );
+      throw new Error(result.message || `Registration failed: ${res.status}`);
     }
 
     console.log("Registration successful:", result);

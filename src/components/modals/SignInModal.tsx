@@ -40,9 +40,7 @@ export function SignInModal({ children }: { children: React.ReactNode }) {
     try {
       await login(data);
       setOpen(false);
-    } catch (error) {
-      // Error handled in AuthContext
-    }
+    } catch (error) {}
   }
 
   return (
@@ -83,7 +81,11 @@ export function SignInModal({ children }: { children: React.ReactNode }) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
               {form.formState.isSubmitting ? "Signing in..." : "Sign In"}
             </Button>
           </form>

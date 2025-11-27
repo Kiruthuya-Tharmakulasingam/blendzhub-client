@@ -48,13 +48,8 @@ export default function LoginPage() {
 
     try {
       await login(data);
-      // Redirection is handled by AuthContext
     } catch (err: any) {
       console.error("Login error:", err);
-      // Error is also displayed by toast in AuthContext, but we can show it here too if needed
-      // For now, let's rely on the toast or set a local error if strictly necessary for UI
-      // But based on the previous code, it seems they want an inline error.
-      // Let's see what AuthContext throws. It throws the error.
       setError(err.response?.data?.message || err.message || "Login failed");
     } finally {
       setIsSubmitting(false);
@@ -101,7 +96,11 @@ export default function LoginPage() {
               </Field>
             </FieldGroup>
 
-            <Button type="submit" className="w-full mt-4" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full mt-4"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Logging in..." : "Login"}
             </Button>
           </form>
@@ -122,4 +121,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

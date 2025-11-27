@@ -53,9 +53,7 @@ export function BecomeOwnerModal({ children }: { children: React.ReactNode }) {
         password: data.password,
       });
       setOpen(false);
-    } catch (error) {
-      // Error handled in AuthContext
-    }
+    } catch (error) {}
   }
 
   return (
@@ -65,7 +63,8 @@ export function BecomeOwnerModal({ children }: { children: React.ReactNode }) {
         <DialogHeader>
           <DialogTitle>Become a Partner</DialogTitle>
           <DialogDescription>
-            Register your business with BlendzHub. Your account will be pending approval.
+            Register your business with BlendzHub. Your account will be pending
+            approval.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -148,8 +147,14 @@ export function BecomeOwnerModal({ children }: { children: React.ReactNode }) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Submitting..." : "Register Business"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting
+                ? "Submitting..."
+                : "Register Business"}
             </Button>
           </form>
         </Form>

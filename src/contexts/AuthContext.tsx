@@ -1,7 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { User, LoginRequest, RegisterCustomerRequest, RegisterOwnerRequest, AuthResponse } from "@/types/auth.types";
+import {
+  User,
+  LoginRequest,
+  RegisterCustomerRequest,
+  RegisterOwnerRequest,
+  AuthResponse,
+} from "@/types/auth.types";
 import { authService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -41,8 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.success && response.data?.user) {
         setUser(response.data.user);
         toast.success("Login successful");
-        
-        // Redirect based on role
+
         switch (response.data.user.role) {
           case "admin":
             router.push("/dashboard/admin");
@@ -83,8 +88,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authService.registerOwner(data);
       if (response.success) {
-        toast.success("Registration successful. Please wait for admin approval.");
-        // Don't set user or redirect to dashboard as they need approval
+        toast.success(
+          "Registration successful. Please wait for admin approval."
+        );
         router.push("/");
       }
     } catch (error: any) {
@@ -102,7 +108,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.success("Logged out successfully");
     } catch (error) {
       console.error("Logout error:", error);
-      // Force logout on client side even if server fails
       setUser(null);
       router.push("/auth/login");
     }

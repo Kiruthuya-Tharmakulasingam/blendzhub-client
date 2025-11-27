@@ -51,9 +51,7 @@ export function SignUpModal({ children }: { children: React.ReactNode }) {
         password: data.password,
       });
       setOpen(false);
-    } catch (error) {
-      // Error handled in AuthContext
-    }
+    } catch (error) {}
   }
 
   return (
@@ -133,7 +131,11 @@ export function SignUpModal({ children }: { children: React.ReactNode }) {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
               {form.formState.isSubmitting ? "Creating Account..." : "Sign Up"}
             </Button>
           </form>

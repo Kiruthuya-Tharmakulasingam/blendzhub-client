@@ -12,19 +12,20 @@ export default function CustomerDashboard() {
     <ProtectedRoute allowedRoles={["customer"]}>
       <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
         <Navbar />
-        
+
         <main className="flex-1 py-12 px-8">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold mb-2">My Dashboard</h1>
-              <p className="text-zinc-600 dark:text-zinc-400">Manage your appointments and profile</p>
+              <p className="text-zinc-600 dark:text-zinc-400">
+                Manage your appointments and profile
+              </p>
             </div>
 
             <div className="grid gap-8 md:grid-cols-3">
               <div className="md:col-span-2 space-y-6">
                 <h2 className="text-xl font-semibold">Upcoming Appointments</h2>
-                
-                {/* Placeholder for appointments */}
+
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12 text-center text-zinc-500">
                     <Calendar className="h-12 w-12 mb-4 opacity-20" />
