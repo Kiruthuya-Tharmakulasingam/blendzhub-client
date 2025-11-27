@@ -1,28 +1,73 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import DashboardLayout from "@/components/DashboardLayout";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, Scissors, ShoppingBag, Users } from "lucide-react";
 
 export default function OwnerDashboard() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 dark:bg-black px-4">
-      <div className="bg-white dark:bg-zinc-900 shadow-lg rounded-2xl p-10 w-full max-w-lg text-center">
-        <h1 className="text-3xl font-bold text-black dark:text-white">
-          Owner Dashboard
-        </h1>
-
-        <p className="text-zinc-600 dark:text-zinc-400 mt-2">
-          Manage your salon, services, products, equipments and appointments.
-        </p>
-
-        <div className="mt-8">
-          <Link href="/auth/login">
-            <Button className="w-full py-3 text-lg font-semibold bg-black text-white hover:bg-black/90">
-              Logout
-            </Button>
-          </Link>
+    <ProtectedRoute allowedRoles={["owner"]}>
+      <DashboardLayout role="owner">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Appointments
+              </CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-muted-foreground">
+                +0% from last month
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Active Services
+              </CardTitle>
+              <Scissors className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-muted-foreground">
+                +0 new services
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Products
+              </CardTitle>
+              <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-muted-foreground">
+                In stock
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Customers
+              </CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">0</div>
+              <p className="text-xs text-muted-foreground">
+                +0 since last week
+              </p>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-    </div>
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 }
