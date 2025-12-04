@@ -14,10 +14,6 @@ export const authService = {
       credentials
     );
 
-    // Token is handled by HttpOnly cookie
-    // localStorage.setItem("token", response.data.token);
-    // localStorage.setItem("user", JSON.stringify(response.data.data.user));
-
     return response.data;
   },
 
@@ -26,10 +22,6 @@ export const authService = {
       "/api/auth/register/customer",
       data
     );
-
-    // Token is handled by HttpOnly cookie
-    // localStorage.setItem("token", response.data.token);
-    // localStorage.setItem("user", JSON.stringify(response.data.data.user));
 
     return response.data;
   },
@@ -43,21 +35,42 @@ export const authService = {
   },
 
   async getMe(): Promise<AuthResponse> {
-    const response = await api.get<AuthResponse>("/api/auth/me");
-    return response.data;
+    try {
+      const response = await api.get<AuthResponse>("/api/auth/me", {
+        // Don't throw errors for 401 - it's expected when not logged in
+        validateStatus: (status) => status < 500,
+      });
+      
+      // Handle 401 as expected (user not logged in)
+      if (response.status === 401) {
+        return {
+          success: false,
+          message: "Not authenticated",
+        } as AuthResponse;
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      // Silently handle 401 errors - this is expected when not authenticated
+      if (error.response?.status === 401 || error.isExpectedAuthCheck) {
+        return {
+          success: false,
+          message: "Not authenticated",
+        } as AuthResponse;
+      }
+      // Only throw non-401 errors
+      throw error;
+    }
   },
 
   async logout(): Promise<void> {
     try {
       await api.post("/api/auth/logout");
     } finally {
-      // localStorage.removeItem("token");
-      // localStorage.removeItem("user");
     }
   },
 
   getStoredUser(): User | null {
-    // User state is managed by AuthContext via getMe()
     return null;
   },
 };
