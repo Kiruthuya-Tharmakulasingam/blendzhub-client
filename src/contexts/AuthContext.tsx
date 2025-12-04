@@ -35,10 +35,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const response = await authService.getMe();
         if (response.success && response.data?.user) {
           setUser(response.data.user);
+        } else {
+          // Not authenticated - this is expected for public pages
+          setUser(null);
         }
-      } catch (error) {
-        // Not authenticated or session expired
-        console.log("Not authenticated");
+      } catch (error: any) {
+        // Not authenticated or session expired - this is expected when not logged in
+        // Only log if it's not a 401 (unauthorized) error
+        if (error.response?.status !== 401) {
+          console.error("Auth initialization error:", error);
+        }
+        setUser(null);
       } finally {
         setLoading(false);
       }
