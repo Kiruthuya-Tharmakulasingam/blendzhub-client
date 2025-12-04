@@ -14,10 +14,9 @@ export const authService = {
       credentials
     );
 
-    if (response.data.token && response.data.data?.user) {
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.data.user));
-    }
+    // Token is handled by HttpOnly cookie
+    // localStorage.setItem("token", response.data.token);
+    // localStorage.setItem("user", JSON.stringify(response.data.data.user));
 
     return response.data;
   },
@@ -28,10 +27,9 @@ export const authService = {
       data
     );
 
-    if (response.data.token && response.data.data?.user) {
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.data.user));
-    }
+    // Token is handled by HttpOnly cookie
+    // localStorage.setItem("token", response.data.token);
+    // localStorage.setItem("user", JSON.stringify(response.data.data.user));
 
     return response.data;
   },
@@ -53,30 +51,13 @@ export const authService = {
     try {
       await api.post("/api/auth/logout");
     } finally {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      // localStorage.removeItem("token");
+      // localStorage.removeItem("user");
     }
   },
 
   getStoredUser(): User | null {
-    if (typeof window === "undefined") return null;
-
-    const userStr = localStorage.getItem("user");
-    if (!userStr) return null;
-
-    try {
-      return JSON.parse(userStr);
-    } catch {
-      return null;
-    }
-  },
-
-  getStoredToken(): string | null {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("token");
-  },
-
-  isAuthenticated(): boolean {
-    return !!this.getStoredToken();
+    // User state is managed by AuthContext via getMe()
+    return null;
   },
 };

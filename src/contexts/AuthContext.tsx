@@ -31,11 +31,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
-      const storedUser = authService.getStoredUser();
-      if (storedUser) {
-        setUser(storedUser);
+      try {
+        const response = await authService.getMe();
+        if (response.success && response.data?.user) {
+          setUser(response.data.user);
+        }
+      } catch (error) {
+        // Not authenticated or session expired
+        console.log("Not authenticated");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initAuth();

@@ -1,84 +1,46 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, Store, Calendar, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { ownerService } from "@/services/owner.service";
-import { Owner } from "@/types/auth.types";
-import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import api from "@/services/api";
 
 export default function AdminDashboard() {
-  const [pendingOwners, setPendingOwners] = useState<Owner[]>([]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalSalons: 0,
+    totalAppointments: 0,
+    pendingOwners: 0,
+  });
   const [loading, setLoading] = useState(true);
-  const [actionOwner, setActionOwner] = useState<Owner | null>(null);
-  const [actionType, setActionType] = useState<
-    "approve" | "reject" | "delete" | null
-  >(null);
-  const [rejectReason, setRejectReason] = useState("");
 
   useEffect(() => {
-    loadPendingOwners();
+    fetchStats();
   }, []);
 
-  const loadPendingOwners = async () => {
+  const fetchStats = async () => {
     try {
-      const response = await ownerService.getPendingOwners();
-      if (response.success && response.data) {
-        setPendingOwners(response.data);
-      }
+      // Fetch stats from available endpoints
+      const [salonsRes, appointmentsRes, ownersRes] = await Promise.all([
+        api.get("/api/salons").catch(() => ({ data: { total: 0 } })),
+        api.get("/api/appointments").catch(() => ({ data: { total: 0 } })),
+        api.get("/api/owners/pending").catch(() => ({ data: { data: [] } })),
+      ]);
+
+      setStats({
+        totalUsers: 0, // User endpoint not available
+        totalSalons: salonsRes.data?.total || salonsRes.data?.data?.length || 0,
+        totalAppointments: appointmentsRes.data?.total || appointmentsRes.data?.data?.length || 0,
+        pendingOwners: ownersRes.data?.data?.length || 0,
+      });
     } catch (error) {
-      toast.error("Failed to load pending owners");
+      console.error("Failed to fetch stats:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAction = async () => {
-    if (!actionOwner || !actionType) return;
-
-    try {
-      if (actionType === "approve") {
-        await ownerService.approveOwner(actionOwner._id);
-        toast.success(`Approved ${actionOwner.name}'s request`);
-      } else if (actionType === "reject") {
-        await ownerService.rejectOwner(actionOwner._id, rejectReason);
-        toast.success(`Rejected ${actionOwner.name}'s request`);
-      } else if (actionType === "delete") {
-        await ownerService.deleteOwner(actionOwner._id);
-        toast.success(`Deleted ${actionOwner.name}'s request`);
-      }
-
-      loadPendingOwners();
-
-      setActionOwner(null);
-      setActionType(null);
-      setRejectReason("");
-    } catch (error: any) {
-      toast.error(
-        error.response?.data?.message || `Failed to ${actionType} owner`
-      );
     }
   };
 
@@ -86,154 +48,126 @@ export default function AdminDashboard() {
     <ProtectedRoute allowedRoles={["admin"]}>
       <DashboardLayout role="admin">
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Pending Approvals</h2>
-            <Button onClick={loadPendingOwners} variant="outline" size="sm">
-              Refresh
-            </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+              Manage users, salons, and system overview
+            </p>
           </div>
 
-          <div className="rounded-md border bg-white dark:bg-zinc-900">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Business Name</TableHead>
-                  <TableHead>Owner Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      Loading...
-                    </TableCell>
-                  </TableRow>
-                ) : pendingOwners.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="text-center py-8 text-zinc-500"
-                    >
-                      No pending approvals found.
-                    </TableCell>
-                  </TableRow>
+          {/* Stats Cards */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalUsers}</div>
+                <p className="text-xs text-muted-foreground">
+                  All registered users
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Salons</CardTitle>
+                <Store className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalSalons}</div>
+                <p className="text-xs text-muted-foreground">
+                  Active salons
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Appointments</CardTitle>
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.totalAppointments}</div>
+                <p className="text-xs text-muted-foreground">
+                  Total bookings
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
+                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stats.pendingOwners}</div>
+                <p className="text-xs text-muted-foreground">
+                  Owner requests
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Link href="/dashboard/admin/users">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Users className="mr-2 h-4 w-4" />
+                    Manage Users
+                  </Button>
+                </Link>
+                <Link href="/dashboard/admin/salons">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Store className="mr-2 h-4 w-4" />
+                    Manage Salons
+                  </Button>
+                </Link>
+                <Link href="/dashboard/admin/appointments">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Manage Appointments
+                  </Button>
+                </Link>
+                <Link href="/dashboard/admin/analytics">
+                  <Button className="w-full justify-start" variant="outline">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    View Analytics
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Pending Owner Approvals</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {stats.pendingOwners > 0 ? (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      You have {stats.pendingOwners} pending owner approval{stats.pendingOwners > 1 ? 's' : ''}
+                    </p>
+                    <Link href="/dashboard/admin/approvals">
+                      <Button className="w-full">
+                        Review Approvals
+                      </Button>
+                    </Link>
+                  </div>
                 ) : (
-                  pendingOwners.map((owner) => (
-                    <TableRow key={owner._id}>
-                      <TableCell className="font-medium">
-                        {owner.businessName || "N/A"}
-                      </TableCell>
-                      <TableCell>{owner.name}</TableCell>
-                      <TableCell>{owner.email}</TableCell>
-                      <TableCell>{owner.phone || "N/A"}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                        >
-                          {owner.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="bg-green-600 hover:bg-green-700"
-                          onClick={() => {
-                            setActionOwner(owner);
-                            setActionType("approve");
-                          }}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => {
-                            setActionOwner(owner);
-                            setActionType("reject");
-                          }}
-                        >
-                          Reject
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                          onClick={() => {
-                            setActionOwner(owner);
-                            setActionType("delete");
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No pending approvals
+                  </p>
                 )}
-              </TableBody>
-            </Table>
+              </CardContent>
+            </Card>
           </div>
-
-          <AlertDialog
-            open={!!actionOwner}
-            onOpenChange={(open) => !open && setActionOwner(null)}
-          >
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {actionType === "approve"
-                    ? "Approve Owner Request"
-                    : actionType === "reject"
-                    ? "Reject Owner Request"
-                    : "Delete Owner Request"}
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {actionType === "approve"
-                    ? `Are you sure you want to approve ${actionOwner?.name}? They will be able to access their dashboard immediately.`
-                    : actionType === "reject"
-                    ? `Are you sure you want to reject ${actionOwner?.name}? This action cannot be undone.`
-                    : `Are you sure you want to DELETE ${actionOwner?.name}? This will permanently remove the owner request and user account. This cannot be undone.`}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-
-              {actionType === "reject" && (
-                <div className="py-2">
-                  <Input
-                    placeholder="Reason for rejection (optional)"
-                    value={rejectReason}
-                    onChange={(e) => setRejectReason(e.target.value)}
-                  />
-                </div>
-              )}
-
-              <AlertDialogFooter>
-                <AlertDialogCancel
-                  onClick={() => {
-                    setActionOwner(null);
-                    setActionType(null);
-                    setRejectReason("");
-                  }}
-                >
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleAction}
-                  className={
-                    actionType === "approve"
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-red-600 hover:bg-red-700"
-                  }
-                >
-                  {actionType === "delete" ? "Delete" : "Confirm"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
       </DashboardLayout>
     </ProtectedRoute>

@@ -4,19 +4,15 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
+// Request interceptor removed as we are using cookies
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
     return config;
   },
   (error) => {
@@ -29,9 +25,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        window.location.href = "/";
+        // Optional: Redirect to login if needed, but avoid loops
+        // window.location.href = "/";
       }
     }
     return Promise.reject(error);
