@@ -16,10 +16,11 @@ import {
   Armchair,
   MessageSquare,
   Store,
+  TrendingUp,
 } from "lucide-react";
 
 interface SidebarProps {
-  role: "admin" | "owner";
+  role: "admin" | "owner" | "customer";
 }
 
 export default function Sidebar({ role }: SidebarProps) {
@@ -38,12 +39,20 @@ export default function Sidebar({ role }: SidebarProps) {
     { href: "/dashboard/owner/appointments", label: "Appointments", icon: Calendar },
     { href: "/dashboard/owner/services", label: "Services", icon: Scissors },
     { href: "/dashboard/owner/products", label: "Products", icon: ShoppingBag },
-    { href: "/dashboard/owner/equipments", label: "Equipments", icon: Armchair },
+    { href: "/dashboard/owner/equipment", label: "Equipment", icon: Armchair },
+    { href: "/dashboard/owner/analytics", label: "Analytics", icon: TrendingUp },
     { href: "/dashboard/owner/feedbacks", label: "Feedbacks", icon: MessageSquare },
     { href: "/dashboard/owner/salon", label: "My Salon", icon: Store },
   ];
 
-  const links = role === "admin" ? adminLinks : ownerLinks;
+  const customerLinks = [
+    { href: "/dashboard/customer", label: "Overview", icon: LayoutDashboard },
+    { href: "/dashboard/customer/salons", label: "Browse Salons", icon: Store },
+    { href: "/dashboard/customer/appointments", label: "My Appointments", icon: Calendar },
+    { href: "/dashboard/customer/profile", label: "Profile", icon: Settings },
+  ];
+
+  const links = role === "admin" ? adminLinks : role === "owner" ? ownerLinks : customerLinks;
 
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-white dark:bg-zinc-900 sticky top-0">

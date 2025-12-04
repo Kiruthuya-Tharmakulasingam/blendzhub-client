@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  role: "admin" | "owner";
+  role: "admin" | "owner" | "customer";
 }
 
 export default function DashboardLayout({ children, role }: DashboardLayoutProps) {
