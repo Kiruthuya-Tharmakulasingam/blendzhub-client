@@ -19,6 +19,7 @@ interface AuthContextType {
   registerCustomer: (data: RegisterCustomerRequest) => Promise<void>;
   registerOwner: (data: RegisterOwnerRequest) => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -126,6 +127,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await authService.getMe();
+      if (response.success && response.data?.user) {
+        setUser(response.data.user);
+      }
+    } catch (error) {
+      console.error("Failed to refresh user:", error);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -135,6 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         registerCustomer,
         registerOwner,
         logout,
+        refreshUser,
         isAuthenticated: !!user,
       }}
     >
