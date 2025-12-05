@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://blendz-hub-api.vercel.app";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 const api: AxiosInstance = axios.create({
   baseURL: API_URL,
