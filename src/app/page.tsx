@@ -232,12 +232,18 @@ export default function Home() {
 
                     <div className="mt-4" onClick={(e) => e.stopPropagation()}>
                       {isAuthenticated && user?.role === "customer" ? (
-                        <Link href="/dashboard/customer/salons">
-                          <Button className="w-full" size="lg">
-                            <Calendar className="mr-2 h-4 w-4" />
-                            Book Now
-                          </Button>
-                        </Link>
+                        <Button 
+                          className="w-full" 
+                          size="lg"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            router.push('/dashboard/customer/salons');
+                          }}
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Book Now
+                        </Button>
                       ) : (
                         <SignInModal>
                           <Button className="w-full" size="lg" variant="outline">

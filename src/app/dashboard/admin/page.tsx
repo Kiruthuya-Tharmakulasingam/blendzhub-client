@@ -34,7 +34,10 @@ export default function AdminDashboard() {
       setStats({
         totalUsers: 0, // User endpoint not available
         totalSalons: salonsRes.data?.total || salonsRes.data?.data?.length || 0,
-        totalAppointments: appointmentsRes.data?.total || appointmentsRes.data?.data?.length || 0,
+        totalAppointments:
+          appointmentsRes.data?.total ||
+          appointmentsRes.data?.data?.length ||
+          0,
         pendingOwners: ownersRes.data?.data?.length || 0,
       });
     } catch (error) {
@@ -59,7 +62,9 @@ export default function AdminDashboard() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Users
+                </CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -72,40 +77,42 @@ export default function AdminDashboard() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Salons</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Salons
+                </CardTitle>
                 <Store className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalSalons}</div>
-                <p className="text-xs text-muted-foreground">
-                  Active salons
-                </p>
+                <p className="text-xs text-muted-foreground">Active salons</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Appointments</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Appointments
+                </CardTitle>
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalAppointments}</div>
-                <p className="text-xs text-muted-foreground">
-                  Total bookings
-                </p>
+                <div className="text-2xl font-bold">
+                  {stats.totalAppointments}
+                </div>
+                <p className="text-xs text-muted-foreground">Total bookings</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Pending Approvals
+                </CardTitle>
                 <CheckCircle className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.pendingOwners}</div>
-                <p className="text-xs text-muted-foreground">
-                  Owner requests
-                </p>
+                <p className="text-xs text-muted-foreground">Owner requests</p>
               </CardContent>
             </Card>
           </div>
@@ -152,12 +159,11 @@ export default function AdminDashboard() {
                 {stats.pendingOwners > 0 ? (
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">
-                      You have {stats.pendingOwners} pending owner approval{stats.pendingOwners > 1 ? 's' : ''}
+                      You have {stats.pendingOwners} pending owner approval
+                      {stats.pendingOwners > 1 ? "s" : ""}
                     </p>
                     <Link href="/dashboard/admin/approvals">
-                      <Button className="w-full">
-                        Review Approvals
-                      </Button>
+                      <Button className="w-full">Review Approvals</Button>
                     </Link>
                   </div>
                 ) : (

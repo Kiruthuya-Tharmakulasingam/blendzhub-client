@@ -202,9 +202,9 @@ export default function AdminAppointmentsPage() {
                           <MapPin className="h-4 w-4 text-muted-foreground" />
                           <div>
                             <div className="font-medium">
-                              {appointment.salonId?.name || "Unknown Salon"}
+                              {typeof appointment.salonId === 'object' && appointment.salonId ? appointment.salonId.name : "Unknown Salon"}
                             </div>
-                            {appointment.salonId?.location && (
+                            {typeof appointment.salonId === 'object' && appointment.salonId?.location && (
                               <div className="text-sm text-muted-foreground">
                                 {appointment.salonId.location}
                               </div>

@@ -39,9 +39,9 @@ import { Input } from "@/components/ui/input";
 
 interface Appointment {
   _id: string;
-  salonId: { _id: string; name: string; location: string };
-  serviceId: { _id: string; name: string; price: number; duration: number };
-  customerId: string;
+  salonId: string | { _id: string; name: string; location: string };
+  serviceId: string | { _id: string; name: string; price: number; duration?: number };
+  customerId: string | { _id: string; name: string; email: string };
   date: string;
   status: "pending" | "accepted" | "rejected" | "in-progress" | "completed" | "cancelled" | "no-show";
   notes?: string;
@@ -96,8 +96,8 @@ export default function MyAppointmentsPage() {
     try {
       const response = await notificationService.getNotifications({ limit: 10 });
       if (response.success && response.data) {
-        setNotifications(response.data);
-        setUnreadCount(response.unreadCount || 0);
+        setNotifications(response.data.data || []);
+        setUnreadCount(response.data.unreadCount || 0);
       }
     } catch (error) {
       console.error("Failed to fetch notifications", error);
@@ -118,7 +118,7 @@ export default function MyAppointmentsPage() {
     try {
       const response = await appointmentService.getAppointments();
       if (response.success && response.data) {
-        setAppointments(response.data);
+        setAppointments(Array.isArray(response.data) ? response.data : []);
       }
     } catch (error) {
       toast.error("Failed to fetch appointments");
@@ -397,18 +397,18 @@ export default function MyAppointmentsPage() {
                     <TableRow key={appointment._id}>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{appointment.salonId?.name || "N/A"}</div>
+                          <div className="font-medium">{typeof appointment.salonId === 'object' ? appointment.salonId.name : "N/A"}</div>
                           <div className="text-sm text-muted-foreground flex items-center">
                             <MapPin className="h-3 w-3 mr-1" />
-                            {appointment.salonId?.location || "N/A"}
+                            {typeof appointment.salonId === 'object' ? appointment.salonId.location : "N/A"}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{appointment.serviceId?.name || "N/A"}</div>
+                          <div className="font-medium">{typeof appointment.serviceId === 'object' ? appointment.serviceId.name : "N/A"}</div>
                           <div className="text-sm text-muted-foreground">
-                            Rs. {appointment.serviceId?.price || 0} • {appointment.serviceId?.duration || 0} min
+                            Rs. {typeof appointment.serviceId === 'object' ? appointment.serviceId.price : 0} • {typeof appointment.serviceId === 'object' ? (appointment.serviceId.duration || 0) : 0} min
                           </div>
                         </div>
                       </TableCell>

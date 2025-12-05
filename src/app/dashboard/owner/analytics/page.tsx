@@ -147,16 +147,16 @@ export default function OwnerAnalyticsPage() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stats.totalAppointments}</div>
+                <div className="text-2xl font-bold">
+                  {stats.totalAppointments}
+                </div>
                 <p className="text-xs text-muted-foreground">All time</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Completed
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Completed</CardTitle>
                 <TrendingUp className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
@@ -166,7 +166,8 @@ export default function OwnerAnalyticsPage() {
                 <p className="text-xs text-muted-foreground">
                   {stats.totalAppointments > 0
                     ? `${Math.round(
-                        (stats.completedAppointments / stats.totalAppointments) *
+                        (stats.completedAppointments /
+                          stats.totalAppointments) *
                           100
                       )}%`
                     : "0%"}{" "}
@@ -268,7 +269,7 @@ export default function OwnerAnalyticsPage() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) =>
+                      label={({ name, percent }: any) =>
                         `${name}: ${(percent * 100).toFixed(0)}%`
                       }
                       outerRadius={80}
@@ -301,7 +302,8 @@ export default function OwnerAnalyticsPage() {
                   <span className="font-bold">
                     {stats.totalAppointments > 0
                       ? `${Math.round(
-                          (stats.completedAppointments / stats.totalAppointments) *
+                          (stats.completedAppointments /
+                            stats.totalAppointments) *
                             100
                         )}%`
                       : "0%"}
@@ -314,7 +316,9 @@ export default function OwnerAnalyticsPage() {
                   <span className="font-bold">
                     Rs.{" "}
                     {stats.completedAppointments > 0
-                      ? Math.round(stats.totalRevenue / stats.completedAppointments)
+                      ? Math.round(
+                          stats.totalRevenue / stats.completedAppointments
+                        )
                       : 0}
                   </span>
                 </div>
