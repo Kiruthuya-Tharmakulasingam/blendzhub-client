@@ -47,7 +47,7 @@ const registerOwner = async (data: any) => {
 
     console.log("Sending registration data:", requestData);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://blendz-hub-api.vercel.app";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
     const res = await fetch(`${apiUrl}/api/auth/register/owner`, {
       method: "POST",
       headers: {
