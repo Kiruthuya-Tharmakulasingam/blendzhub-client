@@ -10,6 +10,7 @@ export interface Salon {
   phone?: string;
   email?: string;
   openingHours?: string;
+  imageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,6 +22,7 @@ export interface UpdateSalonRequest {
   phone?: string;
   email?: string;
   openingHours?: string;
+  imageUrl?: string;
 }
 
 export interface CreateSalonRequest {
@@ -30,6 +32,7 @@ export interface CreateSalonRequest {
   phone?: string;
   email?: string;
   openingHours?: string;
+  imageUrl?: string;
 }
 
 export const salonService = {

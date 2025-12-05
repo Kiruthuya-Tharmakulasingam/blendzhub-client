@@ -20,6 +20,7 @@ export interface Equipment {
   description?: string;
   status: "available" | "in-use" | "maintenance" | "unavailable";
   lastSterlizedDate?: string;
+  imageUrl?: string;
   salonId: string | { _id: string; name: string; location: string };
   createdAt: string;
   updatedAt: string;

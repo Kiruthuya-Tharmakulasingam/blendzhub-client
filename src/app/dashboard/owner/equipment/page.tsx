@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import api from "@/services/api";
 
 export default function EquipmentPage() {
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
@@ -47,6 +48,7 @@ export default function EquipmentPage() {
     lastSterlizedDate: "",
     imageUrl: "",
   });
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     fetchEquipment();
@@ -62,6 +64,31 @@ export default function EquipmentPage() {
       toast.error("Failed to fetch equipment");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const uploadFormData = new FormData();
+      uploadFormData.append("image", file);
+
+      const response = await api.post("/api/upload", uploadFormData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data.success) {
+        setFormData({ ...formData, imageUrl: response.data.url });
+        toast.success("Image uploaded successfully");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload image");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -198,30 +225,39 @@ export default function EquipmentPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    type="url"
-                    value={formData.imageUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, imageUrl: e.target.value })
-                    }
-                    placeholder="https://example.com/image.jpg"
-                  />
-                  {formData.imageUrl && (
-                    <div className="mt-2">
-                      <img
-                        src={formData.imageUrl}
-                        alt="Equipment preview"
-                        className="w-full h-32 object-cover rounded-md border"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                    </div>
-                  )}
+                  <Label htmlFor="image">Equipment Image</Label>
+                  <div className="space-y-2">
+                    {formData.imageUrl && (
+                      <div className="relative w-32 h-32">
+                        <img
+                          src={formData.imageUrl}
+                          alt="Equipment preview"
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-1 right-1"
+                          onClick={() => setFormData({ ...formData, imageUrl: "" })}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    )}
+                    <Input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={isUploading}
+                    />
+                    {isUploading && (
+                      <p className="text-sm text-muted-foreground">Uploading image...</p>
+                    )}
+                  </div>
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={isUploading}>
                   {editingEquipment ? "Update" : "Create"}
                 </Button>
               </form>

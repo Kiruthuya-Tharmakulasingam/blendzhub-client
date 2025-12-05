@@ -15,7 +15,7 @@ import { equipmentService } from "@/services/equipment.service";
 import { feedbackService, Feedback } from "@/services/feedback.service";
 import { Service } from "@/types/service.types";
 import { Product, Equipment } from "@/types/owner.types";
-import { MapPin, Phone, Mail, Clock, Calendar, ArrowLeft, DollarSign, Package, Wrench, Loader2, Star, MessageSquare } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Calendar, ArrowLeft, DollarSign, Package, Wrench, Scissors, Loader2, Star, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
@@ -248,8 +248,8 @@ export default function SalonDetailPage() {
     );
   };
 
-  const calculateAverageRating = () => {
-    if (feedbacks.length === 0) return 0;
+  const calculateAverageRating = (): string => {
+    if (feedbacks.length === 0) return "0";
     const sum = feedbacks.reduce((acc, f) => acc + f.rating, 0);
     return (sum / feedbacks.length).toFixed(1);
   };
@@ -403,6 +403,27 @@ export default function SalonDetailPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                     {services.map((service) => (
                       <Card key={service._id} className="hover:shadow-lg transition-shadow">
+                        {service.imageUrl ? (
+                          <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800">
+                            <img
+                              src={service.imageUrl}
+                              alt={service.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = "none";
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="h-16 w-16 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 15.536c-1.171 1.952-3.07 1.952-4.242 0-1.172-1.952-1.172-5.119 0-7.072 1.172-1.952 3.07-1.952 4.242 0M8 10.5h4m-4 3h4m9-1.5a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>';
+                                }
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                            <Scissors className="h-16 w-16 text-zinc-400" />
+                          </div>
+                        )}
                         <CardHeader>
                           <CardTitle className="flex items-start justify-between">
                             <span>{service.name}</span>
@@ -500,16 +521,25 @@ export default function SalonDetailPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                   {products.map((product) => (
                     <Card key={product._id} className="hover:shadow-lg transition-shadow">
-                      {product.imageUrl && (
-                        <div className="w-full h-48 overflow-hidden rounded-t-lg">
+                      {product.imageUrl ? (
+                        <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800">
                           <img
                             src={product.imageUrl}
                             alt={product.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = "none";
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = "none";
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="h-16 w-16 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>';
+                              }
                             }}
                           />
+                        </div>
+                      ) : (
+                        <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                          <Package className="h-16 w-16 text-zinc-400" />
                         </div>
                       )}
                       <CardHeader>
@@ -633,16 +663,25 @@ export default function SalonDetailPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                   {equipment.map((item) => (
                     <Card key={item._id} className="hover:shadow-lg transition-shadow">
-                      {item.imageUrl && (
-                        <div className="w-full h-48 overflow-hidden rounded-t-lg">
+                      {item.imageUrl ? (
+                        <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800">
                           <img
                             src={item.imageUrl}
                             alt={item.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = "none";
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = "none";
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="h-16 w-16 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>';
+                              }
                             }}
                           />
+                        </div>
+                      ) : (
+                        <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                          <Wrench className="h-16 w-16 text-zinc-400" />
                         </div>
                       )}
                       <CardHeader>

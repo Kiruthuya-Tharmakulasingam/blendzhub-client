@@ -32,6 +32,7 @@ export default function Sidebar({ role }: SidebarProps) {
     { href: "/dashboard/admin/users", label: "Users", icon: Users },
     { href: "/dashboard/admin/salons", label: "Salons", icon: Store },
     { href: "/dashboard/admin/analytics", label: "Analytics", icon: Calendar },
+    { href: "/dashboard/admin/profile", label: "Profile", icon: Users },
   ];
 
   const ownerLinks = [
@@ -43,13 +44,14 @@ export default function Sidebar({ role }: SidebarProps) {
     { href: "/dashboard/owner/analytics", label: "Analytics", icon: TrendingUp },
     { href: "/dashboard/owner/feedbacks", label: "Feedbacks", icon: MessageSquare },
     { href: "/dashboard/owner/salon", label: "My Salon", icon: Store },
+    { href: "/dashboard/owner/profile", label: "Profile", icon: Users },
   ];
 
   const customerLinks = [
     { href: "/dashboard/customer", label: "Overview", icon: LayoutDashboard },
     { href: "/dashboard/customer/salons", label: "Browse Salons", icon: Store },
     { href: "/dashboard/customer/appointments", label: "My Appointments", icon: Calendar },
-    { href: "/dashboard/customer/profile", label: "Profile", icon: Settings },
+    { href: "/dashboard/customer/profile", label: "Profile", icon: Users },
   ];
 
   const links = role === "admin" ? adminLinks : role === "owner" ? ownerLinks : customerLinks;

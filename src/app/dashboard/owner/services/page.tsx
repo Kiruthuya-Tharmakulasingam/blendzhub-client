@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import api from "@/services/api";
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
@@ -39,7 +40,9 @@ export default function ServicesPage() {
     price: "",
     duration: "",
     discount: "",
+    imageUrl: "",
   });
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     fetchServices();
@@ -58,6 +61,31 @@ export default function ServicesPage() {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploading(true);
+      const uploadFormData = new FormData();
+      uploadFormData.append("image", file);
+
+      const response = await api.post("/api/upload", uploadFormData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data.success) {
+        setFormData({ ...formData, imageUrl: response.data.url });
+        toast.success("Image uploaded successfully");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload image");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -66,6 +94,7 @@ export default function ServicesPage() {
         price: Number(formData.price),
         duration: Number(formData.duration),
         discount: formData.discount ? Number(formData.discount) : undefined,
+        imageUrl: formData.imageUrl || undefined,
       };
 
       if (editingService) {
@@ -103,6 +132,7 @@ export default function ServicesPage() {
       price: service.price?.toString() || "0",
       duration: service.duration?.toString() || "0",
       discount: service.discount?.toString() || "",
+      imageUrl: service.imageUrl || "",
     });
     setIsModalOpen(true);
   };
@@ -115,6 +145,7 @@ export default function ServicesPage() {
       price: "",
       duration: "",
       discount: "",
+      imageUrl: "",
     });
   };
 
@@ -194,7 +225,40 @@ export default function ServicesPage() {
                     }
                   />
                 </div>
-                <Button type="submit" className="w-full">
+                <div>
+                  <Label htmlFor="image">Service Image</Label>
+                  <div className="space-y-2">
+                    {formData.imageUrl && (
+                      <div className="relative w-32 h-32">
+                        <img
+                          src={formData.imageUrl}
+                          alt="Service preview"
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-1 right-1"
+                          onClick={() => setFormData({ ...formData, imageUrl: "" })}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    )}
+                    <Input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={isUploading}
+                    />
+                    {isUploading && (
+                      <p className="text-sm text-muted-foreground">Uploading image...</p>
+                    )}
+                  </div>
+                </div>
+                <Button type="submit" className="w-full" disabled={isUploading}>
                   {editingService ? "Update" : "Create"}
                 </Button>
               </form>

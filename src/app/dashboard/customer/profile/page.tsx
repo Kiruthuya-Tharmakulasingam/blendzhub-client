@@ -11,14 +11,18 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { User, Mail, Phone } from "lucide-react";
 import api from "@/services/api";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Camera, Trash2 } from "lucide-react";
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
+    image: "",
   });
 
   useEffect(() => {
@@ -27,6 +31,7 @@ export default function ProfilePage() {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
+        image: user.image || "",
       });
     }
   }, [user]);
@@ -42,8 +47,61 @@ export default function ProfilePage() {
         refreshUser();
       }
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || "Failed to update profile";
+      const errorMessage =
+        error?.response?.data?.message || "Failed to update profile";
       toast.error(errorMessage);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const uploadFormData = new FormData();
+    uploadFormData.append("image", file);
+
+    try {
+      const response = await api.post("/api/upload", uploadFormData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data.success) {
+        const imageUrl = response.data.data.secure_url;
+        setFormData((prev) => ({ ...prev, image: imageUrl }));
+        
+        // Update user profile immediately with new image
+        await api.put("/api/profile", { ...formData, image: imageUrl });
+        
+        if (refreshUser) {
+          await refreshUser();
+        }
+        toast.success("Profile image updated successfully");
+      }
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload image");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    try {
+      setFormData((prev) => ({ ...prev, image: "" }));
+      
+      // Update user profile immediately with empty image
+      await api.put("/api/profile", { ...formData, image: "" });
+      
+      if (refreshUser) {
+        await refreshUser();
+      }
+      toast.success("Profile image removed successfully");
+    } catch (error: any) {
+      console.error("Remove image error:", error);
+      toast.error("Failed to remove image");
     }
   };
 
@@ -63,11 +121,54 @@ export default function ProfilePage() {
               <div className="flex justify-between items-center">
                 <CardTitle>Personal Information</CardTitle>
                 {!isEditing && (
-                  <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+                  <Button onClick={() => setIsEditing(true)}>
+                    Edit Profile
+                  </Button>
                 )}
               </div>
             </CardHeader>
             <CardContent>
+              <div className="flex flex-col items-center mb-6">
+                <div className="relative">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={formData.image || undefined} alt={formData.name} />
+                    <AvatarFallback>
+                      <User className="h-12 w-12 text-muted-foreground" />
+                    </AvatarFallback>
+                  </Avatar>
+                  {isEditing && (
+                    <div className="absolute bottom-0 right-0 flex gap-2">
+                      <Label
+                        htmlFor="image-upload"
+                        className="cursor-pointer bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors flex items-center justify-center shadow-sm"
+                      >
+                        <Camera className="h-4 w-4" />
+                        <Input
+                          id="image-upload"
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                          disabled={isUploading}
+                        />
+                      </Label>
+                      {formData.image && (
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="h-8 w-8 rounded-full shadow-sm"
+                          onClick={handleRemoveImage}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {isUploading && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <Label htmlFor="name">Full Name</Label>
@@ -130,6 +231,7 @@ export default function ProfilePage() {
                             name: user.name || "",
                             email: user.email || "",
                             phone: user.phone || "",
+                            image: user.image || "",
                           });
                         }
                       }}

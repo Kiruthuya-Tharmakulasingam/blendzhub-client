@@ -5,6 +5,7 @@ export interface Service {
   description?: string;
   discount?: number;
   duration: number; // in minutes
+  imageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }

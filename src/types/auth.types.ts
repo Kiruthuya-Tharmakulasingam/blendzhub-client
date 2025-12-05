@@ -5,6 +5,9 @@ export interface User {
   email: string;
   role: "customer" | "owner" | "admin" | "staff";
   isActive: boolean;
+  phone?: string;
+  image?: string;
+  createdAt?: string;
   lastLoginAt?: Date;
 }
 
@@ -14,6 +17,7 @@ export interface Customer {
   name: string;
   email: string;
   contact: string;
+  phone?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,6 +71,8 @@ export interface ApiResponse<T = any> {
   message?: string;
   data?: T;
   total?: number;
+  totalPages?: number;
   page?: number;
   limit?: number;
 }
+
