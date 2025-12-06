@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -120,7 +120,7 @@ export default function MyAppointmentsPage() {
       if (response.success && response.data) {
         setAppointments(Array.isArray(response.data) ? response.data : []);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch appointments");
     } finally {
       setLoading(false);
@@ -136,8 +136,9 @@ export default function MyAppointmentsPage() {
         toast.success("Appointment cancelled successfully");
         fetchAppointments();
       }
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || "Failed to cancel appointment";
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      const errorMessage = apiError?.response?.data?.message || "Failed to cancel appointment";
       toast.error(errorMessage);
     }
   };
@@ -164,8 +165,9 @@ export default function MyAppointmentsPage() {
       
       const response = await slotService.getAvailableSlots(date, serviceId, salonId);
       setAvailableSlots(response.slots || []);
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Failed to fetch available slots");
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      toast.error(apiError?.response?.data?.message || "Failed to fetch available slots");
       setAvailableSlots([]);
     } finally {
       setLoadingSlots(false);
@@ -190,8 +192,9 @@ export default function MyAppointmentsPage() {
         setRescheduleModalOpen(false);
         fetchAppointments();
       }
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || "Failed to reschedule appointment";
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      const errorMessage = apiError?.response?.data?.message || "Failed to reschedule appointment";
       toast.error(errorMessage);
     }
   };
@@ -230,8 +233,9 @@ export default function MyAppointmentsPage() {
         // Refresh both appointments and feedbacks
         await Promise.all([fetchAppointments(), fetchFeedbacks()]);
       }
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || "Failed to submit feedback";
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      const errorMessage = apiError?.response?.data?.message || "Failed to submit feedback";
       toast.error(errorMessage);
     } finally {
       setSubmittingFeedback(false);

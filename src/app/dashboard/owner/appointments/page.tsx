@@ -41,12 +41,20 @@ export default function AppointmentsPage() {
 
   useEffect(() => {
     fetchAppointments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, statusFilter, sortBy, sortOrder]);
 
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const params: any = {
+      const params: {
+        page: number;
+        limit: number;
+        sortBy: string;
+        sortOrder: "asc" | "desc";
+        search?: string;
+        status?: string;
+      } = {
         page,
         limit,
         sortBy,
@@ -64,7 +72,7 @@ export default function AppointmentsPage() {
         setTotal(response.total || 0);
         setTotalPages(response.totalPages || 0);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch appointments");
     } finally {
       setLoading(false);
@@ -84,8 +92,9 @@ export default function AppointmentsPage() {
         }
         fetchAppointments();
       }
-    } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || "Failed to update status";
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { message?: string } } };
+      const errorMessage = apiError?.response?.data?.message || "Failed to update status";
       toast.error(errorMessage);
     }
   };

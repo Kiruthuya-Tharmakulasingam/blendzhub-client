@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import api from "@/services/api";
+import { uploadService } from "@/services/upload.service";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -62,7 +62,7 @@ export default function ProductsPage() {
       if (response.success && response.data) {
         setProducts(response.data);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch products");
     } finally {
       setLoading(false);
@@ -78,11 +78,9 @@ export default function ProductsPage() {
       const uploadFormData = new FormData();
       uploadFormData.append("image", file);
 
-      const response = await api.post("/api/upload", uploadFormData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await uploadService.uploadImage(file);
 
-      if (response.data.success) {
+      if (response.success && response.data) {
         setFormData({ ...formData, imageUrl: response.data.url });
         toast.success("Image uploaded successfully");
       }
@@ -96,10 +94,10 @@ export default function ProductsPage() {
 
   const handleStatusChange = async (id: string, status: string) => {
     try {
-      await productService.updateProduct(id, { status: status as any });
+      await productService.updateProduct(id, { status: status as "active" | "out-of-stock" | "discontinued" });
       toast.success("Product status updated");
       fetchProducts();
-    } catch (error) {
+    } catch {
       toast.error("Failed to update status");
     }
   };
@@ -123,7 +121,7 @@ export default function ProductsPage() {
       setIsModalOpen(false);
       resetForm();
       fetchProducts();
-    } catch (error) {
+    } catch {
       toast.error("Failed to save product");
     }
   };
@@ -134,9 +132,9 @@ export default function ProductsPage() {
         await productService.deleteProduct(id);
         toast.success("Product deleted successfully");
         fetchProducts();
-      } catch (error) {
-        toast.error("Failed to delete product");
-      }
+    } catch {
+      toast.error("Failed to delete product");
+    }
     }
   };
 
@@ -246,9 +244,9 @@ export default function ProductsPage() {
                     <Label htmlFor="status">Status</Label>
                     <Select
                       value={formData.status}
-                      onValueChange={(value: any) =>
-                        setFormData({ ...formData, status: value })
-                      }
+                    onValueChange={(value: "active" | "out-of-stock" | "discontinued") =>
+                      setFormData({ ...formData, status: value })
+                    }
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -265,6 +263,7 @@ export default function ProductsPage() {
                     <div className="space-y-2">
                       {formData.imageUrl && (
                         <div className="relative w-32 h-32">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={formData.imageUrl}
                             alt="Product preview"

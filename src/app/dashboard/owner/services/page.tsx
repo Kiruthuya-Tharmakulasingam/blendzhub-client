@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import api from "@/services/api";
+import { uploadService } from "@/services/upload.service";
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
@@ -54,7 +54,7 @@ export default function ServicesPage() {
       if (response.success && response.data) {
         setServices(response.data);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch services");
     } finally {
       setLoading(false);
@@ -70,11 +70,9 @@ export default function ServicesPage() {
       const uploadFormData = new FormData();
       uploadFormData.append("image", file);
 
-      const response = await api.post("/api/upload", uploadFormData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await uploadService.uploadImage(file);
 
-      if (response.data.success) {
+      if (response.success && response.data) {
         setFormData({ ...formData, imageUrl: response.data.url });
         toast.success("Image uploaded successfully");
       }
@@ -107,7 +105,7 @@ export default function ServicesPage() {
       setIsModalOpen(false);
       resetForm();
       fetchServices();
-    } catch (error) {
+    } catch {
       toast.error("Failed to save service");
     }
   };
@@ -118,9 +116,9 @@ export default function ServicesPage() {
         await serviceService.deleteService(id);
         toast.success("Service deleted successfully");
         fetchServices();
-      } catch (error) {
-        toast.error("Failed to delete service");
-      }
+    } catch {
+      toast.error("Failed to delete service");
+    }
     }
   };
 
@@ -230,6 +228,7 @@ export default function ServicesPage() {
                   <div className="space-y-2">
                     {formData.imageUrl && (
                       <div className="relative w-32 h-32">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={formData.imageUrl}
                           alt="Service preview"

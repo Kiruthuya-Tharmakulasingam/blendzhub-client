@@ -5,7 +5,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, DollarSign, TrendingUp, Users } from "lucide-react";
-import api from "@/services/api";
+import { appointmentService } from "@/services/appointment.service";
+import { feedbackService } from "@/services/feedback.service";
 import {
   LineChart,
   Line,
@@ -36,10 +37,10 @@ export default function OwnerAnalyticsPage() {
     totalRevenue: 0,
     averageRating: 0,
   });
-  const [appointmentTrends, setAppointmentTrends] = useState<any[]>([]);
-  const [servicePopularity, setServicePopularity] = useState<any[]>([]);
-  const [statusDistribution, setStatusDistribution] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [appointmentTrends, setAppointmentTrends] = useState<Array<{ date: string; appointments: number }>>([]);
+  const [servicePopularity, setServicePopularity] = useState<Array<{ name: string; count: number }>>([]);
+  const [statusDistribution, setStatusDistribution] = useState<Array<{ name: string; value: number }>>([]);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     fetchAnalytics();
@@ -48,12 +49,12 @@ export default function OwnerAnalyticsPage() {
   const fetchAnalytics = async () => {
     try {
       const [appointmentsRes, feedbacksRes] = await Promise.all([
-        api.get("/api/appointments"),
-        api.get("/api/feedbacks").catch(() => ({ data: { data: [] } })),
+        appointmentService.getAppointments().catch(() => ({ success: false, data: [] })),
+        feedbackService.getFeedbacks().catch(() => ({ success: false, data: [] })),
       ]);
 
-      const appointments: Appointment[] = appointmentsRes.data?.data || [];
-      const feedbacks = feedbacksRes.data?.data || [];
+      const appointments: Appointment[] = appointmentsRes.data || [];
+      const feedbacks = feedbacksRes.data || [];
 
       // Calculate stats
       const completed = appointments.filter((a) => a.status === "completed");
@@ -63,7 +64,7 @@ export default function OwnerAnalyticsPage() {
       );
       const avgRating =
         feedbacks.length > 0
-          ? feedbacks.reduce((sum: number, f: any) => sum + f.rating, 0) /
+          ? feedbacks.reduce((sum: number, f: { rating: number }) => sum + f.rating, 0) /
             feedbacks.length
           : 0;
 
@@ -133,7 +134,7 @@ export default function OwnerAnalyticsPage() {
           <div>
             <h1 className="text-3xl font-bold">Analytics</h1>
             <p className="text-zinc-600 dark:text-zinc-400 mt-2">
-              Track your salon's performance and insights
+              Track your salon&apos;s performance and insights
             </p>
           </div>
 
@@ -269,9 +270,12 @@ export default function OwnerAnalyticsPage() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }: any) =>
-                        `${name}: ${(percent * 100).toFixed(0)}%`
-                      }
+                      label={(entry: unknown) => {
+                        const props = entry as { name?: string; percent?: number };
+                        const name = props?.name || 'Unknown';
+                        const percent = props?.percent || 0;
+                        return `${name}: ${(percent * 100).toFixed(0)}%`;
+                      }}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"

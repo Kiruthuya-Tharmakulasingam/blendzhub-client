@@ -14,12 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { salonService, Salon } from "@/services/salon.service";
+import { salonService } from "@/services/salon.service";
+import { Salon } from "@/types/salon.types";
 import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
-
 export default function MySalonPage() {
-  const { user } = useAuth();
   const [salon, setSalon] = useState<Salon | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -47,14 +45,14 @@ export default function MySalonPage() {
         setFormData({
           name: salonData.name,
           location: salonData.location,
-          type: salonData.type,
+          type: salonData.type || "unisex",
           phone: salonData.phone || "",
           email: salonData.email || "",
           openingHours: salonData.openingHours || "",
           imageUrl: salonData.imageUrl || "",
         });
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch salon details");
     } finally {
       setLoading(false);
@@ -88,9 +86,10 @@ export default function MySalonPage() {
       }
       setIsEditing(false);
       fetchSalon();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to save salon:", error);
-      const errorMessage = error?.response?.data?.message || error?.message || "Failed to save salon details";
+      const apiError = error as { response?: { data?: { message?: string } }; message?: string };
+      const errorMessage = apiError?.response?.data?.message || apiError?.message || "Failed to save salon details";
       toast.error(errorMessage);
     }
   };
@@ -119,7 +118,7 @@ export default function MySalonPage() {
           <div className="max-w-2xl">
             <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
               <p className="text-blue-800">
-                You don't have a salon yet. Please create one to get started.
+                You don&apos;t have a salon yet. Please create one to get started.
               </p>
             </div>
 
@@ -153,7 +152,7 @@ export default function MySalonPage() {
                   <Label htmlFor="type">Type *</Label>
                   <Select
                     value={formData.type}
-                    onValueChange={(value: any) =>
+                    onValueChange={(value: "men" | "women" | "unisex") =>
                       setFormData({ ...formData, type: value })
                     }
                   >
@@ -273,7 +272,7 @@ export default function MySalonPage() {
                 <Label htmlFor="type">Type</Label>
                 <Select
                   value={formData.type}
-                  onValueChange={(value: any) =>
+                  onValueChange={(value: "men" | "women" | "unisex") =>
                     setFormData({ ...formData, type: value })
                   }
                   disabled={!isEditing}
@@ -344,6 +343,7 @@ export default function MySalonPage() {
                 </p>
                 {formData.imageUrl && (
                   <div className="mt-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={formData.imageUrl}
                       alt="Salon preview"

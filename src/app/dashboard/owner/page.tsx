@@ -8,7 +8,6 @@ import { Calendar, Scissors, ShoppingBag, Users } from "lucide-react";
 import { appointmentService } from "@/services/appointment.service";
 import { serviceService } from "@/services/service.service";
 import { productService } from "@/services/product.service";
-import api from "@/services/api";
 
 export default function OwnerDashboard() {
   const [stats, setStats] = useState({
@@ -38,7 +37,9 @@ export default function OwnerDashboard() {
 
       // Get unique customers
       const uniqueCustomers = new Set(
-        appointments.map((apt: any) => apt.customerId?._id || apt.customerId).filter(Boolean)
+        appointments.map((apt: { customerId?: { _id?: string } | string }) => 
+          typeof apt.customerId === 'object' ? apt.customerId?._id : apt.customerId
+        ).filter(Boolean)
       );
 
       setStats({

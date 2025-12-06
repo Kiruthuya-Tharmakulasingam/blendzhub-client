@@ -45,7 +45,7 @@ export default function FeedbacksPage() {
       if (response.success && response.data) {
         setFeedbacks(response.data);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch feedbacks");
     } finally {
       setLoading(false);
@@ -84,7 +84,7 @@ export default function FeedbacksPage() {
       toast.success("Reply submitted successfully");
       setReplyModalOpen(false);
       fetchFeedbacks(); // Refresh list to show new reply
-    } catch (error) {
+    } catch {
       toast.error("Failed to submit reply");
     } finally {
       setSubmittingReply(false);

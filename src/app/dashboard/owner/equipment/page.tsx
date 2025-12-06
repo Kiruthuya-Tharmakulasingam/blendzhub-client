@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import api from "@/services/api";
+import { uploadService } from "@/services/upload.service";
 
 export default function EquipmentPage() {
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
@@ -60,7 +60,7 @@ export default function EquipmentPage() {
       if (response.success && response.data) {
         setEquipmentList(response.data);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch equipment");
     } finally {
       setLoading(false);
@@ -73,14 +73,9 @@ export default function EquipmentPage() {
 
     try {
       setIsUploading(true);
-      const uploadFormData = new FormData();
-      uploadFormData.append("image", file);
+      const response = await uploadService.uploadImage(file);
 
-      const response = await api.post("/api/upload", uploadFormData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (response.data.success) {
+      if (response.success && response.data) {
         setFormData({ ...formData, imageUrl: response.data.url });
         toast.success("Image uploaded successfully");
       }
@@ -94,10 +89,10 @@ export default function EquipmentPage() {
 
   const handleStatusChange = async (id: string, status: string) => {
     try {
-      await equipmentService.updateEquipment(id, { status: status as any });
+      await equipmentService.updateEquipment(id, { status: status as "available" | "in-use" | "maintenance" | "unavailable" });
       toast.success("Equipment status updated");
       fetchEquipment();
-    } catch (error) {
+    } catch {
       toast.error("Failed to update status");
     }
   };
@@ -115,7 +110,7 @@ export default function EquipmentPage() {
       setIsModalOpen(false);
       resetForm();
       fetchEquipment();
-    } catch (error) {
+    } catch {
       toast.error("Failed to save equipment");
     }
   };
@@ -126,9 +121,9 @@ export default function EquipmentPage() {
         await equipmentService.deleteEquipment(id);
         toast.success("Equipment deleted successfully");
         fetchEquipment();
-      } catch (error) {
-        toast.error("Failed to delete equipment");
-      }
+    } catch {
+      toast.error("Failed to delete equipment");
+    }
     }
   };
 
@@ -198,7 +193,7 @@ export default function EquipmentPage() {
                   <Label htmlFor="status">Status</Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value: any) =>
+                    onValueChange={(value: "available" | "in-use" | "maintenance" | "unavailable") =>
                       setFormData({ ...formData, status: value })
                     }
                   >
@@ -229,6 +224,7 @@ export default function EquipmentPage() {
                   <div className="space-y-2">
                     {formData.imageUrl && (
                       <div className="relative w-32 h-32">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={formData.imageUrl}
                           alt="Equipment preview"
