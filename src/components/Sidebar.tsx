@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
-  Settings,
   LogOut,
   Scissors,
   ShoppingBag,

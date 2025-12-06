@@ -31,9 +31,11 @@ const AvatarImage = React.forwardRef<
   }
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       ref={ref}
       src={src}
+      alt=""
       className={cn("aspect-square h-full w-full object-cover", className)}
       onError={() => setImageError(true)}
       {...props}

@@ -40,7 +40,9 @@ export function SignInModal({ children }: { children: React.ReactNode }) {
     try {
       await login(data);
       setOpen(false);
-    } catch (error) {}
+    } catch {
+      // Error is handled by AuthContext
+    }
   }
 
   return (

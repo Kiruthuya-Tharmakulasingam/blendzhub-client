@@ -51,7 +51,9 @@ export function SignUpModal({ children }: { children: React.ReactNode }) {
         password: data.password,
       });
       setOpen(false);
-    } catch (error) {}
+    } catch {
+      // Error is handled by AuthContext
+    }
   }
 
   return (
