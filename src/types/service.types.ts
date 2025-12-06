@@ -18,4 +18,4 @@ export interface CreateServiceRequest {
   duration: number;
 }
 
-export interface UpdateServiceRequest extends Partial<CreateServiceRequest> {}
+export type UpdateServiceRequest = Partial<CreateServiceRequest>;

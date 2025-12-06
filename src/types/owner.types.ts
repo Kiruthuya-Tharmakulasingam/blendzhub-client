@@ -61,7 +61,7 @@ export interface CreateProductRequest {
   imageUrl?: string;
 }
 
-export interface UpdateProductRequest extends Partial<CreateProductRequest> {}
+export type UpdateProductRequest = Partial<CreateProductRequest>;
 
 export interface CreateEquipmentRequest {
   name: string;
@@ -69,4 +69,4 @@ export interface CreateEquipmentRequest {
   lastSterlizedDate?: string;
 }
 
-export interface UpdateEquipmentRequest extends Partial<CreateEquipmentRequest> {}
+export type UpdateEquipmentRequest = Partial<CreateEquipmentRequest>;

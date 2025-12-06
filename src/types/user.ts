@@ -35,44 +35,23 @@ export interface Owner {
   updatedAt: string;
 }
 
-export interface LoginRequest {
+export interface LoginCredentials {
   email: string;
   password: string;
 }
 
-export interface RegisterCustomerRequest {
+export interface RegisterCustomerData {
   name: string;
   email: string;
   password: string;
   contact: string;
 }
 
-export interface RegisterOwnerRequest {
+export interface RegisterOwnerData {
   name: string;
   email: string;
   password: string;
   phone?: string;
   businessName?: string;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  message: string;
-  token?: string;
-  data?: {
-    user: User;
-    customer?: Customer;
-    owner?: Owner;
-  };
-}
-
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  message?: string;
-  data?: T;
-  total?: number;
-  totalPages?: number;
-  page?: number;
-  limit?: number;
 }
 
