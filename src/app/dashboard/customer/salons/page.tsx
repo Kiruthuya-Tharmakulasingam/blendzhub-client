@@ -21,14 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { salonService, Salon } from "@/services/salon.service";
+import { salonService } from "@/services/salon.service";
+import { Salon } from "@/types/salon.types";
 import { serviceService } from "@/services/service.service";
 import { Service } from "@/types/service.types";
 import { slotService, TimeSlot } from "@/services/slot.service";
 import { appointmentService } from "@/services/appointment.service";
 import { toast } from "sonner";
 import { MapPin, Phone, Mail, Clock, Calendar } from "lucide-react";
-import api from "@/services/api";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
 
@@ -60,12 +60,20 @@ export default function BrowseSalonsPage() {
 
   useEffect(() => {
     fetchSalons();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, searchQuery, filterType, sortBy, sortOrder]);
 
   const fetchSalons = async () => {
     try {
       setLoading(true);
-      const params: any = {
+      const params: {
+        page: number;
+        limit: number;
+        sortBy: string;
+        sortOrder: "asc" | "desc";
+        search?: string;
+        type?: string;
+      } = {
         page,
         limit,
         sortBy,
@@ -83,7 +91,7 @@ export default function BrowseSalonsPage() {
         setTotal(response.total || 0);
         setTotalPages(response.totalPages || 0);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch salons");
     } finally {
       setLoading(false);
@@ -92,11 +100,11 @@ export default function BrowseSalonsPage() {
 
   const fetchServicesForSalon = async (salonId: string) => {
     try {
-      const response = await serviceService.getServices({ salonId } as any);
+      const response = await serviceService.getServices({ salonId });
       if (response.success && response.data) {
         setServices(response.data);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch services");
     }
   };
@@ -132,15 +140,11 @@ export default function BrowseSalonsPage() {
         // Optionally redirect to appointments page
         router.push("/dashboard/customer/appointments");
       }
-    } catch (error: any) {
-      console.error("Booking error:", error);
-      const errorMessage = error?.response?.data?.message || error?.message || "Failed to book appointment";
-      console.error("Error details:", {
-        message: errorMessage,
-        status: error?.response?.status,
-        data: error?.response?.data
-      });
+    } catch (error: unknown) {
+      const apiError = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      const errorMessage = apiError?.response?.data?.message || apiError?.message || "Failed to book appointment";
       toast.error(errorMessage);
+      console.error("Booking error:", error);
     }
   };
 
@@ -161,14 +165,9 @@ export default function BrowseSalonsPage() {
       } else {
         setAvailableSlots([]);
       }
-    } catch (error: any) {
-      console.error("Failed to fetch available slots:", error);
-      const errorMessage = error?.response?.data?.message || error?.message || "Failed to fetch available time slots";
-      console.error("Error details:", {
-        message: errorMessage,
-        status: error?.response?.status,
-        data: error?.response?.data
-      });
+    } catch (error: unknown) {
+      const apiError = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      const errorMessage = apiError?.response?.data?.message || apiError?.message || "Failed to fetch available time slots";
       toast.error(errorMessage);
       setAvailableSlots([]);
     } finally {

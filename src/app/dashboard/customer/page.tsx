@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Store, User } from "lucide-react";
+import { Calendar, Store } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { appointmentService } from "@/services/appointment.service";
@@ -17,7 +17,7 @@ export default function CustomerDashboard() {
     totalAppointments: 0,
     completedAppointments: 0,
   });
-  const [allAppointments, setAllAppointments] = useState<any[]>([]);
+  const [, setAllAppointments] = useState<Array<{ date: string; status: string }>>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,14 +39,14 @@ export default function CustomerDashboard() {
       nextWeek.setDate(today.getDate() + 7);
       nextWeek.setHours(23, 59, 59, 999);
       
-      const upcoming = appointments.filter((apt: any) => {
+      const upcoming = appointments.filter((apt: { date: string; status: string }) => {
         const aptDate = new Date(apt.date);
         aptDate.setHours(0, 0, 0, 0);
         return aptDate >= today && aptDate <= nextWeek && 
                (apt.status === "pending" || apt.status === "accepted" || apt.status === "in-progress");
       });
 
-      const completed = appointments.filter((apt: any) => apt.status === "completed");
+      const completed = appointments.filter((apt: { status: string }) => apt.status === "completed");
 
       setStats({
         upcomingAppointments: upcoming.length,
