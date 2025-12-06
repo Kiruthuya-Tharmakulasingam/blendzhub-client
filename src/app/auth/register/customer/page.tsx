@@ -42,7 +42,7 @@ export default function CustomerRegister() {
     },
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log("Customer Signup:", data);
   };
 

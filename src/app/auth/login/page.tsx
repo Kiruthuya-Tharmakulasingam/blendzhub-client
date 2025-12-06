@@ -42,15 +42,20 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     setError(null);
 
     try {
       await login(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
-      setError(err.response?.data?.message || err.message || "Login failed");
+      const errorMessage = err && typeof err === 'object' && 'response' in err 
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : err && typeof err === 'object' && 'message' in err
+        ? String((err as { message?: unknown }).message)
+        : "Login failed";
+      setError(errorMessage || "Login failed");
     } finally {
       setIsSubmitting(false);
     }
@@ -108,7 +113,7 @@ export default function LoginPage() {
 
         <CardFooter className="flex justify-center">
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/auth/register/customer"
               className="text-black font-semibold hover:underline dark:text-white"

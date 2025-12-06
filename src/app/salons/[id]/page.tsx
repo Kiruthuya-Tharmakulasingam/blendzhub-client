@@ -1,14 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { SignInModal } from "@/components/modals/SignInModal";
 import { useAuth } from "@/hooks/useAuth";
-import { salonService, Salon } from "@/services/salon.service";
+import { salonService } from "@/services/salon.service";
+import { Salon } from "@/types/salon.types";
 import { serviceService } from "@/services/service.service";
 import { productService } from "@/services/product.service";
 import { equipmentService } from "@/services/equipment.service";
@@ -22,7 +23,6 @@ import { Pagination } from "@/components/Pagination";
 
 export default function SalonDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const { isAuthenticated, user } = useAuth();
   const salonId = params.id as string;
 
@@ -76,30 +76,35 @@ export default function SalonDetailPage() {
     if (salonId) {
       fetchSalon();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salonId]);
 
   React.useEffect(() => {
     if (salonId) {
       fetchServices();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salonId, servicesPage, servicesSearch, servicesSortBy, servicesSortOrder]);
 
   React.useEffect(() => {
     if (salonId) {
       fetchProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salonId, productsPage, productsSearch, productsFilterStatus, productsSortBy, productsSortOrder]);
 
   React.useEffect(() => {
     if (salonId) {
       fetchEquipment();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salonId, equipmentPage, equipmentSearch, equipmentFilterStatus, equipmentSortBy, equipmentSortOrder]);
 
   React.useEffect(() => {
     if (salonId) {
       fetchFeedbacks();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salonId, feedbacksPage, feedbacksSearch, feedbacksFilterRating, feedbacksSortBy, feedbacksSortOrder]);
 
   const fetchSalon = async () => {
@@ -116,7 +121,14 @@ export default function SalonDetailPage() {
   const fetchServices = async () => {
     try {
       setLoading(true);
-      const params: any = {
+      const params: {
+        salonId: string;
+        page: number;
+        limit: number;
+        sortBy: string;
+        sortOrder: "asc" | "desc";
+        search?: string;
+      } = {
         salonId,
         page: servicesPage,
         limit: servicesLimit,
@@ -142,7 +154,15 @@ export default function SalonDetailPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const params: any = {
+      const params: {
+        salonId: string;
+        page: number;
+        limit: number;
+        sortBy: string;
+        sortOrder: "asc" | "desc";
+        search?: string;
+        status?: string;
+      } = {
         salonId,
         page: productsPage,
         limit: productsLimit,
@@ -171,7 +191,15 @@ export default function SalonDetailPage() {
   const fetchEquipment = async () => {
     try {
       setLoading(true);
-      const params: any = {
+      const params: {
+        salonId: string;
+        page: number;
+        limit: number;
+        sortBy: string;
+        sortOrder: "asc" | "desc";
+        search?: string;
+        status?: string;
+      } = {
         salonId,
         page: equipmentPage,
         limit: equipmentLimit,
@@ -200,7 +228,15 @@ export default function SalonDetailPage() {
   const fetchFeedbacks = async () => {
     try {
       setLoading(true);
-      const params: any = {
+      const params: {
+        salonId: string;
+        page: number;
+        limit: number;
+        sortBy: string;
+        sortOrder: "asc" | "desc";
+        search?: string;
+        rating?: string;
+      } = {
         salonId,
         page: feedbacksPage,
         limit: feedbacksLimit,
@@ -300,6 +336,7 @@ export default function SalonDetailPage() {
 
             {salon.imageUrl && (
               <div className="mb-6 rounded-lg overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={salon.imageUrl}
                   alt={salon.name}
@@ -405,6 +442,7 @@ export default function SalonDetailPage() {
                       <Card key={service._id} className="hover:shadow-lg transition-shadow">
                         {service.imageUrl ? (
                           <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={service.imageUrl}
                               alt={service.name}
@@ -523,6 +561,7 @@ export default function SalonDetailPage() {
                     <Card key={product._id} className="hover:shadow-lg transition-shadow">
                       {product.imageUrl ? (
                         <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={product.imageUrl}
                             alt={product.name}
@@ -665,6 +704,7 @@ export default function SalonDetailPage() {
                     <Card key={item._id} className="hover:shadow-lg transition-shadow">
                       {item.imageUrl ? (
                         <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={item.imageUrl}
                             alt={item.name}

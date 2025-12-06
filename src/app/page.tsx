@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { SignInModal } from "@/components/modals/SignInModal";
-import { SignUpModal } from "@/components/modals/SignUpModal";
 import { BecomeOwnerModal } from "@/components/modals/BecomeOwnerModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { salonService, Salon } from "@/services/salon.service";
+import { salonService } from "@/services/salon.service";
+import { Salon } from "@/types/salon.types";
 import { MapPin, Phone, Mail, Clock, Calendar } from "lucide-react";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
@@ -38,12 +38,20 @@ export default function Home() {
 
   React.useEffect(() => {
     fetchSalons();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, searchQuery, filterType, sortBy, sortOrder]);
 
   const fetchSalons = async () => {
     try {
       setLoading(true);
-      const params: any = {
+      const params: {
+        page: number;
+        limit: number;
+        sortBy: string;
+        sortOrder: "asc" | "desc";
+        search?: string;
+        type?: string;
+      } = {
         page,
         limit,
         sortBy,
@@ -101,6 +109,7 @@ export default function Home() {
               </div>
             </div>
             <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
                 alt="Modern salon interior"
@@ -186,6 +195,7 @@ export default function Home() {
                   >
                     {salon.imageUrl && (
                       <div className="mb-4 rounded-lg overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={salon.imageUrl}
                           alt={salon.name}

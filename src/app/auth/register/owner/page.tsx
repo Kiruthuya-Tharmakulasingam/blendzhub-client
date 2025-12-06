@@ -5,8 +5,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import { useAuth } from "@/contexts/AuthContext";
 
 import {
   Card,
@@ -35,58 +35,9 @@ const formSchema = z.object({
     .min(3, "Business name must be at least 3 characters."),
 });
 
-const registerOwner = async (data: any) => {
-  try {
-    const requestData = {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      password: data.password,
-      businessName: data.businessName,
-    };
-
-    console.log("Sending registration data:", requestData);
-
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-    const res = await fetch(`${apiUrl}/api/auth/register/owner`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestData),
-    });
-
-    console.log("Response status:", res.status);
-
-    const responseText = await res.text();
-    console.log("Raw response:", responseText);
-
-    let result;
-    try {
-      result = JSON.parse(responseText);
-      console.log("Parsed response:", result);
-    } catch (parseError) {
-      console.error("Failed to parse JSON response:", parseError);
-      throw new Error(`Invalid JSON response: ${responseText}`);
-    }
-
-    if (!res.ok) {
-      throw new Error(result.message || `Registration failed: ${res.status}`);
-    }
-
-    console.log("Registration successful:", result);
-    return result;
-  } catch (error) {
-    console.error("Registration API error:", error);
-    throw error;
-  }
-};
-
 export default function OwnerRegister() {
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const { registerOwner } = useAuth();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -99,33 +50,21 @@ export default function OwnerRegister() {
     },
   });
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    setError(null);
-    setMessage(null);
 
     try {
-      console.log("Owner Register Data:", data);
-
-      const result = await registerOwner(data);
-      console.log("Registration Result:", result);
-
-      if (result.success) {
-        setMessage(
-          "Registration successful! Please wait for admin approval. You will receive an email once approved."
-        );
-
-        form.reset();
-
-        setTimeout(() => {
-          router.push("/auth/login");
-        }, 3000);
-      } else {
-        setError(result.message || "Registration failed");
-      }
-    } catch (err: any) {
+      await registerOwner({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        password: data.password,
+        businessName: data.businessName,
+      });
+      form.reset();
+    } catch (err: unknown) {
       console.error("Registration error:", err);
-      setError(err.message || "Registration failed. Please try again.");
+      // Error is already handled by AuthContext with toast
     } finally {
       setIsLoading(false);
     }
@@ -144,16 +83,6 @@ export default function OwnerRegister() {
           </CardHeader>
 
           <CardContent>
-            {error && (
-              <div className="mb-4 p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-md">
-                {error}
-              </div>
-            )}
-            {message && (
-              <div className="mb-4 p-3 text-sm text-green-500 bg-green-50 border border-green-200 rounded-md">
-                {message}
-              </div>
-            )}
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <FieldGroup>
                 <Field>
@@ -205,8 +134,8 @@ export default function OwnerRegister() {
                 </Field>
               </FieldGroup>
 
-              <Button type="submit" className="w-full mt-4">
-                Register as Owner
+              <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+                {isLoading ? "Registering..." : "Register as Owner"}
               </Button>
             </form>
           </CardContent>
