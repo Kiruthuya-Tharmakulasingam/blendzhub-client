@@ -5,7 +5,8 @@ import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Store, Calendar, TrendingUp } from "lucide-react";
-import api from "@/services/api";
+import { salonService } from "@/services/salon.service";
+import { appointmentService } from "@/services/appointment.service";
 
 export default function AnalyticsPage() {
   const [stats, setStats] = useState({
@@ -16,7 +17,7 @@ export default function AnalyticsPage() {
     pendingAppointments: 0,
     cancelledAppointments: 0,
   });
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     fetchAnalytics();
@@ -25,26 +26,24 @@ export default function AnalyticsPage() {
   const fetchAnalytics = async () => {
     try {
       const [salonsRes, appointmentsRes] = await Promise.all([
-        api.get("/api/salons").catch(() => ({ data: { total: 0, data: [] } })),
-        api
-          .get("/api/appointments")
-          .catch(() => ({ data: { total: 0, data: [] } })),
+        salonService.getSalons().catch(() => ({ success: false, data: [], total: 0 })),
+        appointmentService.getAppointments().catch(() => ({ success: false, data: [], total: 0 })),
       ]);
 
-      const appointments = appointmentsRes.data?.data || [];
+      const appointments = appointmentsRes.data || [];
 
       setStats({
         totalUsers: 0, // User endpoint not available
-        totalSalons: salonsRes.data?.total || salonsRes.data?.data?.length || 0,
+        totalSalons: salonsRes.total || salonsRes.data?.length || 0,
         totalAppointments: appointments.length,
         completedAppointments: appointments.filter(
-          (a: any) => a.status === "completed"
+          (a: { status: string }) => a.status === "completed"
         ).length,
         pendingAppointments: appointments.filter(
-          (a: any) => a.status === "pending"
+          (a: { status: string }) => a.status === "pending"
         ).length,
         cancelledAppointments: appointments.filter(
-          (a: any) => a.status === "cancelled"
+          (a: { status: string }) => a.status === "cancelled"
         ).length,
       });
     } catch (error) {

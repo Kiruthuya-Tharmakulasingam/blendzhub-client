@@ -47,7 +47,7 @@ export default function ApprovalsPage() {
       if (response.success && response.data) {
         setPendingOwners(response.data);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to load pending owners");
     } finally {
       setLoading(false);
@@ -74,9 +74,10 @@ export default function ApprovalsPage() {
       setActionOwner(null);
       setActionType(null);
       setRejectReason("");
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { message?: string } } };
       toast.error(
-        error.response?.data?.message || `Failed to ${actionType} owner`
+        apiError?.response?.data?.message || `Failed to ${actionType} owner`
       );
     }
   };

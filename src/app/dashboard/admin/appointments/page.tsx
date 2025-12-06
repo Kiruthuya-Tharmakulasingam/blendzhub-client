@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import {
@@ -38,14 +38,17 @@ export default function AdminAppointmentsPage() {
   const [sortBy, setSortBy] = useState("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  useEffect(() => {
-    fetchAppointments();
-  }, [page, search, statusFilter, sortBy, sortOrder]);
-
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const params: any = {
+      const params: {
+        page: number;
+        limit: number;
+        sortBy: string;
+        sortOrder: "asc" | "desc";
+        search?: string;
+        status?: string;
+      } = {
         page,
         limit,
         sortBy,
@@ -63,7 +66,7 @@ export default function AdminAppointmentsPage() {
         setTotal(response.total || 0);
         setTotalPages(response.totalPages || 0);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch appointments");
     } finally {
       setLoading(false);
@@ -75,7 +78,7 @@ export default function AdminAppointmentsPage() {
       await appointmentService.updateAppointmentStatus(id, status);
       toast.success("Appointment status updated");
       fetchAppointments();
-    } catch (error) {
+    } catch {
       toast.error("Failed to update status");
     }
   };

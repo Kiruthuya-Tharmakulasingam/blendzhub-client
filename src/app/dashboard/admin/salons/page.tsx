@@ -14,7 +14,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { salonService, Salon } from "@/services/salon.service";
+import { salonService } from "@/services/salon.service";
+import { Salon } from "@/types/salon.types";
 
 export default function SalonsPage() {
   const [salons, setSalons] = useState<Salon[]>([]);
@@ -30,7 +31,7 @@ export default function SalonsPage() {
       if (response.success && response.data) {
         setSalons(response.data);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to fetch salons");
     } finally {
       setLoading(false);
@@ -97,8 +98,8 @@ export default function SalonsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getTypeBadgeColor(salon.type)}>
-                          {salon.type.charAt(0).toUpperCase() + salon.type.slice(1)}
+                        <Badge className={getTypeBadgeColor(salon.type || "unisex")}>
+                          {(salon.type || "unisex").charAt(0).toUpperCase() + (salon.type || "unisex").slice(1)}
                         </Badge>
                       </TableCell>
                       <TableCell>

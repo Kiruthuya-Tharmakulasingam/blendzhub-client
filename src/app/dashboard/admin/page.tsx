@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Store, Calendar, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import api from "@/services/api";
+import { salonService } from "@/services/salon.service";
+import { appointmentService } from "@/services/appointment.service";
+import { ownerService } from "@/services/owner.service";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -16,7 +18,7 @@ export default function AdminDashboard() {
     totalAppointments: 0,
     pendingOwners: 0,
   });
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
@@ -26,19 +28,19 @@ export default function AdminDashboard() {
     try {
       // Fetch stats from available endpoints
       const [salonsRes, appointmentsRes, ownersRes] = await Promise.all([
-        api.get("/api/salons").catch(() => ({ data: { total: 0 } })),
-        api.get("/api/appointments").catch(() => ({ data: { total: 0 } })),
-        api.get("/api/owners/pending").catch(() => ({ data: { data: [] } })),
+        salonService.getSalons().catch(() => ({ success: false, data: [], total: 0 })),
+        appointmentService.getAppointments().catch(() => ({ success: false, data: [], total: 0 })),
+        ownerService.getPendingOwners().catch(() => ({ success: false, data: [] })),
       ]);
 
       setStats({
         totalUsers: 0, // User endpoint not available
-        totalSalons: salonsRes.data?.total || salonsRes.data?.data?.length || 0,
+        totalSalons: salonsRes.total || salonsRes.data?.length || 0,
         totalAppointments:
-          appointmentsRes.data?.total ||
-          appointmentsRes.data?.data?.length ||
+          appointmentsRes.total ||
+          appointmentsRes.data?.length ||
           0,
-        pendingOwners: ownersRes.data?.data?.length || 0,
+        pendingOwners: ownersRes.data?.length || 0,
       });
     } catch (error) {
       console.error("Failed to fetch stats:", error);

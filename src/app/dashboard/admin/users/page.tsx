@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,14 +43,22 @@ export default function UsersPage() {
         limit: 10,
         search: searchQuery,
       });
-      if (response.success && response.data) {
-        setUsers(response.data);
-        // Assuming backend returns total pages, if not we might need to adjust
-        setTotalPages(Math.ceil((response.total || 0) / 10) || 1);
+      if (response && response.success) {
+        const data = response.data;
+        if (data && Array.isArray(data)) {
+          setUsers(data);
+          // Assuming backend returns total pages, if not we might need to adjust
+          setTotalPages(Math.ceil((response.total || 0) / 10) || 1);
+        } else {
+          setUsers([]);
+        }
+      } else {
+        setUsers([]);
       }
     } catch (error) {
       console.error("Failed to fetch users:", error);
       toast.error("Failed to load users");
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -61,6 +69,7 @@ export default function UsersPage() {
       fetchUsers();
     }, 500);
     return () => clearTimeout(debounce);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, page]);
 
   const handleDeleteUser = async (userId: string) => {
