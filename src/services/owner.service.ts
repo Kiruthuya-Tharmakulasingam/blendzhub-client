@@ -1,10 +1,11 @@
-import api from "./api";
-import { Owner, ApiResponse } from "@/types/auth.types";
+import apiClient from "@/lib/apiClient";
+import { ApiResponse } from "@/types/common";
+import { Owner } from "@/types/user";
 
 export const ownerService = {
   async getPendingOwners(page = 1, limit = 20): Promise<ApiResponse<Owner[]>> {
-    const response = await api.get<ApiResponse<Owner[]>>(
-      "/api/owners/pending",
+    const response = await apiClient.get<ApiResponse<Owner[]>>(
+      "/owners/pending",
       {
         params: { page, limit },
       }
@@ -18,15 +19,15 @@ export const ownerService = {
     status?: string;
     search?: string;
   }): Promise<ApiResponse<Owner[]>> {
-    const response = await api.get<ApiResponse<Owner[]>>("/api/owners", {
+    const response = await apiClient.get<ApiResponse<Owner[]>>("/owners", {
       params,
     });
     return response.data;
   },
 
   async approveOwner(ownerId: string): Promise<ApiResponse<Owner>> {
-    const response = await api.patch<ApiResponse<Owner>>(
-      `/api/owners/${ownerId}/approve`
+    const response = await apiClient.patch<ApiResponse<Owner>>(
+      `/owners/${ownerId}/approve`
     );
     return response.data;
   },
@@ -35,8 +36,8 @@ export const ownerService = {
     ownerId: string,
     reason?: string
   ): Promise<ApiResponse<Owner>> {
-    const response = await api.patch<ApiResponse<Owner>>(
-      `/api/owners/${ownerId}/reject`,
+    const response = await apiClient.patch<ApiResponse<Owner>>(
+      `/owners/${ownerId}/reject`,
       {
         reason,
       }
@@ -45,8 +46,8 @@ export const ownerService = {
   },
 
   async deleteOwner(ownerId: string): Promise<ApiResponse<void>> {
-    const response = await api.delete<ApiResponse<void>>(
-      `/api/owners/${ownerId}`
+    const response = await apiClient.delete<ApiResponse<void>>(
+      `/owners/${ownerId}`
     );
     return response.data;
   },

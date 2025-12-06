@@ -1,58 +1,32 @@
-import api from "./api";
-import { ApiResponse } from "@/types/auth.types";
-
-export interface Salon {
-  _id: string;
-  name: string;
-  location: string;
-  type: "men" | "women" | "unisex";
-  ownerId: string;
-  phone?: string;
-  email?: string;
-  openingHours?: string;
-  imageUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface UpdateSalonRequest {
-  name?: string;
-  location?: string;
-  type?: "men" | "women" | "unisex";
-  phone?: string;
-  email?: string;
-  openingHours?: string;
-  imageUrl?: string;
-}
-
-export interface CreateSalonRequest {
-  name: string;
-  location: string;
-  type: "men" | "women" | "unisex";
-  phone?: string;
-  email?: string;
-  openingHours?: string;
-  imageUrl?: string;
-}
+import apiClient from "@/lib/apiClient";
+import { ApiResponse } from "@/types/common";
+import { Salon, CreateSalonRequest, UpdateSalonRequest } from "@/types/salon.types";
 
 export const salonService = {
-  async getSalons(params?: { page?: number; limit?: number }): Promise<ApiResponse<Salon[]>> {
-    const response = await api.get<ApiResponse<Salon[]>>("/api/salons", { params });
+  async getSalons(params?: { 
+    page?: number; 
+    limit?: number; 
+    search?: string; 
+    sortBy?: string; 
+    sortOrder?: "asc" | "desc"; 
+    type?: string;
+  }): Promise<ApiResponse<Salon[]>> {
+    const response = await apiClient.get<ApiResponse<Salon[]>>("/salons", { params });
     return response.data;
   },
 
   async getSalonById(id: string): Promise<ApiResponse<Salon>> {
-    const response = await api.get<ApiResponse<Salon>>(`/api/salons/${id}`);
+    const response = await apiClient.get<ApiResponse<Salon>>(`/salons/${id}`);
     return response.data;
   },
 
   async createSalon(data: CreateSalonRequest): Promise<ApiResponse<Salon>> {
-    const response = await api.post<ApiResponse<Salon>>("/api/salons", data);
+    const response = await apiClient.post<ApiResponse<Salon>>("/salons", data);
     return response.data;
   },
 
   async updateSalon(id: string, data: UpdateSalonRequest): Promise<ApiResponse<Salon>> {
-    const response = await api.put<ApiResponse<Salon>>(`/api/salons/${id}`, data);
+    const response = await apiClient.patch<ApiResponse<Salon>>(`/salons/${id}`, data);
     return response.data;
   },
 };

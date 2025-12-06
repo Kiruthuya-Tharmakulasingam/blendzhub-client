@@ -1,48 +1,59 @@
-import api from "./api";
-import {
-  LoginRequest,
-  RegisterCustomerRequest,
-  RegisterOwnerRequest,
-  AuthResponse,
-  User,
-} from "@/types/auth.types";
+import apiClient from "@/lib/apiClient";
+import Cookies from "js-cookie";
+import { LoginCredentials, RegisterCustomerData, RegisterOwnerData, User, Customer, Owner } from "@/types/user";
+
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  token?: string;
+  data?: {
+    user: User;
+    customer?: Customer;
+    owner?: Owner;
+  };
+}
 
 export const authService = {
-  async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
-      "/api/auth/login",
-      credentials
-    );
-
+  login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>("/auth/login", credentials);
     return response.data;
   },
 
-  async registerCustomer(data: RegisterCustomerRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
-      "/api/auth/register/customer",
-      data
-    );
-
+  register: async (data: RegisterCustomerData): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>("/auth/register/customer", data);
     return response.data;
   },
 
-  async registerOwner(data: RegisterOwnerRequest): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>(
-      "/api/auth/register/owner",
-      data
-    );
+  registerCustomer: async (data: RegisterCustomerData): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>("/auth/register/customer", data);
     return response.data;
   },
 
-  async getMe(): Promise<AuthResponse> {
+  registerOwner: async (data: RegisterOwnerData): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>("/auth/register/owner", data);
+    return response.data;
+  },
+
+  getCurrentUser: async (): Promise<AuthResponse> => {
+    // Check if token exists before making the request
+    // This prevents unnecessary 401 errors in the console
+    const token = Cookies.get("token");
+    if (!token) {
+      return {
+        success: false,
+        message: "Not authenticated",
+      } as AuthResponse;
+    }
+
     try {
-      const response = await api.get<AuthResponse>("/api/auth/me", {
-        // Don't throw errors for 401 - it's expected when not logged in
-        validateStatus: (status) => status < 500,
+      const response = await apiClient.get<AuthResponse>("/auth/me", {
+        validateStatus: (status) => status < 500, // Don't treat 401 as error
       });
       
-      // Handle 401 as expected (user not logged in)
+      // Handle 401 gracefully - this is expected when user is not authenticated
       if (response.status === 401) {
+        // Clear invalid token
+        Cookies.remove("token");
         return {
           success: false,
           message: "Not authenticated",
@@ -50,27 +61,32 @@ export const authService = {
       }
       
       return response.data;
-    } catch (error: any) {
-      // Silently handle 401 errors - this is expected when not authenticated
-      if (error.response?.status === 401 || error.isExpectedAuthCheck) {
+    } catch (error: unknown) {
+      // This catch block should rarely be hit due to validateStatus,
+      // but handle it just in case
+      const apiError = error as { response?: { status?: number } };
+      if (apiError.response?.status === 401) {
+        Cookies.remove("token");
         return {
           success: false,
           message: "Not authenticated",
         } as AuthResponse;
       }
-      // Only throw non-401 errors
+      // Only log non-401 errors
+      console.error("Unexpected error in getCurrentUser:", error);
       throw error;
     }
   },
 
-  async logout(): Promise<void> {
-    try {
-      await api.post("/api/auth/logout");
-    } finally {
-    }
+  getMe: async (): Promise<AuthResponse> => {
+    return authService.getCurrentUser();
   },
 
-  getStoredUser(): User | null {
-    return null;
+  logout: async (): Promise<void> => {
+    try {
+      await apiClient.post("/auth/logout");
+    } catch {
+      // Ignore logout errors
+    }
   },
 };

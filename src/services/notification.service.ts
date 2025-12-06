@@ -1,5 +1,5 @@
-import api from "./api";
-import { ApiResponse } from "@/types/auth.types";
+import apiClient from "@/lib/apiClient";
+import { ApiResponse } from "@/types/common";
 
 export interface Notification {
   _id: string;
@@ -20,22 +20,22 @@ export interface Notification {
 
 export const notificationService = {
   async getNotifications(params?: { read?: boolean; limit?: number }): Promise<ApiResponse<{ data: Notification[]; unreadCount: number }>> {
-    const response = await api.get<ApiResponse<{ data: Notification[]; unreadCount: number }>>("/api/notifications", { params });
+    const response = await apiClient.get<ApiResponse<{ data: Notification[]; unreadCount: number }>>("/notifications", { params });
     return response.data;
   },
 
   async markAsRead(id: string): Promise<ApiResponse<Notification>> {
-    const response = await api.patch<ApiResponse<Notification>>(`/api/notifications/${id}/read`);
+    const response = await apiClient.patch<ApiResponse<Notification>>(`/notifications/${id}/read`);
     return response.data;
   },
 
   async markAllAsRead(): Promise<ApiResponse<void>> {
-    const response = await api.patch<ApiResponse<void>>("/api/notifications/read-all");
+    const response = await apiClient.patch<ApiResponse<void>>("/notifications/read-all");
     return response.data;
   },
 
   async deleteNotification(id: string): Promise<ApiResponse<void>> {
-    const response = await api.delete<ApiResponse<void>>(`/api/notifications/${id}`);
+    const response = await apiClient.delete<ApiResponse<void>>(`/notifications/${id}`);
     return response.data;
   },
 };

@@ -1,5 +1,5 @@
-import api from "./api";
-import { ApiResponse } from "@/types/auth.types";
+import apiClient from "@/lib/apiClient";
+import { ApiResponse } from "@/types/common";
 import { Product, CreateProductRequest, UpdateProductRequest } from "@/types/owner.types";
 
 export const productService = {
@@ -12,27 +12,27 @@ export const productService = {
     sortBy?: string;
     sortOrder?: string;
   }): Promise<ApiResponse<Product[]>> {
-    const response = await api.get<ApiResponse<Product[]>>("/api/products", { params });
+    const response = await apiClient.get<ApiResponse<Product[]>>("/products", { params });
     return response.data;
   },
 
   async getProduct(id: string): Promise<ApiResponse<Product>> {
-    const response = await api.get<ApiResponse<Product>>(`/api/products/${id}`);
+    const response = await apiClient.get<ApiResponse<Product>>(`/products/${id}`);
     return response.data;
   },
 
   async createProduct(data: CreateProductRequest): Promise<ApiResponse<Product>> {
-    const response = await api.post<ApiResponse<Product>>("/api/products", data);
+    const response = await apiClient.post<ApiResponse<Product>>("/products", data);
     return response.data;
   },
 
   async updateProduct(id: string, data: UpdateProductRequest): Promise<ApiResponse<Product>> {
-    const response = await api.put<ApiResponse<Product>>(`/api/products/${id}`, data);
+    const response = await apiClient.patch<ApiResponse<Product>>(`/products/${id}`, data);
     return response.data;
   },
 
   async deleteProduct(id: string): Promise<ApiResponse<void>> {
-    const response = await api.delete<ApiResponse<void>>(`/api/products/${id}`);
+    const response = await apiClient.delete<ApiResponse<void>>(`/products/${id}`);
     return response.data;
   },
 };

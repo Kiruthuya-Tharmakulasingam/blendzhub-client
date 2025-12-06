@@ -1,5 +1,5 @@
-import api from "./api";
-import { ApiResponse } from "@/types/auth.types";
+import apiClient from "@/lib/apiClient";
+import { ApiResponse } from "@/types/common";
 
 export interface Feedback {
   _id: string;
@@ -24,12 +24,12 @@ export const feedbackService = {
     sortBy?: string;
     sortOrder?: string;
   }): Promise<ApiResponse<Feedback[]>> {
-    const response = await api.get<ApiResponse<Feedback[]>>("/api/feedbacks", { params });
+    const response = await apiClient.get<ApiResponse<Feedback[]>>("/feedbacks", { params });
     return response.data;
   },
 
   async getFeedbackById(id: string): Promise<ApiResponse<Feedback>> {
-    const response = await api.get<ApiResponse<Feedback>>(`/api/feedbacks/${id}`);
+    const response = await apiClient.get<ApiResponse<Feedback>>(`/feedbacks/${id}`);
     return response.data;
   },
 
@@ -39,12 +39,12 @@ export const feedbackService = {
     rating: number;
     comments?: string;
   }): Promise<ApiResponse<Feedback>> {
-    const response = await api.post<ApiResponse<Feedback>>("/api/feedbacks", data);
+    const response = await apiClient.post<ApiResponse<Feedback>>("/feedbacks", data);
     return response.data;
   },
 
   async replyToFeedback(id: string, reply: string): Promise<ApiResponse<Feedback>> {
-    const response = await api.put<ApiResponse<Feedback>>(`/api/feedbacks/${id}/reply`, { reply });
+    const response = await apiClient.put<ApiResponse<Feedback>>(`/feedbacks/${id}/reply`, { reply });
     return response.data;
   },
 };

@@ -1,5 +1,5 @@
-import api from "./api";
-import { ApiResponse } from "@/types/auth.types";
+import apiClient from "@/lib/apiClient";
+import { ApiResponse } from "@/types/common";
 import { Appointment } from "@/types/owner.types";
 
 export const appointmentService = {
@@ -12,12 +12,12 @@ export const appointmentService = {
     sortBy?: string;
     sortOrder?: string;
   }): Promise<ApiResponse<Appointment[]>> {
-    const response = await api.get<ApiResponse<Appointment[]>>("/api/appointments", { params });
+    const response = await apiClient.get<ApiResponse<Appointment[]>>("/appointments", { params });
     return response.data;
   },
 
   async getAppointmentById(id: string): Promise<ApiResponse<Appointment>> {
-    const response = await api.get<ApiResponse<Appointment>>(`/api/appointments/${id}`);
+    const response = await apiClient.get<ApiResponse<Appointment>>(`/appointments/${id}`);
     return response.data;
   },
 
@@ -28,22 +28,22 @@ export const appointmentService = {
     time: string;
     notes?: string;
   }): Promise<ApiResponse<Appointment>> {
-    const response = await api.post<ApiResponse<Appointment>>("/api/appointments", data);
+    const response = await apiClient.post<ApiResponse<Appointment>>("/appointments", data);
     return response.data;
   },
 
   async rescheduleAppointment(id: string, date: string, time: string): Promise<ApiResponse<Appointment>> {
-    const response = await api.put<ApiResponse<Appointment>>(`/api/appointments/${id}/reschedule`, { date, time });
+    const response = await apiClient.put<ApiResponse<Appointment>>(`/appointments/${id}/reschedule`, { date, time });
     return response.data;
   },
 
   async updateAppointmentStatus(id: string, status: string): Promise<ApiResponse<Appointment>> {
-    const response = await api.patch<ApiResponse<Appointment>>(`/api/appointments/${id}/status`, { status });
+    const response = await apiClient.patch<ApiResponse<Appointment>>(`/appointments/${id}/status`, { status });
     return response.data;
   },
 
   async cancelAppointment(id: string): Promise<ApiResponse<Appointment>> {
-    const response = await api.delete<ApiResponse<Appointment>>(`/api/appointments/${id}`);
+    const response = await apiClient.delete<ApiResponse<Appointment>>(`/appointments/${id}`);
     return response.data;
   },
 };

@@ -1,4 +1,4 @@
-import api from "./api";
+import apiClient from "@/lib/apiClient";
 
 export interface TimeSlot {
   start: string;
@@ -17,7 +17,7 @@ export const slotService = {
     if (salonId) {
       params.salonId = salonId;
     }
-    const response = await api.get<AvailableSlotsResponse>("/api/slots", { params });
+    const response = await apiClient.get<AvailableSlotsResponse>("/slots", { params });
     return response.data;
   },
 };
