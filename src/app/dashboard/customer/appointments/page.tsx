@@ -39,14 +39,52 @@ import { Input } from "@/components/ui/input";
 
 interface Appointment {
   _id: string;
-  salonId: string | { _id: string; name: string; location: string };
-  serviceId: string | { _id: string; name: string; price: number; duration?: number };
-  customerId: string | { _id: string; name: string; email: string };
+  salonId: string | { _id: string; name: string; location: string } | null;
+  serviceId: string | { _id: string; name: string; price: number; duration?: number } | null;
+  customerId: string | { _id: string; name: string; email: string } | null;
   date: string;
   status: "pending" | "accepted" | "rejected" | "in-progress" | "completed" | "cancelled" | "no-show";
   notes?: string;
   createdAt: string;
 }
+
+// Helper functions to safely access nested properties
+const getSalonName = (salonId: Appointment['salonId']): string => {
+  if (!salonId || typeof salonId !== 'object') return "N/A";
+  return salonId.name || "N/A";
+};
+
+const getSalonLocation = (salonId: Appointment['salonId']): string => {
+  if (!salonId || typeof salonId !== 'object') return "N/A";
+  return salonId.location || "N/A";
+};
+
+const getServiceName = (serviceId: Appointment['serviceId']): string => {
+  if (!serviceId || typeof serviceId !== 'object') return "N/A";
+  return serviceId.name || "N/A";
+};
+
+const getServicePrice = (serviceId: Appointment['serviceId']): number => {
+  if (!serviceId || typeof serviceId !== 'object') return 0;
+  return serviceId.price || 0;
+};
+
+const getServiceDuration = (serviceId: Appointment['serviceId']): number => {
+  if (!serviceId || typeof serviceId !== 'object') return 0;
+  return serviceId.duration || 0;
+};
+
+const getSalonIdValue = (salonId: Appointment['salonId']): string | null => {
+  if (!salonId) return null;
+  if (typeof salonId === 'object') return salonId._id;
+  return salonId;
+};
+
+const getServiceIdValue = (serviceId: Appointment['serviceId']): string | null => {
+  if (!serviceId) return null;
+  if (typeof serviceId === 'object') return serviceId._id;
+  return serviceId;
+};
 
 export default function MyAppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -156,12 +194,13 @@ export default function MyAppointmentsPage() {
 
     try {
       setLoadingSlots(true);
-      const salonId = selectedAppointment.salonId && typeof selectedAppointment.salonId === 'object' 
-        ? selectedAppointment.salonId._id 
-        : selectedAppointment.salonId;
-      const serviceId = selectedAppointment.serviceId && typeof selectedAppointment.serviceId === 'object'
-        ? selectedAppointment.serviceId._id
-        : selectedAppointment.serviceId;
+      const salonId = getSalonIdValue(selectedAppointment.salonId);
+      const serviceId = getServiceIdValue(selectedAppointment.serviceId);
+      
+      if (!salonId || !serviceId) {
+        toast.error("Invalid appointment data");
+        return;
+      }
       
       const response = await slotService.getAvailableSlots(date, serviceId, salonId);
       setAvailableSlots(response.slots || []);
@@ -216,10 +255,15 @@ export default function MyAppointmentsPage() {
 
     try {
       setSubmittingFeedback(true);
+      const salonId = getSalonIdValue(selectedAppointment.salonId);
+      if (!salonId) {
+        toast.error("Invalid appointment data");
+        setSubmittingFeedback(false);
+        return;
+      }
+      
       const response = await feedbackService.createFeedback({
-        salonId: selectedAppointment.salonId && typeof selectedAppointment.salonId === 'object' 
-          ? selectedAppointment.salonId._id 
-          : selectedAppointment.salonId,
+        salonId,
         appointmentId: selectedAppointment._id,
         rating,
         comments: comments.trim() || undefined,
@@ -401,18 +445,18 @@ export default function MyAppointmentsPage() {
                     <TableRow key={appointment._id}>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{appointment.salonId && typeof appointment.salonId === 'object' ? appointment.salonId.name : "N/A"}</div>
+                          <div className="font-medium">{getSalonName(appointment.salonId)}</div>
                           <div className="text-sm text-muted-foreground flex items-center">
                             <MapPin className="h-3 w-3 mr-1" />
-                            {appointment.salonId && typeof appointment.salonId === 'object' ? appointment.salonId.location : "N/A"}
+                            {getSalonLocation(appointment.salonId)}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{appointment.serviceId && typeof appointment.serviceId === 'object' ? appointment.serviceId.name : "N/A"}</div>
+                          <div className="font-medium">{getServiceName(appointment.serviceId)}</div>
                           <div className="text-sm text-muted-foreground">
-                            Rs. {appointment.serviceId && typeof appointment.serviceId === 'object' ? appointment.serviceId.price : 0} • {appointment.serviceId && typeof appointment.serviceId === 'object' ? (appointment.serviceId.duration || 0) : 0} min
+                            Rs. {getServicePrice(appointment.serviceId)} • {getServiceDuration(appointment.serviceId)} min
                           </div>
                         </div>
                       </TableCell>
@@ -514,9 +558,7 @@ export default function MyAppointmentsPage() {
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>
-                  Leave Feedback for {selectedAppointment?.salonId && typeof selectedAppointment.salonId === 'object' 
-                    ? selectedAppointment.salonId.name 
-                    : 'Salon'}
+                  Leave Feedback for {selectedAppointment ? getSalonName(selectedAppointment.salonId) : 'Salon'}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={(e) => { e.preventDefault(); handleSubmitFeedback(); }} className="space-y-4 py-4">
