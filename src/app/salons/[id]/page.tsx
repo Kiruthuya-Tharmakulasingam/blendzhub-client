@@ -11,12 +11,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { salonService } from "@/services/salon.service";
 import { Salon } from "@/types/salon.types";
 import { serviceService } from "@/services/service.service";
-import { productService } from "@/services/product.service";
-import { equipmentService } from "@/services/equipment.service";
 import { feedbackService, Feedback } from "@/services/feedback.service";
 import { Service } from "@/types/service.types";
-import { Product, Equipment } from "@/types/owner.types";
-import { MapPin, Phone, Mail, Clock, Calendar, ArrowLeft, DollarSign, Package, Wrench, Scissors, Loader2, Star, MessageSquare } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Calendar, ArrowLeft, DollarSign, Scissors, Loader2, Star, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
@@ -28,8 +25,6 @@ export default function SalonDetailPage() {
 
   const [salon, setSalon] = React.useState<Salon | null>(null);
   const [services, setServices] = React.useState<Service[]>([]);
-  const [products, setProducts] = React.useState<Product[]>([]);
-  const [equipment, setEquipment] = React.useState<Equipment[]>([]);
   const [feedbacks, setFeedbacks] = React.useState<Feedback[]>([]);
   const [loading, setLoading] = React.useState(true);
 
@@ -41,26 +36,6 @@ export default function SalonDetailPage() {
   const [servicesSearch, setServicesSearch] = React.useState("");
   const [servicesSortBy, setServicesSortBy] = React.useState("createdAt");
   const [servicesSortOrder, setServicesSortOrder] = React.useState<"asc" | "desc">("desc");
-
-  // Products pagination/filtering/sorting
-  const [productsPage, setProductsPage] = React.useState(1);
-  const [productsLimit] = React.useState(9);
-  const [productsTotal, setProductsTotal] = React.useState(0);
-  const [productsTotalPages, setProductsTotalPages] = React.useState(0);
-  const [productsSearch, setProductsSearch] = React.useState("");
-  const [productsFilterStatus, setProductsFilterStatus] = React.useState("");
-  const [productsSortBy, setProductsSortBy] = React.useState("createdAt");
-  const [productsSortOrder, setProductsSortOrder] = React.useState<"asc" | "desc">("desc");
-
-  // Equipment pagination/filtering/sorting
-  const [equipmentPage, setEquipmentPage] = React.useState(1);
-  const [equipmentLimit] = React.useState(9);
-  const [equipmentTotal, setEquipmentTotal] = React.useState(0);
-  const [equipmentTotalPages, setEquipmentTotalPages] = React.useState(0);
-  const [equipmentSearch, setEquipmentSearch] = React.useState("");
-  const [equipmentFilterStatus, setEquipmentFilterStatus] = React.useState("");
-  const [equipmentSortBy, setEquipmentSortBy] = React.useState("createdAt");
-  const [equipmentSortOrder, setEquipmentSortOrder] = React.useState<"asc" | "desc">("desc");
 
   // Feedbacks pagination/filtering/sorting
   const [feedbacksPage, setFeedbacksPage] = React.useState(1);
@@ -85,20 +60,6 @@ export default function SalonDetailPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [salonId, servicesPage, servicesSearch, servicesSortBy, servicesSortOrder]);
-
-  React.useEffect(() => {
-    if (salonId) {
-      fetchProducts();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [salonId, productsPage, productsSearch, productsFilterStatus, productsSortBy, productsSortOrder]);
-
-  React.useEffect(() => {
-    if (salonId) {
-      fetchEquipment();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [salonId, equipmentPage, equipmentSearch, equipmentFilterStatus, equipmentSortBy, equipmentSortOrder]);
 
   React.useEffect(() => {
     if (salonId) {
@@ -146,80 +107,6 @@ export default function SalonDetailPage() {
       }
     } catch (error) {
       console.error("Failed to fetch services:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const params: {
-        salonId: string;
-        page: number;
-        limit: number;
-        sortBy: string;
-        sortOrder: "asc" | "desc";
-        search?: string;
-        status?: string;
-      } = {
-        salonId,
-        page: productsPage,
-        limit: productsLimit,
-        sortBy: productsSortBy,
-        sortOrder: productsSortOrder,
-      };
-      if (productsSearch.trim()) {
-        params.search = productsSearch;
-      }
-      if (productsFilterStatus) {
-        params.status = productsFilterStatus;
-      }
-      const response = await productService.getProducts(params);
-      if (response.success && response.data) {
-        setProducts(response.data);
-        setProductsTotal(response.total || 0);
-        setProductsTotalPages(response.totalPages || 0);
-      }
-    } catch (error) {
-      console.error("Failed to fetch products:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchEquipment = async () => {
-    try {
-      setLoading(true);
-      const params: {
-        salonId: string;
-        page: number;
-        limit: number;
-        sortBy: string;
-        sortOrder: "asc" | "desc";
-        search?: string;
-        status?: string;
-      } = {
-        salonId,
-        page: equipmentPage,
-        limit: equipmentLimit,
-        sortBy: equipmentSortBy,
-        sortOrder: equipmentSortOrder,
-      };
-      if (equipmentSearch.trim()) {
-        params.search = equipmentSearch;
-      }
-      if (equipmentFilterStatus) {
-        params.status = equipmentFilterStatus;
-      }
-      const response = await equipmentService.getEquipment(params);
-      if (response.success && response.data) {
-        setEquipment(response.data);
-        setEquipmentTotal(response.total || 0);
-        setEquipmentTotalPages(response.totalPages || 0);
-      }
-    } catch (error) {
-      console.error("Failed to fetch equipment:", error);
     } finally {
       setLoading(false);
     }
@@ -506,279 +393,6 @@ export default function SalonDetailPage() {
                 <Card>
                   <CardContent className="py-12 text-center">
                     <p className="text-muted-foreground">No services available</p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Products Section */}
-            <div>
-              <h2 className="text-3xl font-bold mb-6">Products Available</h2>
-              <FilterAndSort
-                searchValue={productsSearch}
-                onSearchChange={(value) => {
-                  setProductsSearch(value);
-                  setProductsPage(1);
-                }}
-                searchPlaceholder="Search products..."
-                showSearch={true}
-                showFilter={true}
-                filterLabel="Filter by Status"
-                filterValue={productsFilterStatus}
-                filterOptions={[
-                  { value: "active", label: "Active" },
-                  { value: "out-of-stock", label: "Out of Stock" },
-                  { value: "discontinued", label: "Discontinued" },
-                ]}
-                onFilterChange={(value) => {
-                  setProductsFilterStatus(value);
-                  setProductsPage(1);
-                }}
-                showSort={true}
-                sortLabel="Sort by"
-                sortValue={productsSortBy}
-                sortOptions={[
-                  { value: "name", label: "Name" },
-                  { value: "price", label: "Price" },
-                  { value: "supplier", label: "Supplier" },
-                  { value: "status", label: "Status" },
-                  { value: "createdAt", label: "Date Added" },
-                ]}
-                onSortChange={(value) => {
-                  setProductsSortBy(value);
-                  setProductsPage(1);
-                }}
-                sortOrder={productsSortOrder}
-                onSortOrderChange={(order) => {
-                  setProductsSortOrder(order);
-                  setProductsPage(1);
-                }}
-              />
-              {products.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                  {products.map((product) => (
-                    <Card key={product._id} className="hover:shadow-lg transition-shadow">
-                      {product.imageUrl ? (
-                        <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={product.imageUrl}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = "none";
-                              const parent = target.parentElement;
-                              if (parent) {
-                                parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="h-16 w-16 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>';
-                              }
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                          <Package className="h-16 w-16 text-zinc-400" />
-                        </div>
-                      )}
-                      <CardHeader>
-                        <CardTitle className="flex items-start justify-between">
-                          <span>{product.name}</span>
-                          <div className="flex items-center gap-1 text-lg font-bold text-blue-600 dark:text-blue-400">
-                            <DollarSign className="h-5 w-5" />
-                            Rs. {product.price}
-                          </div>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {product.description && (
-                          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-3">
-                            {product.description}
-                          </p>
-                        )}
-                        <div className="space-y-2">
-                          {product.category && (
-                            <div className="text-sm">
-                              <span className="font-medium">Category: </span>
-                              <span className="text-zinc-600 dark:text-zinc-400">{product.category}</span>
-                            </div>
-                          )}
-                          {product.supplier && (
-                            <div className="text-sm">
-                              <span className="font-medium">Supplier: </span>
-                              <span className="text-zinc-600 dark:text-zinc-400">{product.supplier}</span>
-                            </div>
-                          )}
-                          <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-zinc-800">
-                            <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-500">
-                              <Package className="h-4 w-4" />
-                              <span>Stock: {product.stock}</span>
-                            </div>
-                            <span
-                              className={`px-2 py-1 rounded text-xs font-medium ${
-                                product.status === "active"
-                                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                                  : product.status === "out-of-stock"
-                                  ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
-                                  : "bg-gray-100 dark:bg-gray-900/30 text-gray-600 dark:text-gray-400"
-                              }`}
-                            >
-                              {product.status === "active"
-                                ? "Available"
-                                : product.status === "out-of-stock"
-                                ? "Out of Stock"
-                                : "Discontinued"}
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  </div>
-                  {productsTotalPages > 1 && (
-                    <Pagination
-                      currentPage={productsPage}
-                      totalPages={productsTotalPages}
-                      onPageChange={setProductsPage}
-                      limit={productsLimit}
-                      total={productsTotal}
-                    />
-                  )}
-                </>
-              ) : (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">No products available</p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Equipment Section */}
-            <div>
-              <h2 className="text-3xl font-bold mb-6">Equipment Used</h2>
-              <FilterAndSort
-                searchValue={equipmentSearch}
-                onSearchChange={(value) => {
-                  setEquipmentSearch(value);
-                  setEquipmentPage(1);
-                }}
-                searchPlaceholder="Search equipment..."
-                showSearch={true}
-                showFilter={true}
-                filterLabel="Filter by Status"
-                filterValue={equipmentFilterStatus}
-                filterOptions={[
-                  { value: "available", label: "Available" },
-                  { value: "in-use", label: "In Use" },
-                  { value: "maintenance", label: "Maintenance" },
-                  { value: "unavailable", label: "Unavailable" },
-                ]}
-                onFilterChange={(value) => {
-                  setEquipmentFilterStatus(value);
-                  setEquipmentPage(1);
-                }}
-                showSort={true}
-                sortLabel="Sort by"
-                sortValue={equipmentSortBy}
-                sortOptions={[
-                  { value: "name", label: "Name" },
-                  { value: "status", label: "Status" },
-                  { value: "lastSterlizedDate", label: "Last Sterilized" },
-                  { value: "createdAt", label: "Date Added" },
-                ]}
-                onSortChange={(value) => {
-                  setEquipmentSortBy(value);
-                  setEquipmentPage(1);
-                }}
-                sortOrder={equipmentSortOrder}
-                onSortOrderChange={(order) => {
-                  setEquipmentSortOrder(order);
-                  setEquipmentPage(1);
-                }}
-              />
-              {equipment.length > 0 ? (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                  {equipment.map((item) => (
-                    <Card key={item._id} className="hover:shadow-lg transition-shadow">
-                      {item.imageUrl ? (
-                        <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={item.imageUrl}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = "none";
-                              const parent = target.parentElement;
-                              if (parent) {
-                                parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="h-16 w-16 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></div>';
-                              }
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                          <Wrench className="h-16 w-16 text-zinc-400" />
-                        </div>
-                      )}
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-3">
-                          {!item.imageUrl && (
-                            <div className="p-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-                              <Wrench className="h-5 w-5 text-zinc-600 dark:text-zinc-400" />
-                            </div>
-                          )}
-                          {item.name}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        {item.description && (
-                          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-3">
-                            {item.description}
-                          </p>
-                        )}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-zinc-500 dark:text-zinc-500">Status</span>
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${
-                              item.status === "available"
-                                ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
-                                : item.status === "in-use"
-                                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                                : item.status === "maintenance"
-                                ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400"
-                                : "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
-                            }`}
-                          >
-                            {item.status}
-                          </span>
-                        </div>
-                        {item.lastSterlizedDate && (
-                          <div className="mt-3 text-xs text-zinc-500 dark:text-zinc-500">
-                            Last sterilized: {new Date(item.lastSterlizedDate).toLocaleDateString()}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                  </div>
-                  {equipmentTotalPages > 1 && (
-                    <Pagination
-                      currentPage={equipmentPage}
-                      totalPages={equipmentTotalPages}
-                      onPageChange={setEquipmentPage}
-                      limit={equipmentLimit}
-                      total={equipmentTotal}
-                    />
-                  )}
-                </>
-              ) : (
-                <Card>
-                  <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">No equipment listed</p>
                   </CardContent>
                 </Card>
               )}
