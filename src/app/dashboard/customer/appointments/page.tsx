@@ -156,10 +156,10 @@ export default function MyAppointmentsPage() {
 
     try {
       setLoadingSlots(true);
-      const salonId = typeof selectedAppointment.salonId === 'object' 
+      const salonId = selectedAppointment.salonId && typeof selectedAppointment.salonId === 'object' 
         ? selectedAppointment.salonId._id 
         : selectedAppointment.salonId;
-      const serviceId = typeof selectedAppointment.serviceId === 'object'
+      const serviceId = selectedAppointment.serviceId && typeof selectedAppointment.serviceId === 'object'
         ? selectedAppointment.serviceId._id
         : selectedAppointment.serviceId;
       
@@ -217,7 +217,7 @@ export default function MyAppointmentsPage() {
     try {
       setSubmittingFeedback(true);
       const response = await feedbackService.createFeedback({
-        salonId: typeof selectedAppointment.salonId === 'object' 
+        salonId: selectedAppointment.salonId && typeof selectedAppointment.salonId === 'object' 
           ? selectedAppointment.salonId._id 
           : selectedAppointment.salonId,
         appointmentId: selectedAppointment._id,
@@ -401,18 +401,18 @@ export default function MyAppointmentsPage() {
                     <TableRow key={appointment._id}>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{typeof appointment.salonId === 'object' ? appointment.salonId.name : "N/A"}</div>
+                          <div className="font-medium">{appointment.salonId && typeof appointment.salonId === 'object' ? appointment.salonId.name : "N/A"}</div>
                           <div className="text-sm text-muted-foreground flex items-center">
                             <MapPin className="h-3 w-3 mr-1" />
-                            {typeof appointment.salonId === 'object' ? appointment.salonId.location : "N/A"}
+                            {appointment.salonId && typeof appointment.salonId === 'object' ? appointment.salonId.location : "N/A"}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{typeof appointment.serviceId === 'object' ? appointment.serviceId.name : "N/A"}</div>
+                          <div className="font-medium">{appointment.serviceId && typeof appointment.serviceId === 'object' ? appointment.serviceId.name : "N/A"}</div>
                           <div className="text-sm text-muted-foreground">
-                            Rs. {typeof appointment.serviceId === 'object' ? appointment.serviceId.price : 0} • {typeof appointment.serviceId === 'object' ? (appointment.serviceId.duration || 0) : 0} min
+                            Rs. {appointment.serviceId && typeof appointment.serviceId === 'object' ? appointment.serviceId.price : 0} • {appointment.serviceId && typeof appointment.serviceId === 'object' ? (appointment.serviceId.duration || 0) : 0} min
                           </div>
                         </div>
                       </TableCell>
