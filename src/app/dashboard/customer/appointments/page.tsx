@@ -50,40 +50,89 @@ interface Appointment {
 
 // Helper functions to safely access nested properties
 const getSalonName = (salonId: Appointment['salonId']): string => {
-  if (!salonId || typeof salonId !== 'object') return "N/A";
-  return salonId.name || "N/A";
+  try {
+    if (!salonId) return "N/A";
+    if (typeof salonId === 'string') return "N/A";
+    if (typeof salonId !== 'object' || salonId === null) return "N/A";
+    if (!('name' in salonId)) return "N/A";
+    const name = salonId.name;
+    if (name === null || name === undefined) return "N/A";
+    return String(name);
+  } catch {
+    return "N/A";
+  }
 };
 
 const getSalonLocation = (salonId: Appointment['salonId']): string => {
-  if (!salonId || typeof salonId !== 'object') return "N/A";
-  return salonId.location || "N/A";
+  try {
+    if (!salonId) return "N/A";
+    if (typeof salonId === 'string') return "N/A";
+    if (typeof salonId !== 'object' || salonId === null) return "N/A";
+    if (!('location' in salonId)) return "N/A";
+    const location = salonId.location;
+    if (location === null || location === undefined) return "N/A";
+    return String(location);
+  } catch {
+    return "N/A";
+  }
 };
 
 const getServiceName = (serviceId: Appointment['serviceId']): string => {
-  if (!serviceId || typeof serviceId !== 'object') return "N/A";
-  return serviceId.name || "N/A";
+  try {
+    if (!serviceId) return "N/A";
+    if (typeof serviceId === 'string') return "N/A";
+    if (typeof serviceId !== 'object' || serviceId === null) return "N/A";
+    if (!('name' in serviceId)) return "N/A";
+    const name = serviceId.name;
+    if (name === null || name === undefined) return "N/A";
+    return String(name);
+  } catch {
+    return "N/A";
+  }
 };
 
 const getServicePrice = (serviceId: Appointment['serviceId']): number => {
-  if (!serviceId || typeof serviceId !== 'object') return 0;
-  return serviceId.price || 0;
+  try {
+    if (!serviceId) return 0;
+    if (typeof serviceId === 'string') return 0;
+    if (typeof serviceId !== 'object' || serviceId === null) return 0;
+    if (!('price' in serviceId)) return 0;
+    const price = serviceId.price;
+    if (price === null || price === undefined) return 0;
+    return Number(price) || 0;
+  } catch {
+    return 0;
+  }
 };
 
 const getServiceDuration = (serviceId: Appointment['serviceId']): number => {
-  if (!serviceId || typeof serviceId !== 'object') return 0;
-  return serviceId.duration || 0;
+  try {
+    if (!serviceId) return 0;
+    if (typeof serviceId === 'string') return 0;
+    if (typeof serviceId !== 'object' || serviceId === null) return 0;
+    if (!('duration' in serviceId)) return 0;
+    const duration = serviceId.duration;
+    if (duration === null || duration === undefined) return 0;
+    return Number(duration) || 0;
+  } catch {
+    return 0;
+  }
 };
 
 const getSalonIdValue = (salonId: Appointment['salonId']): string | null => {
   if (!salonId) return null;
-  if (typeof salonId === 'object') return salonId._id;
-  return salonId;
+  if (typeof salonId === 'string') return salonId;
+  if (typeof salonId !== 'object' || salonId === null) return null;
+  if (!('_id' in salonId) || !salonId._id) return null;
+  return String(salonId._id);
 };
 
 const getServiceIdValue = (serviceId: Appointment['serviceId']): string | null => {
   if (!serviceId) return null;
-  if (typeof serviceId === 'object') return serviceId._id;
-  return serviceId;
+  if (typeof serviceId === 'string') return serviceId;
+  if (typeof serviceId !== 'object' || serviceId === null) return null;
+  if (!('_id' in serviceId) || !serviceId._id) return null;
+  return String(serviceId._id);
 };
 
 export default function MyAppointmentsPage() {
@@ -156,7 +205,15 @@ export default function MyAppointmentsPage() {
     try {
       const response = await appointmentService.getAppointments();
       if (response.success && response.data) {
-        setAppointments(Array.isArray(response.data) ? response.data : []);
+        const appointmentsData = Array.isArray(response.data) ? response.data : [];
+        // Sanitize appointments to ensure they have valid structure
+        const sanitizedAppointments = appointmentsData.map((apt: any) => ({
+          ...apt,
+          salonId: apt.salonId || null,
+          serviceId: apt.serviceId || null,
+          customerId: apt.customerId || null,
+        }));
+        setAppointments(sanitizedAppointments);
       }
     } catch {
       toast.error("Failed to fetch appointments");
@@ -441,7 +498,9 @@ export default function MyAppointmentsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredAppointments.map((appointment) => (
+                  {filteredAppointments
+                    .filter((appointment) => appointment && appointment._id) // Filter out invalid appointments
+                    .map((appointment) => (
                     <TableRow key={appointment._id}>
                       <TableCell>
                         <div>
