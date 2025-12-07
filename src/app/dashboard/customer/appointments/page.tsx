@@ -228,11 +228,21 @@ export default function MyAppointmentsPage() {
       if (response.success && response.data) {
         const appointmentsData = Array.isArray(response.data) ? response.data : [];
         // Sanitize appointments to ensure they have valid structure
-        const sanitizedAppointments = appointmentsData.map((apt: any) => ({
-          ...apt,
+        type RawAppointment = Partial<Appointment> & { 
+          _id?: string; 
+          date?: string; 
+          status?: Appointment['status']; 
+          createdAt?: string;
+        };
+        const sanitizedAppointments = appointmentsData.map((apt: RawAppointment): Appointment => ({
+          _id: apt._id || '',
           salonId: apt.salonId || null,
           serviceId: apt.serviceId || null,
           customerId: apt.customerId || null,
+          date: apt.date || new Date().toISOString(),
+          status: apt.status || 'pending',
+          notes: apt.notes,
+          createdAt: apt.createdAt || new Date().toISOString(),
         }));
         setAppointments(sanitizedAppointments);
       }
