@@ -51,12 +51,12 @@ interface Appointment {
 // Helper functions to safely access nested properties using optional chaining
 const getSalonName = (salonId: Appointment['salonId']): string => {
   try {
-    if (!salonId) return "N/A";
+    if (!salonId || salonId === null) return "N/A";
     if (typeof salonId === 'string') return "N/A";
-    if (typeof salonId !== 'object' || salonId === null) return "N/A";
+    if (typeof salonId !== 'object') return "N/A";
     // Use optional chaining and nullish coalescing for maximum safety
-    const name = salonId?.name ?? null;
-    if (!name) return "N/A";
+    const name = salonId?.name;
+    if (name === null || name === undefined || name === '') return "N/A";
     return String(name);
   } catch (error) {
     console.error('Error getting salon name:', error);
@@ -66,12 +66,12 @@ const getSalonName = (salonId: Appointment['salonId']): string => {
 
 const getSalonLocation = (salonId: Appointment['salonId']): string => {
   try {
-    if (!salonId) return "N/A";
+    if (!salonId || salonId === null) return "N/A";
     if (typeof salonId === 'string') return "N/A";
-    if (typeof salonId !== 'object' || salonId === null) return "N/A";
+    if (typeof salonId !== 'object') return "N/A";
     // Use optional chaining and nullish coalescing for maximum safety
-    const location = salonId?.location ?? null;
-    if (!location) return "N/A";
+    const location = salonId?.location;
+    if (location === null || location === undefined || location === '') return "N/A";
     return String(location);
   } catch (error) {
     console.error('Error getting salon location:', error);
@@ -81,12 +81,12 @@ const getSalonLocation = (salonId: Appointment['salonId']): string => {
 
 const getServiceName = (serviceId: Appointment['serviceId']): string => {
   try {
-    if (!serviceId) return "N/A";
+    if (!serviceId || serviceId === null) return "N/A";
     if (typeof serviceId === 'string') return "N/A";
-    if (typeof serviceId !== 'object' || serviceId === null) return "N/A";
+    if (typeof serviceId !== 'object') return "N/A";
     // Use optional chaining and nullish coalescing for maximum safety
-    const name = serviceId?.name ?? null;
-    if (!name) return "N/A";
+    const name = serviceId?.name;
+    if (name === null || name === undefined || name === '') return "N/A";
     return String(name);
   } catch (error) {
     console.error('Error getting service name:', error);
@@ -96,11 +96,11 @@ const getServiceName = (serviceId: Appointment['serviceId']): string => {
 
 const getServicePrice = (serviceId: Appointment['serviceId']): number => {
   try {
-    if (!serviceId) return 0;
+    if (!serviceId || serviceId === null) return 0;
     if (typeof serviceId === 'string') return 0;
-    if (typeof serviceId !== 'object' || serviceId === null) return 0;
+    if (typeof serviceId !== 'object') return 0;
     // Use optional chaining and nullish coalescing for maximum safety
-    const price = serviceId?.price ?? null;
+    const price = serviceId?.price;
     if (price === null || price === undefined) return 0;
     const numPrice = Number(price);
     return isNaN(numPrice) ? 0 : numPrice;
@@ -112,11 +112,11 @@ const getServicePrice = (serviceId: Appointment['serviceId']): number => {
 
 const getServiceDuration = (serviceId: Appointment['serviceId']): number => {
   try {
-    if (!serviceId) return 0;
+    if (!serviceId || serviceId === null) return 0;
     if (typeof serviceId === 'string') return 0;
-    if (typeof serviceId !== 'object' || serviceId === null) return 0;
+    if (typeof serviceId !== 'object') return 0;
     // Use optional chaining and nullish coalescing for maximum safety
-    const duration = serviceId?.duration ?? null;
+    const duration = serviceId?.duration;
     if (duration === null || duration === undefined) return 0;
     const numDuration = Number(duration);
     return isNaN(numDuration) ? 0 : numDuration;
@@ -204,11 +204,19 @@ export default function MyAppointmentsPage() {
     try {
       const response = await notificationService.getNotifications({ limit: 10 });
       if (response.success && response.data) {
-        setNotifications(response.data.data || []);
+        // Safely filter out any invalid notifications
+        const validNotifications = (response.data.data || [])
+          .filter((notif: Notification) => notif && notif._id && notif.message);
+        setNotifications(validNotifications);
         setUnreadCount(response.data.unreadCount || 0);
+      } else {
+        setNotifications([]);
+        setUnreadCount(0);
       }
     } catch (error) {
       console.error("Failed to fetch notifications", error);
+      setNotifications([]);
+      setUnreadCount(0);
     }
   };
 
@@ -234,20 +242,58 @@ export default function MyAppointmentsPage() {
           status?: Appointment['status']; 
           createdAt?: string;
         };
-        const sanitizedAppointments = appointmentsData.map((apt: RawAppointment): Appointment => ({
-          _id: apt._id || '',
-          salonId: apt.salonId || null,
-          serviceId: apt.serviceId || null,
-          customerId: apt.customerId || null,
-          date: apt.date || new Date().toISOString(),
-          status: apt.status || 'pending',
-          notes: apt.notes,
-          createdAt: apt.createdAt || new Date().toISOString(),
-        }));
+        const sanitizedAppointments = appointmentsData
+          .filter((apt: RawAppointment) => apt && apt._id) // Filter out invalid appointments
+          .map((apt: RawAppointment): Appointment => {
+            // Safely handle salonId
+            let salonId: Appointment['salonId'] = null;
+            if (apt.salonId) {
+              if (typeof apt.salonId === 'string') {
+                salonId = apt.salonId;
+              } else if (typeof apt.salonId === 'object' && apt.salonId !== null) {
+                salonId = apt.salonId;
+              }
+            }
+
+            // Safely handle serviceId
+            let serviceId: Appointment['serviceId'] = null;
+            if (apt.serviceId) {
+              if (typeof apt.serviceId === 'string') {
+                serviceId = apt.serviceId;
+              } else if (typeof apt.serviceId === 'object' && apt.serviceId !== null) {
+                serviceId = apt.serviceId;
+              }
+            }
+
+            // Safely handle customerId
+            let customerId: Appointment['customerId'] = null;
+            if (apt.customerId) {
+              if (typeof apt.customerId === 'string') {
+                customerId = apt.customerId;
+              } else if (typeof apt.customerId === 'object' && apt.customerId !== null) {
+                customerId = apt.customerId;
+              }
+            }
+
+            return {
+              _id: apt._id || '',
+              salonId,
+              serviceId,
+              customerId,
+              date: apt.date || new Date().toISOString(),
+              status: apt.status || 'pending',
+              notes: apt.notes,
+              createdAt: apt.createdAt || new Date().toISOString(),
+            };
+          });
         setAppointments(sanitizedAppointments);
+      } else {
+        setAppointments([]);
       }
-    } catch {
+    } catch (error) {
+      console.error('Failed to fetch appointments:', error);
       toast.error("Failed to fetch appointments");
+      setAppointments([]);
     } finally {
       setLoading(false);
     }
@@ -405,10 +451,21 @@ export default function MyAppointmentsPage() {
   };
 
   const getFeedbackForAppointment = (appointmentId: string) => {
-    return feedbacks.find((f) => {
-      const fAppId = f.appointmentId && typeof f.appointmentId === 'object' ? f.appointmentId._id : f.appointmentId;
-      return fAppId === appointmentId;
-    });
+    try {
+      if (!appointmentId || !feedbacks || !Array.isArray(feedbacks)) {
+        return undefined;
+      }
+      return feedbacks.find((f) => {
+        if (!f || !f.appointmentId) return false;
+        const fAppId = f.appointmentId && typeof f.appointmentId === 'object' && f.appointmentId !== null
+          ? f.appointmentId._id
+          : f.appointmentId;
+        return fAppId === appointmentId;
+      });
+    } catch (error) {
+      console.error('Error getting feedback for appointment:', error);
+      return undefined;
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -472,35 +529,43 @@ export default function MyAppointmentsPage() {
           {/* Notifications Display */}
           {notifications.length > 0 && (
             <div className="space-y-2">
-              {notifications.slice(0, 5).map((notification) => (
-                <Card
-                  key={notification._id}
-                  className={`cursor-pointer transition-colors ${
-                    !notification.read ? "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800" : ""
-                  }`}
-                  onClick={() => {
-                    if (!notification.read) {
-                      markNotificationAsRead(notification._id);
-                    }
-                  }}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className={`text-sm ${!notification.read ? "font-semibold" : ""}`}>
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(notification.createdAt).toLocaleString()}
-                        </p>
+              {notifications.slice(0, 5).map((notification) => {
+                // Defensive check for notification validity
+                if (!notification || !notification._id || !notification.message) {
+                  return null;
+                }
+                return (
+                  <Card
+                    key={notification._id}
+                    className={`cursor-pointer transition-colors ${
+                      !notification.read ? "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800" : ""
+                    }`}
+                    onClick={() => {
+                      if (!notification.read && notification._id) {
+                        markNotificationAsRead(notification._id);
+                      }
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className={`text-sm ${!notification.read ? "font-semibold" : ""}`}>
+                            {notification.message || "No message"}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {notification.createdAt 
+                              ? new Date(notification.createdAt).toLocaleString()
+                              : "Unknown date"}
+                          </p>
+                        </div>
+                        {!notification.read && (
+                          <div className="h-2 w-2 bg-blue-500 rounded-full ml-2 mt-1" />
+                        )}
                       </div>
-                      {!notification.read && (
-                        <div className="h-2 w-2 bg-blue-500 rounded-full ml-2 mt-1" />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           )}
 
@@ -538,122 +603,138 @@ export default function MyAppointmentsPage() {
                       return true;
                     })
                     .map((appointment) => {
-                      // Double-check and provide fallback values at render time
-                      const safeAppointment = {
-                        ...appointment,
-                        salonId: appointment.salonId ?? null,
-                        serviceId: appointment.serviceId ?? null,
-                        date: appointment.date ?? new Date().toISOString(),
-                        status: appointment.status ?? 'pending' as const,
-                      };
-                      return (
-                    <TableRow key={safeAppointment._id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{getSalonName(safeAppointment.salonId)}</div>
-                          <div className="text-sm text-muted-foreground flex items-center">
-                            <MapPin className="h-3 w-3 mr-1" />
-                            {getSalonLocation(safeAppointment.salonId)}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{getServiceName(safeAppointment.serviceId)}</div>
-                          <div className="text-sm text-muted-foreground">
-                            Rs. {getServicePrice(safeAppointment.serviceId)} • {getServiceDuration(safeAppointment.serviceId)} min
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-2" />
-                          {new Date(safeAppointment.date).toLocaleString()}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            safeAppointment.status
-                          )}`}
-                        >
-                          {safeAppointment.status.charAt(0).toUpperCase() + safeAppointment.status.slice(1)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {safeAppointment.status === "pending" && (
-                          <div className="text-sm text-muted-foreground text-right">
-                            Waiting for salon confirmation
-                          </div>
-                        )}
-                        {safeAppointment.status === "rejected" && (
-                          <div className="text-sm text-red-600 dark:text-red-400 font-medium text-right">
-                            Appointment was rejected
-                          </div>
-                        )}
-                        {safeAppointment.status === "accepted" && (
-                          <div className="flex items-center gap-2 justify-end">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleOpenReschedule(safeAppointment)}
-                            >
-                              <CalendarClock className="h-4 w-4 mr-1" />
-                              Reschedule
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-500"
-                              onClick={() => handleCancelAppointment(safeAppointment._id)}
-                            >
-                              <X className="h-4 w-4 mr-1" />
-                              Cancel
-                            </Button>
-                          </div>
-                        )}
-                        {safeAppointment.status === "completed" && (
-                          <>
-                            {getFeedbackForAppointment(safeAppointment._id) ? (
-                              <div className="text-left space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-medium">Your Feedback:</span>
-                                  {renderStars(
-                                    getFeedbackForAppointment(safeAppointment._id)!.rating
-                                  )}
+                      try {
+                        // Double-check and provide fallback values at render time
+                        const safeAppointment = {
+                          ...appointment,
+                          salonId: appointment.salonId ?? null,
+                          serviceId: appointment.serviceId ?? null,
+                          date: appointment.date ?? new Date().toISOString(),
+                          status: appointment.status ?? 'pending' as const,
+                        };
+
+                        // Safely get feedback once to avoid multiple lookups
+                        const feedback = getFeedbackForAppointment(safeAppointment._id);
+
+                        return (
+                          <TableRow key={safeAppointment._id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{getSalonName(safeAppointment.salonId)}</div>
+                                <div className="text-sm text-muted-foreground flex items-center">
+                                  <MapPin className="h-3 w-3 mr-1" />
+                                  {getSalonLocation(safeAppointment.salonId)}
                                 </div>
-                                {getFeedbackForAppointment(safeAppointment._id)!.comments && (
-                                  <p className="text-sm text-muted-foreground">
-                                    {getFeedbackForAppointment(safeAppointment._id)!.comments}
-                                  </p>
-                                )}
-                                {getFeedbackForAppointment(safeAppointment._id)!.reply && (
-                                  <div className="bg-muted p-2 rounded-md text-sm border-l-2 border-primary">
-                                    <span className="font-medium text-primary">
-                                      Owner Reply:
-                                    </span>{" "}
-                                    <span className="text-muted-foreground">
-                                      {getFeedbackForAppointment(safeAppointment._id)!.reply}
-                                    </span>
-                                  </div>
-                                )}
                               </div>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleOpenFeedback(safeAppointment)}
-                                className="w-full sm:w-auto"
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{getServiceName(safeAppointment.serviceId)}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  Rs. {getServicePrice(safeAppointment.serviceId)} • {getServiceDuration(safeAppointment.serviceId)} min
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <Clock className="h-4 w-4 mr-2" />
+                                {safeAppointment.date 
+                                  ? new Date(safeAppointment.date).toLocaleString()
+                                  : "Invalid date"}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                                  safeAppointment.status
+                                )}`}
                               >
-                                <Star className="h-4 w-4 mr-1" />
-                                Leave Feedback
-                              </Button>
-                            )}
-                          </>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                      );
+                                {safeAppointment.status.charAt(0).toUpperCase() + safeAppointment.status.slice(1)}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {safeAppointment.status === "pending" && (
+                                <div className="text-sm text-muted-foreground text-right">
+                                  Waiting for salon confirmation
+                                </div>
+                              )}
+                              {safeAppointment.status === "rejected" && (
+                                <div className="text-sm text-red-600 dark:text-red-400 font-medium text-right">
+                                  Appointment was rejected
+                                </div>
+                              )}
+                              {safeAppointment.status === "accepted" && (
+                                <div className="flex items-center gap-2 justify-end">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleOpenReschedule(safeAppointment)}
+                                  >
+                                    <CalendarClock className="h-4 w-4 mr-1" />
+                                    Reschedule
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-500"
+                                    onClick={() => handleCancelAppointment(safeAppointment._id)}
+                                  >
+                                    <X className="h-4 w-4 mr-1" />
+                                    Cancel
+                                  </Button>
+                                </div>
+                              )}
+                              {safeAppointment.status === "completed" && (
+                                <>
+                                  {feedback ? (
+                                    <div className="text-left space-y-2">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium">Your Feedback:</span>
+                                        {renderStars(feedback.rating || 0)}
+                                      </div>
+                                      {feedback.comments && (
+                                        <p className="text-sm text-muted-foreground">
+                                          {feedback.comments}
+                                        </p>
+                                      )}
+                                      {feedback.reply && (
+                                        <div className="bg-muted p-2 rounded-md text-sm border-l-2 border-primary">
+                                          <span className="font-medium text-primary">
+                                            Owner Reply:
+                                          </span>{" "}
+                                          <span className="text-muted-foreground">
+                                            {feedback.reply}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleOpenFeedback(safeAppointment)}
+                                      className="w-full sm:w-auto"
+                                    >
+                                      <Star className="h-4 w-4 mr-1" />
+                                      Leave Feedback
+                                    </Button>
+                                  )}
+                                </>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      } catch (error) {
+                        console.error('Error rendering appointment:', error, appointment);
+                        // Return a minimal row to prevent complete failure
+                        return (
+                          <TableRow key={appointment._id || `error-${Math.random()}`}>
+                            <TableCell colSpan={5} className="text-center text-red-500">
+                              Error loading appointment data
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
                     })}
                 </TableBody>
               </Table>
