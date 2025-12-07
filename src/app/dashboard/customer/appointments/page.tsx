@@ -48,17 +48,18 @@ interface Appointment {
   createdAt: string;
 }
 
-// Helper functions to safely access nested properties
+// Helper functions to safely access nested properties using optional chaining
 const getSalonName = (salonId: Appointment['salonId']): string => {
   try {
     if (!salonId) return "N/A";
     if (typeof salonId === 'string') return "N/A";
     if (typeof salonId !== 'object' || salonId === null) return "N/A";
-    if (!('name' in salonId)) return "N/A";
-    const name = salonId.name;
-    if (name === null || name === undefined) return "N/A";
+    // Use optional chaining and nullish coalescing for maximum safety
+    const name = salonId?.name ?? null;
+    if (!name) return "N/A";
     return String(name);
-  } catch {
+  } catch (error) {
+    console.error('Error getting salon name:', error);
     return "N/A";
   }
 };
@@ -68,11 +69,12 @@ const getSalonLocation = (salonId: Appointment['salonId']): string => {
     if (!salonId) return "N/A";
     if (typeof salonId === 'string') return "N/A";
     if (typeof salonId !== 'object' || salonId === null) return "N/A";
-    if (!('location' in salonId)) return "N/A";
-    const location = salonId.location;
-    if (location === null || location === undefined) return "N/A";
+    // Use optional chaining and nullish coalescing for maximum safety
+    const location = salonId?.location ?? null;
+    if (!location) return "N/A";
     return String(location);
-  } catch {
+  } catch (error) {
+    console.error('Error getting salon location:', error);
     return "N/A";
   }
 };
@@ -82,11 +84,12 @@ const getServiceName = (serviceId: Appointment['serviceId']): string => {
     if (!serviceId) return "N/A";
     if (typeof serviceId === 'string') return "N/A";
     if (typeof serviceId !== 'object' || serviceId === null) return "N/A";
-    if (!('name' in serviceId)) return "N/A";
-    const name = serviceId.name;
-    if (name === null || name === undefined) return "N/A";
+    // Use optional chaining and nullish coalescing for maximum safety
+    const name = serviceId?.name ?? null;
+    if (!name) return "N/A";
     return String(name);
-  } catch {
+  } catch (error) {
+    console.error('Error getting service name:', error);
     return "N/A";
   }
 };
@@ -96,11 +99,13 @@ const getServicePrice = (serviceId: Appointment['serviceId']): number => {
     if (!serviceId) return 0;
     if (typeof serviceId === 'string') return 0;
     if (typeof serviceId !== 'object' || serviceId === null) return 0;
-    if (!('price' in serviceId)) return 0;
-    const price = serviceId.price;
+    // Use optional chaining and nullish coalescing for maximum safety
+    const price = serviceId?.price ?? null;
     if (price === null || price === undefined) return 0;
-    return Number(price) || 0;
-  } catch {
+    const numPrice = Number(price);
+    return isNaN(numPrice) ? 0 : numPrice;
+  } catch (error) {
+    console.error('Error getting service price:', error);
     return 0;
   }
 };
@@ -110,29 +115,45 @@ const getServiceDuration = (serviceId: Appointment['serviceId']): number => {
     if (!serviceId) return 0;
     if (typeof serviceId === 'string') return 0;
     if (typeof serviceId !== 'object' || serviceId === null) return 0;
-    if (!('duration' in serviceId)) return 0;
-    const duration = serviceId.duration;
+    // Use optional chaining and nullish coalescing for maximum safety
+    const duration = serviceId?.duration ?? null;
     if (duration === null || duration === undefined) return 0;
-    return Number(duration) || 0;
-  } catch {
+    const numDuration = Number(duration);
+    return isNaN(numDuration) ? 0 : numDuration;
+  } catch (error) {
+    console.error('Error getting service duration:', error);
     return 0;
   }
 };
 
 const getSalonIdValue = (salonId: Appointment['salonId']): string | null => {
-  if (!salonId) return null;
-  if (typeof salonId === 'string') return salonId;
-  if (typeof salonId !== 'object' || salonId === null) return null;
-  if (!('_id' in salonId) || !salonId._id) return null;
-  return String(salonId._id);
+  try {
+    if (!salonId) return null;
+    if (typeof salonId === 'string') return salonId;
+    if (typeof salonId !== 'object' || salonId === null) return null;
+    // Use optional chaining for maximum safety
+    const id = salonId?._id ?? null;
+    if (!id) return null;
+    return String(id);
+  } catch (error) {
+    console.error('Error getting salon ID:', error);
+    return null;
+  }
 };
 
 const getServiceIdValue = (serviceId: Appointment['serviceId']): string | null => {
-  if (!serviceId) return null;
-  if (typeof serviceId === 'string') return serviceId;
-  if (typeof serviceId !== 'object' || serviceId === null) return null;
-  if (!('_id' in serviceId) || !serviceId._id) return null;
-  return String(serviceId._id);
+  try {
+    if (!serviceId) return null;
+    if (typeof serviceId === 'string') return serviceId;
+    if (typeof serviceId !== 'object' || serviceId === null) return null;
+    // Use optional chaining for maximum safety
+    const id = serviceId?._id ?? null;
+    if (!id) return null;
+    return String(id);
+  } catch (error) {
+    console.error('Error getting service ID:', error);
+    return null;
+  }
 };
 
 export default function MyAppointmentsPage() {
@@ -499,58 +520,73 @@ export default function MyAppointmentsPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredAppointments
-                    .filter((appointment) => appointment && appointment._id) // Filter out invalid appointments
-                    .map((appointment) => (
-                    <TableRow key={appointment._id}>
+                    .filter((appointment) => {
+                      // Comprehensive validation: ensure appointment exists and has required fields
+                      if (!appointment || !appointment._id) return false;
+                      // Allow appointments even if salonId or serviceId are null/string/object
+                      // The helper functions will handle all cases safely
+                      return true;
+                    })
+                    .map((appointment) => {
+                      // Double-check and provide fallback values at render time
+                      const safeAppointment = {
+                        ...appointment,
+                        salonId: appointment.salonId ?? null,
+                        serviceId: appointment.serviceId ?? null,
+                        date: appointment.date ?? new Date().toISOString(),
+                        status: appointment.status ?? 'pending' as const,
+                      };
+                      return (
+                    <TableRow key={safeAppointment._id}>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{getSalonName(appointment.salonId)}</div>
+                          <div className="font-medium">{getSalonName(safeAppointment.salonId)}</div>
                           <div className="text-sm text-muted-foreground flex items-center">
                             <MapPin className="h-3 w-3 mr-1" />
-                            {getSalonLocation(appointment.salonId)}
+                            {getSalonLocation(safeAppointment.salonId)}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium">{getServiceName(appointment.serviceId)}</div>
+                          <div className="font-medium">{getServiceName(safeAppointment.serviceId)}</div>
                           <div className="text-sm text-muted-foreground">
-                            Rs. {getServicePrice(appointment.serviceId)} • {getServiceDuration(appointment.serviceId)} min
+                            Rs. {getServicePrice(safeAppointment.serviceId)} • {getServiceDuration(safeAppointment.serviceId)} min
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-2" />
-                          {new Date(appointment.date).toLocaleString()}
+                          {new Date(safeAppointment.date).toLocaleString()}
                         </div>
                       </TableCell>
                       <TableCell>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            appointment.status
+                            safeAppointment.status
                           )}`}
                         >
-                          {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
+                          {safeAppointment.status.charAt(0).toUpperCase() + safeAppointment.status.slice(1)}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        {appointment.status === "pending" && (
+                        {safeAppointment.status === "pending" && (
                           <div className="text-sm text-muted-foreground text-right">
                             Waiting for salon confirmation
                           </div>
                         )}
-                        {appointment.status === "rejected" && (
+                        {safeAppointment.status === "rejected" && (
                           <div className="text-sm text-red-600 dark:text-red-400 font-medium text-right">
                             Appointment was rejected
                           </div>
                         )}
-                        {appointment.status === "accepted" && (
+                        {safeAppointment.status === "accepted" && (
                           <div className="flex items-center gap-2 justify-end">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleOpenReschedule(appointment)}
+                              onClick={() => handleOpenReschedule(safeAppointment)}
                             >
                               <CalendarClock className="h-4 w-4 mr-1" />
                               Reschedule
@@ -559,35 +595,35 @@ export default function MyAppointmentsPage() {
                               variant="ghost"
                               size="sm"
                               className="text-red-500"
-                              onClick={() => handleCancelAppointment(appointment._id)}
+                              onClick={() => handleCancelAppointment(safeAppointment._id)}
                             >
                               <X className="h-4 w-4 mr-1" />
                               Cancel
                             </Button>
                           </div>
                         )}
-                        {appointment.status === "completed" && (
+                        {safeAppointment.status === "completed" && (
                           <>
-                            {getFeedbackForAppointment(appointment._id) ? (
+                            {getFeedbackForAppointment(safeAppointment._id) ? (
                               <div className="text-left space-y-2">
                                 <div className="flex items-center gap-2">
                                   <span className="text-sm font-medium">Your Feedback:</span>
                                   {renderStars(
-                                    getFeedbackForAppointment(appointment._id)!.rating
+                                    getFeedbackForAppointment(safeAppointment._id)!.rating
                                   )}
                                 </div>
-                                {getFeedbackForAppointment(appointment._id)!.comments && (
+                                {getFeedbackForAppointment(safeAppointment._id)!.comments && (
                                   <p className="text-sm text-muted-foreground">
-                                    {getFeedbackForAppointment(appointment._id)!.comments}
+                                    {getFeedbackForAppointment(safeAppointment._id)!.comments}
                                   </p>
                                 )}
-                                {getFeedbackForAppointment(appointment._id)!.reply && (
+                                {getFeedbackForAppointment(safeAppointment._id)!.reply && (
                                   <div className="bg-muted p-2 rounded-md text-sm border-l-2 border-primary">
                                     <span className="font-medium text-primary">
                                       Owner Reply:
                                     </span>{" "}
                                     <span className="text-muted-foreground">
-                                      {getFeedbackForAppointment(appointment._id)!.reply}
+                                      {getFeedbackForAppointment(safeAppointment._id)!.reply}
                                     </span>
                                   </div>
                                 )}
@@ -596,7 +632,7 @@ export default function MyAppointmentsPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleOpenFeedback(appointment)}
+                                onClick={() => handleOpenFeedback(safeAppointment)}
                                 className="w-full sm:w-auto"
                               >
                                 <Star className="h-4 w-4 mr-1" />
@@ -607,7 +643,8 @@ export default function MyAppointmentsPage() {
                         )}
                       </TableCell>
                     </TableRow>
-                  ))}
+                      );
+                    })}
                 </TableBody>
               </Table>
             </div>
