@@ -1,8 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Removed rewrites - using direct API calls with CORS instead
-  // This ensures cookies are properly sent with credentials: 'include'
+  // Rewrites to proxy API requests to the backend
+  // This solves cross-origin cookie issues by making requests same-origin
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/:path*`,
+      },
+    ];
+  },
   
   // Production optimizations
   productionBrowserSourceMaps: false, // Disable source maps in production to avoid errors

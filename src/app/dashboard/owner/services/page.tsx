@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { serviceService } from "@/services/service.service";
+import { salonService } from "@/services/salon.service";
 import { Service } from "@/types/service.types";
 import { toast } from "sonner";
 import {
@@ -51,13 +52,28 @@ export default function ServicesPage() {
 
   const fetchServices = async () => {
     try {
-      // Note: For owners, the backend automatically filters services by their salon
-      // No need to pass salonId - the backend uses req.salon._id from authentication
-      const response = await serviceService.getServices();
+      // First fetch the owner's salon to get the ID
+      // This is required because the backend service endpoint requires salonId
+      // even for owners in some cases (due to auth middleware behavior)
+      const salonResponse = await salonService.getMySalon();
+      
+      if (!salonResponse.success || !salonResponse.data) {
+        // If no salon found, we can't fetch services
+        // The backend will handle the "no salon" case for creation, 
+        // but for listing we need the ID
+        setServices([]);
+        return;
+      }
+      
+      const salonId = salonResponse.data._id;
+      
+      // Now fetch services with the explicit salonId
+      const response = await serviceService.getServices({ salonId });
       if (response.success && response.data) {
         setServices(response.data);
       }
-    } catch {
+    } catch (error) {
+      console.error("Error fetching services:", error);
       toast.error("Failed to fetch services");
     } finally {
       setLoading(false);

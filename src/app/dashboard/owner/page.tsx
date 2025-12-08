@@ -10,6 +10,7 @@ import { Calendar, Scissors, ShoppingBag, Users, AlertCircle } from "lucide-reac
 import { appointmentService } from "@/services/appointment.service";
 import { serviceService } from "@/services/service.service";
 import { productService } from "@/services/product.service";
+import { salonService } from "@/services/salon.service";
 
 export default function OwnerDashboard() {
   const [stats, setStats] = useState({
@@ -28,18 +29,30 @@ export default function OwnerDashboard() {
   const fetchStats = async () => {
     try {
       setLoading(true);
+      
+      // 1. Fetch Owner's Salon first
+      const salonResponse = await salonService.getMySalon().catch(() => ({ success: false, data: null }));
+      const salon = salonResponse.success ? salonResponse.data : null;
+      
+      if (!salon) {
+        setNeedsSalon(true);
+        setStats({
+          totalAppointments: 0,
+          activeServices: 0,
+          products: 0,
+          customers: 0,
+        });
+        return;
+      }
+      
+      const salonId = salon._id;
+
+      // 2. Fetch data using the salonId
       const [appointmentsRes, servicesRes, productsRes] = await Promise.all([
         appointmentService.getAppointments().catch(() => ({ success: false, data: [] })),
-        serviceService.getServices().catch(() => ({ success: false, data: [] })),
-        productService.getProducts().catch(() => ({ success: false, data: [] })),
+        serviceService.getServices({ salonId }).catch(() => ({ success: false, data: [] })),
+        productService.getProducts({ salonId }).catch(() => ({ success: false, data: [] })),
       ]);
-
-      // Check if owner needs to create a salon
-      const servicesMessage = (servicesRes as { message?: string }).message || "";
-      const productsMessage = (productsRes as { message?: string }).message || "";
-      if (servicesMessage.includes("create a salon") || productsMessage.includes("create a salon")) {
-        setNeedsSalon(true);
-      }
 
       const appointments = appointmentsRes.success && appointmentsRes.data ? appointmentsRes.data : [];
       const services = servicesRes.success && servicesRes.data ? servicesRes.data : [];

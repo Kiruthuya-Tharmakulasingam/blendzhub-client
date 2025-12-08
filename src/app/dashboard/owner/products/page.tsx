@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { productService } from "@/services/product.service";
+import { salonService } from "@/services/salon.service";
 import { Product } from "@/types/owner.types";
 import { toast } from "sonner";
 import {
@@ -58,7 +59,21 @@ export default function ProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const response = await productService.getProducts();
+      // 1. Fetch Owner's Salon first
+      const salonResponse = await salonService.getMySalon().catch(() => ({ success: false, data: null }));
+      const salon = salonResponse.success ? salonResponse.data : null;
+      
+      if (!salon) {
+        // If no salon, we can't fetch products. 
+        // The user will be guided to create a salon from the main dashboard.
+        setProducts([]);
+        return;
+      }
+      
+      const salonId = salon._id;
+
+      // 2. Fetch products with salonId
+      const response = await productService.getProducts({ salonId });
       if (response.success && response.data) {
         setProducts(response.data);
       }

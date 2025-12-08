@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { appointmentService } from "@/services/appointment.service";
+import { salonService } from "@/services/salon.service";
 import { Appointment } from "@/types/owner.types";
 import { toast } from "sonner";
 import {
@@ -47,6 +48,21 @@ export default function AppointmentsPage() {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
+      
+      // 1. Fetch Owner's Salon first
+      const salonResponse = await salonService.getMySalon().catch(() => ({ success: false, data: null }));
+      const salon = salonResponse.success ? salonResponse.data : null;
+      
+      if (!salon) {
+        // If no salon, we can't fetch appointments
+        setAppointments([]);
+        setTotal(0);
+        setTotalPages(0);
+        return;
+      }
+      
+      const salonId = salon._id;
+
       const params: {
         page: number;
         limit: number;
@@ -54,11 +70,13 @@ export default function AppointmentsPage() {
         sortOrder: "asc" | "desc";
         search?: string;
         status?: string;
+        salonId: string;
       } = {
         page,
         limit,
         sortBy,
         sortOrder,
+        salonId,
       };
       if (search.trim()) {
         params.search = search;

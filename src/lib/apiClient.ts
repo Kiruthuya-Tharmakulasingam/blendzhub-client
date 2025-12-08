@@ -6,12 +6,17 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   retryCount?: number;
 }
 
-// Ensure baseURL always ends with /api
+// Use relative path for API calls to leverage Next.js rewrites
+// This ensures cookies are sent correctly as same-origin requests
 const getBaseURL = () => {
+  // In browser, use relative path to go through Next.js proxy
+  if (typeof window !== "undefined") {
+    return "/api";
+  }
+  
+  // On server side (SSR), use absolute URL
   const envUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-  // Remove trailing slash if present
   const cleanUrl = envUrl.replace(/\/$/, "");
-  // Append /api if not already present
   return cleanUrl.endsWith("/api") ? cleanUrl : `${cleanUrl}/api`;
 };
 
