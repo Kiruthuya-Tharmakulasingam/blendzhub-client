@@ -58,6 +58,7 @@ export function SignInModal({ children }: { children: React.ReactNode }) {
               width={60}
               height={60}
               className="h-14 w-auto"
+              style={{ width: "auto", height: "auto" }}
             />
           </div>
           <DialogTitle>Sign In</DialogTitle>

@@ -30,13 +30,13 @@ export default function ProtectedRoute({
     ) {
       switch (user.role) {
         case "admin":
-          router.push("/dashboard/admin");
+          router.push("/admin/dashboard");
           break;
         case "owner":
-          router.push("/dashboard/owner");
+          router.push("/owner/dashboard");
           break;
         case "customer":
-          router.push("/dashboard/customer");
+          router.push("/customer/dashboard");
           break;
         default:
           router.push("/");

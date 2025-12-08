@@ -25,6 +25,7 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
                 width={48}
                 height={48}
                 className="h-12 w-auto"
+                style={{ width: "auto", height: "auto" }}
               />
               <div>
                 <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>

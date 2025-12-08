@@ -12,6 +12,7 @@ export default function SimpleFooter() {
             width={32}
             height={32}
             className="h-8 w-auto"
+            style={{ width: "auto", height: "auto" }}
           />
           <span className="font-semibold hover:text-black dark:hover:text-white">BlendzHub</span>
         </Link>

@@ -13,6 +13,7 @@ export default function Footer() {
               width={48}
               height={48}
               className="h-10 w-auto"
+              style={{ width: "auto", height: "auto" }}
             />
             <h2 className="text-2xl font-bold text-foreground">BlendzHub</h2>
           </Link>

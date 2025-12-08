@@ -69,6 +69,7 @@ export default function Sidebar({ role }: SidebarProps) {
             width={40}
             height={40}
             className="h-10 w-auto"
+            style={{ width: "auto", height: "auto" }}
           />
           <span className="text-2xl font-bold text-sidebar-foreground">BlendzHub</span>
         </Link>
