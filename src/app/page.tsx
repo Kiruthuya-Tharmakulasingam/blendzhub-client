@@ -11,7 +11,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { salonService } from "@/services/salon.service";
 import { Salon } from "@/types/salon.types";
-import { MapPin, Phone, Mail, Clock, Calendar } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Calendar, AlertCircle, RefreshCw } from "lucide-react";
+import { AxiosError } from "axios";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
 
@@ -21,6 +22,7 @@ export default function Home() {
 
   const [salons, setSalons] = React.useState<Salon[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
   const [page, setPage] = React.useState(1);
   const [limit] = React.useState(9);
   const [total, setTotal] = React.useState(0);
@@ -44,6 +46,7 @@ export default function Home() {
   const fetchSalons = async () => {
     try {
       setLoading(true);
+      setError(null);
       const params: {
         page: number;
         limit: number;
@@ -68,9 +71,40 @@ export default function Home() {
         setSalons(response.data);
         setTotal(response.total || 0);
         setTotalPages(response.totalPages || 0);
+        setError(null);
+      } else {
+        setError(response.message || "Failed to load salons. Please try again.");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Failed to fetch salons:", error);
+      // Provide user-friendly error messages
+      if (error instanceof AxiosError) {
+        // Network error or timeout
+        if (!error.response) {
+          if (error.code === "ECONNABORTED" || error.message?.includes("timeout")) {
+            setError("Request took too long. Please check your internet connection and try again.");
+          } else {
+            setError("Network error. Please check your internet connection and try again.");
+          }
+        } else {
+          // Server responded with error
+          const status = error.response.status;
+          if (status >= 500) {
+            setError("Server error. Please try again later.");
+          } else if (status === 404) {
+            setError("Service unavailable. Please try again later.");
+          } else {
+            const errorMessage = (error.response.data as { message?: string })?.message;
+            setError(errorMessage || "Failed to load salons. Please try again.");
+          }
+        }
+      } else {
+        setError("Failed to load salons. Please try again.");
+      }
+      // Clear salons on error
+      setSalons([]);
+      setTotal(0);
+      setTotalPages(0);
     } finally {
       setLoading(false);
     }
@@ -178,7 +212,28 @@ export default function Home() {
               }}
             />
 
-            {loading ? (
+            {error ? (
+              <div className="flex flex-col items-center justify-center py-12 px-4">
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 max-w-md w-full">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="text-red-800 dark:text-red-200 font-semibold mb-2">Unable to Load Salons</h3>
+                      <p className="text-red-700 dark:text-red-300 text-sm mb-4">{error}</p>
+                      <Button
+                        onClick={() => fetchSalons()}
+                        variant="outline"
+                        size="sm"
+                        className="border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40"
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Try Again
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="p-6 bg-zinc-100 dark:bg-zinc-900 rounded-xl animate-pulse h-64" />

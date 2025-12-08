@@ -33,6 +33,7 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -50,6 +51,8 @@ export default function ServicesPage() {
 
   const fetchServices = async () => {
     try {
+      // Note: For owners, the backend automatically filters services by their salon
+      // No need to pass salonId - the backend uses req.salon._id from authentication
       const response = await serviceService.getServices();
       if (response.success && response.data) {
         setServices(response.data);
@@ -86,6 +89,13 @@ export default function ServicesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent double submission
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       const data = {
         ...formData,
@@ -105,8 +115,12 @@ export default function ServicesPage() {
       setIsModalOpen(false);
       resetForm();
       fetchServices();
-    } catch {
-      toast.error("Failed to save service");
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { message?: string } }; message?: string };
+      const errorMessage = apiError?.response?.data?.message || apiError?.message || "Failed to save service";
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -137,6 +151,7 @@ export default function ServicesPage() {
 
   const resetForm = () => {
     setEditingService(null);
+    setIsSubmitting(false);
     setFormData({
       name: "",
       description: "",
@@ -257,8 +272,8 @@ export default function ServicesPage() {
                     )}
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={isUploading}>
-                  {editingService ? "Update" : "Create"}
+                <Button type="submit" className="w-full" disabled={isUploading || isSubmitting}>
+                  {isSubmitting ? (editingService ? "Updating..." : "Creating...") : (editingService ? "Update" : "Create")}
                 </Button>
               </form>
             </DialogContent>

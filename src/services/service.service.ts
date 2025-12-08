@@ -8,8 +8,9 @@ export const serviceService = {
     return response.data;
   },
 
-  async getServiceById(id: string): Promise<ApiResponse<Service>> {
-    const response = await apiClient.get<ApiResponse<Service>>(`/services/${id}`);
+  async getServiceById(id: string, salonId?: string): Promise<ApiResponse<Service>> {
+    const params = salonId ? { salonId } : {};
+    const response = await apiClient.get<ApiResponse<Service>>(`/services/${id}`, { params });
     return response.data;
   },
 
@@ -19,7 +20,7 @@ export const serviceService = {
   },
 
   async updateService(id: string, data: UpdateServiceRequest): Promise<ApiResponse<Service>> {
-    const response = await apiClient.patch<ApiResponse<Service>>(`/services/${id}`, data);
+    const response = await apiClient.put<ApiResponse<Service>>(`/services/${id}`, data);
     return response.data;
   },
 
