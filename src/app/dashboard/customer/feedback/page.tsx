@@ -1,1 +1,5 @@
-import Feedbacks from './feedbacks'; export default function FeedbackPage() { return <Feedbacks />; }
+import Feedbacks from './feedbacks';
+
+export default function FeedbackPage() {
+  return <Feedbacks />;
+}
