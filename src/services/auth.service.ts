@@ -6,6 +6,7 @@ export interface AuthResponse {
   success: boolean;
   message: string;
   token?: string;
+  dashboardPath?: string;
   data?: {
     user: User;
     customer?: Customer;

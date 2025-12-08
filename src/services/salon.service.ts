@@ -56,6 +56,15 @@ export const salonService = {
     }
   },
 
+  async getMySalon(): Promise<ApiResponse<Salon>> {
+    try {
+      const response = await apiClient.get<ApiResponse<Salon>>("/owners/salon");
+      return response.data;
+    } catch (error) {
+      return handleApiError<Salon>(error);
+    }
+  },
+
   async createSalon(data: CreateSalonRequest): Promise<ApiResponse<Salon>> {
     try {
       const response = await apiClient.post<ApiResponse<Salon>>("/salons", data);
