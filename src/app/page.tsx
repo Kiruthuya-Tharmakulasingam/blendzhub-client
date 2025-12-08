@@ -155,7 +155,7 @@ export default function Home() {
             </>
           }
           image={{
-            src: "https://5.imimg.com/data5/SELLER/Default/2025/8/533705624/KP/XD/BN/136142470/salon-wall-mirror-work.png",
+            src: "/salon-wall-mirror-work.png",
             alt: "Modern salon interior",
           }}
           background="gradient"
