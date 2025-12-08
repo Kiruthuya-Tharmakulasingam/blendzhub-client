@@ -1,5 +1,6 @@
 "use client";
 
+// Customer Feedback Page - Route: /dashboard/customer/feedback
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/DashboardLayout";
