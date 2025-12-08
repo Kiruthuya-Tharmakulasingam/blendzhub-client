@@ -11,14 +11,46 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Star } from "lucide-react";
+import { Star, Pencil, Trash2 } from "lucide-react";
 import { feedbackService, Feedback } from "@/services/feedback.service";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Feedbacks() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Edit state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
+  const [editRating, setEditRating] = useState(5);
+  const [editComments, setEditComments] = useState("");
+  const [submittingEdit, setSubmittingEdit] = useState(false);
+
+  // Delete state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [feedbackToDelete, setFeedbackToDelete] = useState<Feedback | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchFeedbacks();
@@ -86,6 +118,54 @@ export default function Feedbacks() {
     }
   };
 
+  const handleOpenEdit = (feedback: Feedback) => {
+    setSelectedFeedback(feedback);
+    setEditRating(feedback.rating);
+    setEditComments(feedback.comments || "");
+    setEditModalOpen(true);
+  };
+
+  const handleSubmitEdit = async () => {
+    if (!selectedFeedback) return;
+
+    try {
+      setSubmittingEdit(true);
+      await feedbackService.updateFeedback(selectedFeedback._id, {
+        rating: editRating,
+        comments: editComments,
+      });
+      toast.success("Feedback updated successfully");
+      setEditModalOpen(false);
+      fetchFeedbacks();
+    } catch {
+      toast.error("Failed to update feedback");
+    } finally {
+      setSubmittingEdit(false);
+    }
+  };
+
+  const handleOpenDelete = (feedback: Feedback) => {
+    setFeedbackToDelete(feedback);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!feedbackToDelete) return;
+
+    try {
+      setDeleting(true);
+      await feedbackService.deleteFeedback(feedbackToDelete._id);
+      toast.success("Feedback deleted successfully");
+      setDeleteDialogOpen(false);
+      setFeedbackToDelete(null);
+      fetchFeedbacks();
+    } catch {
+      toast.error("Failed to delete feedback");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <ProtectedRoute allowedRoles={["customer"]}>
       <DashboardLayout role="customer">
@@ -125,6 +205,7 @@ export default function Feedbacks() {
                     <TableHead>Comments</TableHead>
                     <TableHead>Owner Reply</TableHead>
                     <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -167,12 +248,106 @@ export default function Feedbacks() {
                           day: "numeric",
                         })}
                       </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenEdit(feedback)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenDelete(feedback)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </div>
           )}
+
+          {/* Edit Feedback Dialog */}
+          <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Feedback</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-rating">Rating</Label>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setEditRating(star)}
+                        className="focus:outline-none"
+                      >
+                        <Star
+                          className={`h-6 w-6 ${
+                            star <= editRating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-300"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-comments">Comments</Label>
+                  <Textarea
+                    id="edit-comments"
+                    placeholder="Write your feedback..."
+                    value={editComments}
+                    onChange={(e) => setEditComments(e.target.value)}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setEditModalOpen(false)}
+                  disabled={submittingEdit}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleSubmitEdit} disabled={submittingEdit}>
+                  {submittingEdit ? "Updating..." : "Update Feedback"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Delete Confirmation Dialog */}
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete your
+                  feedback.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleConfirmDelete}
+                  disabled={deleting}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {deleting ? "Deleting..." : "Delete"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </DashboardLayout>
     </ProtectedRoute>

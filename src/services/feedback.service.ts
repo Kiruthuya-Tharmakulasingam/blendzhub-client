@@ -69,4 +69,17 @@ export const feedbackService = {
     });
     return response.data;
   },
+
+  async updateFeedback(id: string, data: {
+    rating?: number;
+    comments?: string;
+  }): Promise<ApiResponse<Feedback>> {
+    const response = await apiClient.put<ApiResponse<Feedback>>(`/feedbacks/${id}`, data);
+    return response.data;
+  },
+
+  async deleteFeedback(id: string): Promise<ApiResponse<void>> {
+    const response = await apiClient.delete<ApiResponse<void>>(`/feedbacks/${id}`);
+    return response.data;
+  },
 };
