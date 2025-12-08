@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Trash2 } from "lucide-react";
 
 export default function AdminProfilePage() {
-  const { user, refreshUser } = useAuth();
+  const { user, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
@@ -41,11 +41,12 @@ export default function AdminProfilePage() {
     e.preventDefault();
 
     try {
-      await profileService.updateProfile(formData);
-      toast.success("Profile updated successfully");
-      setIsEditing(false);
-      if (refreshUser) {
-        refreshUser();
+      const response = await profileService.updateProfile(formData);
+      if (response.success && response.data) {
+        // Update user state immediately with the response data
+        updateUser(response.data);
+        toast.success("Profile updated successfully");
+        setIsEditing(false);
       }
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { message?: string } } };
@@ -64,19 +65,20 @@ export default function AdminProfilePage() {
     uploadFormData.append("image", file);
 
     try {
-      const response = await uploadService.uploadImage(file);
+      const uploadResponse = await uploadService.uploadImage(file);
 
-      if (response.success && response.data) {
-        const imageUrl = response.data.url;
+      if (uploadResponse.success && uploadResponse.data) {
+        const imageUrl = uploadResponse.data.url;
         setFormData((prev) => ({ ...prev, image: imageUrl }));
         
         // Update user profile immediately with new image
-        await profileService.updateProfile({ ...formData, image: imageUrl });
+        const profileResponse = await profileService.updateProfile({ ...formData, image: imageUrl });
         
-        if (refreshUser) {
-          await refreshUser();
+        if (profileResponse.success && profileResponse.data) {
+          // Update user state immediately with the response data
+          updateUser(profileResponse.data);
+          toast.success("Profile image updated successfully");
         }
-        toast.success("Profile image updated successfully");
       }
     } catch (error: unknown) {
       console.error("Upload error:", error);
@@ -91,12 +93,13 @@ export default function AdminProfilePage() {
       setFormData((prev) => ({ ...prev, image: "" }));
       
       // Update user profile immediately with empty image
-      await profileService.updateProfile({ ...formData, image: "" });
+      const response = await profileService.updateProfile({ ...formData, image: "" });
       
-      if (refreshUser) {
-        await refreshUser();
+      if (response.success && response.data) {
+        // Update user state immediately with the response data
+        updateUser(response.data);
+        toast.success("Profile image removed successfully");
       }
-      toast.success("Profile image removed successfully");
     } catch (error: unknown) {
       console.error("Remove image error:", error);
       toast.error("Failed to remove image");

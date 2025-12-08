@@ -66,6 +66,7 @@ export default function CustomerRegister() {
               width={72}
               height={72}
               className="h-20 w-auto"
+              style={{ width: "auto", height: "auto" }}
             />
           </div>
           <CardTitle>Create Account</CardTitle>

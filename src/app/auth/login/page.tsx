@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 import {
@@ -32,8 +33,31 @@ const formSchema = z.object({
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const { login, isAuthenticated, user, loading } = useAuth();
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Redirect authenticated users to their dashboard (only if not currently submitting)
+  useEffect(() => {
+    if (!loading && !isSubmitting && isAuthenticated && user) {
+      // Determine dashboard path based on role
+      let dashboardPath = "/";
+      switch (user.role) {
+        case "admin":
+          dashboardPath = "/admin/dashboard";
+          break;
+        case "owner":
+          dashboardPath = "/owner/dashboard";
+          break;
+        case "customer":
+          dashboardPath = "/customer/dashboard";
+          break;
+        default:
+          dashboardPath = "/";
+      }
+      router.push(dashboardPath);
+    }
+  }, [loading, isAuthenticated, user, router, isSubmitting]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -49,6 +73,8 @@ export default function LoginPage() {
 
     try {
       await login(data);
+      // Login function in AuthContext handles redirect via router.push
+      // No need to do anything here - the redirect happens in AuthContext
     } catch (err: unknown) {
       console.error("Login error:", err);
       const errorMessage = err && typeof err === 'object' && 'response' in err 
@@ -61,6 +87,20 @@ export default function LoginPage() {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  // Don't render login form if user is authenticated (will redirect)
+  if (isAuthenticated && user) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4 relative">
@@ -81,6 +121,7 @@ export default function LoginPage() {
               width={72}
               height={72}
               className="h-20 w-auto"
+              style={{ width: "auto", height: "auto" }}
             />
           </div>
           <CardTitle>Login</CardTitle>

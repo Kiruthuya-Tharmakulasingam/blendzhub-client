@@ -92,6 +92,7 @@ export default function OwnerRegister() {
                 width={72}
                 height={72}
                 className="h-20 w-auto"
+                style={{ width: "auto", height: "auto" }}
               />
             </div>
             <CardTitle>Become a Owner</CardTitle>

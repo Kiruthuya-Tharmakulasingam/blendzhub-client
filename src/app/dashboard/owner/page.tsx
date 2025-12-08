@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Scissors, ShoppingBag, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, Scissors, ShoppingBag, Users, AlertCircle } from "lucide-react";
 import { appointmentService } from "@/services/appointment.service";
 import { serviceService } from "@/services/service.service";
 import { productService } from "@/services/product.service";
@@ -17,6 +19,7 @@ export default function OwnerDashboard() {
     customers: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [needsSalon, setNeedsSalon] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -30,6 +33,13 @@ export default function OwnerDashboard() {
         serviceService.getServices().catch(() => ({ success: false, data: [] })),
         productService.getProducts().catch(() => ({ success: false, data: [] })),
       ]);
+
+      // Check if owner needs to create a salon
+      const servicesMessage = (servicesRes as { message?: string }).message || "";
+      const productsMessage = (productsRes as { message?: string }).message || "";
+      if (servicesMessage.includes("create a salon") || productsMessage.includes("create a salon")) {
+        setNeedsSalon(true);
+      }
 
       const appointments = appointmentsRes.success && appointmentsRes.data ? appointmentsRes.data : [];
       const services = servicesRes.success && servicesRes.data ? servicesRes.data : [];
@@ -65,6 +75,27 @@ export default function OwnerDashboard() {
               Overview of your salon operations
             </p>
           </div>
+          
+          {needsSalon && (
+            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                <div className="flex-1">
+                  <h3 className="font-semibold text-blue-900 dark:text-blue-100">
+                    Create Your Salon First
+                  </h3>
+                  <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
+                    Before you can manage products, services, and appointments, you need to create your salon profile.
+                  </p>
+                  <Link href="/dashboard/owner/salon">
+                    <Button className="mt-3" size="sm">
+                      Create Salon Now
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

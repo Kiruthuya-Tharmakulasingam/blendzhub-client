@@ -38,9 +38,9 @@ export default function MySalonPage() {
 
   const fetchSalon = async () => {
     try {
-      const response = await salonService.getSalons();
-      if (response.success && response.data && response.data.length > 0) {
-        const salonData = response.data[0];
+      const response = await salonService.getMySalon();
+      if (response.success && response.data) {
+        const salonData = response.data;
         setSalon(salonData);
         setFormData({
           name: salonData.name,
@@ -53,7 +53,8 @@ export default function MySalonPage() {
         });
       }
     } catch {
-      toast.error("Failed to fetch salon details");
+      // Silently handle error - salon doesn't exist yet
+      // The UI will show the create form
     } finally {
       setLoading(false);
     }
@@ -68,7 +69,13 @@ export default function MySalonPage() {
         console.log("Updating salon:", salon._id, formData);
         const response = await salonService.updateSalon(salon._id, formData);
         console.log("Update response:", response);
-        toast.success("Salon details updated successfully");
+        if (response.success) {
+          toast.success("Salon details updated successfully");
+          setIsEditing(false);
+          fetchSalon();
+        } else {
+          toast.error(response.message || "Failed to update salon");
+        }
       } else {
         // Create new salon
         console.log("Creating salon:", formData);
@@ -82,10 +89,13 @@ export default function MySalonPage() {
           imageUrl: formData.imageUrl,
         });
         console.log("Create response:", response);
-        toast.success("Salon created successfully");
+        if (response.success) {
+          toast.success("Salon created successfully");
+          fetchSalon();
+        } else {
+          toast.error(response.message || "Failed to create salon");
+        }
       }
-      setIsEditing(false);
-      fetchSalon();
     } catch (error: unknown) {
       console.error("Failed to save salon:", error);
       const apiError = error as { response?: { data?: { message?: string } }; message?: string };
