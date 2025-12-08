@@ -17,8 +17,8 @@ export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
 
   return (
-    <nav className="flex w-full items-center justify-between px-8 py-4 bg-white dark:bg-black shadow-sm border-b sticky top-0 z-50">
-      <Link href="/" className="text-2xl font-bold text-black dark:text-white">
+    <nav className="flex w-full items-center justify-between px-8 py-4 bg-background shadow-sm border-b border-border sticky top-0 z-50">
+      <Link href="/" className="text-2xl font-bold text-foreground">
         BlendzHub
       </Link>
 

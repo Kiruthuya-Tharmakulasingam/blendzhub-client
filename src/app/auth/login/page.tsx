@@ -62,7 +62,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black p-4">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Login</CardTitle>
@@ -73,7 +73,7 @@ export default function LoginPage() {
 
         <CardContent>
           {error && (
-            <div className="mb-4 p-3 text-sm text-red-500 bg-red-50 border border-red-200 rounded-md">
+            <div className="mb-4 p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
               {error}
             </div>
           )}
@@ -112,11 +112,11 @@ export default function LoginPage() {
         </CardContent>
 
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
             <Link
               href="/auth/register/customer"
-              className="text-black font-semibold hover:underline dark:text-white"
+              className="text-foreground font-semibold hover:underline"
             >
               Sign up
             </Link>

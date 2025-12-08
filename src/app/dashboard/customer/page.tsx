@@ -66,7 +66,7 @@ export default function CustomerDashboard() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Welcome back, {user?.name}!</h1>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+            <p className="text-muted-foreground mt-2">
               Manage your appointments and explore salons
             </p>
           </div>

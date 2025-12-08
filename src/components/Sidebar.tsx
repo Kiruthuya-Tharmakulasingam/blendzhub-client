@@ -59,12 +59,12 @@ export default function Sidebar({ role }: SidebarProps) {
   const links = effectiveRole === "admin" ? adminLinks : effectiveRole === "owner" ? ownerLinks : customerLinks;
 
   return (
-    <div className="flex h-screen w-64 flex-col border-r bg-white dark:bg-zinc-900 sticky top-0">
-      <div className="p-6 border-b">
-        <Link href="/" className="text-2xl font-bold">
+    <div className="flex h-screen w-64 flex-col border-r border-border bg-sidebar sticky top-0">
+      <div className="p-6 border-b border-border">
+        <Link href="/" className="text-2xl font-bold text-sidebar-foreground">
           BlendzHub
         </Link>
-        <div className="mt-1 text-xs font-medium text-zinc-500 uppercase tracking-wider">
+        <div className="mt-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {role} Portal
         </div>
       </div>
@@ -80,7 +80,7 @@ export default function Sidebar({ role }: SidebarProps) {
                 variant={isActive ? "secondary" : "ghost"}
                 className={cn(
                   "w-full justify-start",
-                  isActive && "bg-zinc-100 dark:bg-zinc-800"
+                  isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
                 )}
               >
                 <Icon className="mr-2 h-4 w-4" />
@@ -91,10 +91,10 @@ export default function Sidebar({ role }: SidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 border-t">
+      <div className="p-4 border-t border-border">
         <Button
           variant="ghost"
-          className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+          className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={() => logout()}
         >
           <LogOut className="mr-2 h-4 w-4" />

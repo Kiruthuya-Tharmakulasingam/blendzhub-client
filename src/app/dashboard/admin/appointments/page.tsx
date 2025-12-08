@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
 import { Calendar, Clock, MapPin, User, Scissors } from "lucide-react";
@@ -84,20 +84,29 @@ export default function AdminAppointmentsPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "accepted":
-        return <Badge className="bg-blue-500">Accepted</Badge>;
-      case "in-progress":
-        return <Badge className="bg-purple-500">In Progress</Badge>;
-      case "completed":
-        return <Badge className="bg-green-500">Completed</Badge>;
-      case "cancelled":
-        return <Badge className="bg-red-500">Cancelled</Badge>;
-      case "no-show":
-        return <Badge className="bg-gray-500">No Show</Badge>;
-      default:
-        return <Badge className="bg-yellow-500">Pending</Badge>;
-    }
+    type StatusBadgeStatus = 
+      | "pending"
+      | "accepted"
+      | "approved"
+      | "rejected"
+      | "cancelled"
+      | "in-progress"
+      | "completed"
+      | "active"
+      | "inactive"
+      | "no-show";
+    
+    const statusMap: Record<string, StatusBadgeStatus> = {
+      accepted: "accepted",
+      "in-progress": "in-progress",
+      completed: "completed",
+      cancelled: "cancelled",
+      "no-show": "no-show",
+      rejected: "rejected",
+      pending: "pending",
+    };
+    const mappedStatus = statusMap[status] || "pending";
+    return <StatusBadge status={mappedStatus} />;
   };
 
   return (

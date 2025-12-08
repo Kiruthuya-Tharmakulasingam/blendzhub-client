@@ -11,10 +11,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { salonService } from "@/services/salon.service";
 import { Salon } from "@/types/salon.types";
-import { MapPin, Phone, Mail, Clock, Calendar, AlertCircle, RefreshCw } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Calendar, RefreshCw } from "lucide-react";
 import { AxiosError } from "axios";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
+import { HeroSection } from "@/components/ui/hero-section";
+import { AlertBanner } from "@/components/ui/alert-banner";
 
 export default function Home() {
   const { isAuthenticated, user } = useAuth();
@@ -112,64 +114,49 @@ export default function Home() {
 
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
+    <div className="flex min-h-screen flex-col bg-background font-sans">
       <Navbar />
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-20 px-8 sm:px-16 bg-gradient-to-br from-white via-zinc-50 to-zinc-100 dark:from-zinc-900 dark:via-black dark:to-zinc-900 border-b">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="flex flex-col gap-6">
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-black dark:text-white leading-tight">
-                Book Your Next <br />
-                <span className="bg-gradient-to-r from-zinc-600 to-zinc-400 dark:from-zinc-400 dark:to-zinc-200 bg-clip-text text-transparent">
-                  Salon Experience
-                </span>
-              </h1>
-              <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-lg">
-                Discover top-rated salons and spas near you. Book appointments seamlessly and manage your beauty routine with BlendzHub.
-              </p>
-              <div className="flex flex-wrap gap-4 mt-4">
-                <SignInModal>
-                  <Button size="lg" className="text-base px-8 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200">
-                    Get Started
-                  </Button>
-                </SignInModal>
-                <BecomeOwnerModal>
-                  <Button variant="outline" size="lg" className="text-base px-8 border-2">
-                    For Business
-                  </Button>
-                </BecomeOwnerModal>
-              </div>
-            </div>
-            <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-xl">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80"
-                alt="Modern salon interior"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  // Fallback to gradient if image fails to load
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = "none";
-                  if (target.parentElement) {
-                    target.parentElement.className = "relative h-[400px] bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900 rounded-2xl overflow-hidden flex items-center justify-center shadow-xl";
-                    target.parentElement.innerHTML = '<div class="text-zinc-400 text-xl">Salon Experience</div>';
-                  }
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-            </div>
-          </div>
-        </section>
+        <HeroSection
+          title={
+            <>
+              Book Your Next <br />
+              <span className="bg-gradient-to-r from-muted-foreground/80 to-muted-foreground/60 bg-clip-text text-transparent">
+                Salon Experience
+              </span>
+            </>
+          }
+          description="Discover top-rated salons and spas near you. Book appointments seamlessly and manage your beauty routine with BlendzHub."
+          actions={
+            <>
+              <SignInModal>
+                <Button size="lg" className="text-base px-8">
+                  Get Started
+                </Button>
+              </SignInModal>
+              <BecomeOwnerModal>
+                <Button variant="outline" size="lg" className="text-base px-8">
+                  For Business
+                </Button>
+              </BecomeOwnerModal>
+            </>
+          }
+          image={{
+            src: "https://images.unsplash.com/photo-1560066984-138dadb4c035?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80",
+            alt: "Modern salon interior",
+          }}
+          background="gradient"
+        />
 
 
         {/* Salons Section */}
-        <section className="py-20 px-8 sm:px-16 bg-white dark:bg-black">
+        <section className="py-20 px-8 sm:px-16 bg-background">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">Our Salons</h2>
-              <p className="text-zinc-600 dark:text-zinc-400">Discover top-rated salons and book your appointment</p>
+              <p className="text-muted-foreground">Discover top-rated salons and book your appointment</p>
             </div>
 
             <FilterAndSort
@@ -214,29 +201,27 @@ export default function Home() {
 
             {error ? (
               <div className="flex flex-col items-center justify-center py-12 px-4">
-                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 max-w-md w-full">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <h3 className="text-red-800 dark:text-red-200 font-semibold mb-2">Unable to Load Salons</h3>
-                      <p className="text-red-700 dark:text-red-300 text-sm mb-4">{error}</p>
-                      <Button
-                        onClick={() => fetchSalons()}
-                        variant="outline"
-                        size="sm"
-                        className="border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/40"
-                      >
-                        <RefreshCw className="h-4 w-4 mr-2" />
-                        Try Again
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                <AlertBanner
+                  variant="error"
+                  title="Unable to Load Salons"
+                  description={error}
+                  className="max-w-md w-full"
+                >
+                  <Button
+                    onClick={() => fetchSalons()}
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Try Again
+                  </Button>
+                </AlertBanner>
               </div>
             ) : loading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="p-6 bg-zinc-100 dark:bg-zinc-900 rounded-xl animate-pulse h-64" />
+                  <div key={i} className="p-6 bg-muted rounded-xl animate-pulse h-64" />
                 ))}
               </div>
             ) : salons.length > 0 ? (
@@ -246,7 +231,7 @@ export default function Home() {
                   <Link
                     key={salon._id}
                     href={`/salons/${salon._id}`}
-                    className="group p-6 bg-gradient-to-br from-white to-zinc-50 dark:from-zinc-900 dark:to-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 block"
+                    className="group p-6 bg-gradient-to-br from-card to-surface rounded-xl border border-border shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 block"
                   >
                     {salon.imageUrl && (
                       <div className="mb-4 rounded-lg overflow-hidden">
@@ -262,33 +247,33 @@ export default function Home() {
                       </div>
                     )}
                     <div className="mb-4">
-                      <h3 className="text-xl font-semibold mb-2 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition-colors">
+                      <h3 className="text-xl font-semibold mb-2 group-hover:text-foreground/80 transition-colors">
                         {salon.name}
                       </h3>
-                      <div className="flex items-center text-sm text-zinc-600 dark:text-zinc-400 mb-2">
+                      <div className="flex items-center text-sm text-muted-foreground mb-2">
                         <MapPin className="h-4 w-4 mr-1" />
                         {salon.location}
                       </div>
-                      <div className="inline-block px-3 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full text-xs font-medium capitalize mb-3">
+                      <div className="inline-block px-3 py-1 bg-muted text-muted-foreground rounded-full text-xs font-medium capitalize mb-3">
                         {salon.type}
                       </div>
                     </div>
                     
                     <div className="space-y-2 text-sm mb-4">
                       {salon.phone && (
-                        <div className="flex items-center text-zinc-600 dark:text-zinc-400">
+                        <div className="flex items-center text-muted-foreground">
                           <Phone className="h-4 w-4 mr-2" />
                           {salon.phone}
                         </div>
                       )}
                       {salon.email && (
-                        <div className="flex items-center text-zinc-600 dark:text-zinc-400">
+                        <div className="flex items-center text-muted-foreground">
                           <Mail className="h-4 w-4 mr-2" />
                           <span className="truncate">{salon.email}</span>
                         </div>
                       )}
                       {salon.openingHours && (
-                        <div className="flex items-start text-zinc-600 dark:text-zinc-400">
+                        <div className="flex items-start text-muted-foreground">
                           <Clock className="h-4 w-4 mr-2 mt-0.5" />
                           <span className="text-xs">{salon.openingHours}</span>
                         </div>
@@ -330,7 +315,7 @@ export default function Home() {
                 />
               </>
             ) : (
-              <div className="text-center py-12 text-zinc-500">
+              <div className="text-center py-12 text-muted-foreground">
                 No salons available at the moment
               </div>
             )}
@@ -338,11 +323,11 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="py-20 px-8 sm:px-16 bg-zinc-50 dark:bg-zinc-950">
+        <section className="py-20 px-8 sm:px-16 bg-surface">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold mb-4">Why Choose BlendzHub?</h2>
-              <p className="text-zinc-600 dark:text-zinc-400">Everything you need for a perfect salon experience</p>
+              <p className="text-muted-foreground">Everything you need for a perfect salon experience</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -360,9 +345,9 @@ export default function Home() {
                   description: "Reschedule or cancel appointments with ease."
                 }
               ].map((feature, i) => (
-                <div key={i} className="p-8 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm hover:shadow-md transition-shadow">
+                <div key={i} className="p-8 bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow">
                   <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-                  <p className="text-zinc-600 dark:text-zinc-400">{feature.description}</p>
+                  <p className="text-muted-foreground">{feature.description}</p>
                 </div>
               ))}
             </div>

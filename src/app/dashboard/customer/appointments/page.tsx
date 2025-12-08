@@ -37,6 +37,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface Appointment {
   _id: string;
@@ -432,24 +433,8 @@ export default function MyAppointmentsPage() {
     return apt.status === filter;
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
-      case "accepted":
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
-      case "rejected":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
-      case "in-progress":
-        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
-      case "completed":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
-      case "cancelled":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
-    }
-  };
+  // StatusBadge component will handle colors, so we don't need this function anymore
+  // Keeping it for backward compatibility if needed elsewhere, but using StatusBadge in JSX
 
   const getFeedbackForAppointment = (appointmentId: string) => {
     try {
@@ -477,8 +462,8 @@ export default function MyAppointmentsPage() {
             key={star}
             className={`h-3 w-3 ${
               star <= rating
-                ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300"
+                ? "fill-warning text-warning"
+                : "text-muted-foreground"
             }`}
           />
         ))}
@@ -493,7 +478,7 @@ export default function MyAppointmentsPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">My Appointments</h1>
-              <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 View and manage your appointments
               </p>
             </div>
@@ -545,7 +530,7 @@ export default function MyAppointmentsPage() {
                   <Card
                     key={notification._id}
                     className={`cursor-pointer transition-colors ${
-                      !notification.read ? "bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800" : ""
+                      !notification.read ? "bg-info/10 border-info/20" : ""
                     }`}
                     onClick={() => {
                       if (!notification.read && notification._id) {
@@ -566,7 +551,7 @@ export default function MyAppointmentsPage() {
                           </p>
                         </div>
                         {!notification.read && (
-                          <div className="h-2 w-2 bg-blue-500 rounded-full ml-2 mt-1" />
+                          <div className="h-2 w-2 bg-info rounded-full ml-2 mt-1" />
                         )}
                       </div>
                     </CardContent>
@@ -651,13 +636,25 @@ export default function MyAppointmentsPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                                  safeAppointment.status
-                                )}`}
-                              >
-                                {safeAppointment.status.charAt(0).toUpperCase() + safeAppointment.status.slice(1)}
-                              </span>
+                              <StatusBadge
+                                status={
+                                  safeAppointment.status === "in-progress"
+                                    ? "in-progress"
+                                    : safeAppointment.status === "no-show"
+                                    ? "no-show"
+                                    : (safeAppointment.status as 
+                                        | "pending"
+                                        | "accepted"
+                                        | "approved"
+                                        | "rejected"
+                                        | "cancelled"
+                                        | "in-progress"
+                                        | "completed"
+                                        | "active"
+                                        | "inactive"
+                                        | "no-show")
+                                }
+                              />
                             </TableCell>
                             <TableCell className="text-right">
                               {safeAppointment.status === "pending" && (
@@ -666,7 +663,7 @@ export default function MyAppointmentsPage() {
                                 </div>
                               )}
                               {safeAppointment.status === "rejected" && (
-                                <div className="text-sm text-red-600 dark:text-red-400 font-medium text-right">
+                                <div className="text-sm text-destructive font-medium text-right">
                                   Appointment was rejected
                                 </div>
                               )}
@@ -683,7 +680,7 @@ export default function MyAppointmentsPage() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="text-red-500"
+                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
                                     onClick={() => handleCancelAppointment(safeAppointment._id)}
                                   >
                                     <X className="h-4 w-4 mr-1" />
@@ -770,8 +767,8 @@ export default function MyAppointmentsPage() {
                         <Star
                           className={`h-8 w-8 transition-colors ${
                             star <= rating
-                              ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300 dark:text-gray-600"
+                              ? "fill-warning text-warning"
+                              : "text-muted-foreground"
                           }`}
                         />
                       </button>

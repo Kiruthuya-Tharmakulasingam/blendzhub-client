@@ -64,7 +64,7 @@ export function FilterAndSort({
       <div className="flex flex-col sm:flex-row gap-4">
         {showSearch && (
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
               placeholder={searchPlaceholder}
@@ -75,10 +75,10 @@ export function FilterAndSort({
             {searchValue && (
               <button
                 onClick={() => onSearchChange?.("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-full transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-muted rounded-full transition-colors"
                 aria-label="Clear search"
               >
-                <X className="h-4 w-4 text-zinc-400" />
+                <X className="h-4 w-4 text-muted-foreground" />
               </button>
             )}
           </div>

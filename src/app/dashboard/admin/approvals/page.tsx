@@ -26,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ownerService } from "@/services/owner.service";
 import { Owner } from "@/types/auth.types";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export default function ApprovalsPage() {
   const [pendingOwners, setPendingOwners] = useState<Owner[]>([]);
@@ -89,7 +89,7 @@ export default function ApprovalsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Owner Approvals</h1>
-              <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Review and approve pending owner requests
               </p>
             </div>
@@ -98,7 +98,7 @@ export default function ApprovalsPage() {
             </Button>
           </div>
 
-          <div className="rounded-md border bg-white dark:bg-zinc-900">
+          <div className="rounded-md border border-border bg-card">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -121,7 +121,7 @@ export default function ApprovalsPage() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="text-center py-8 text-zinc-500"
+                      className="text-center py-8 text-muted-foreground"
                     >
                       No pending approvals found.
                     </TableCell>
@@ -136,18 +136,15 @@ export default function ApprovalsPage() {
                       <TableCell>{owner.email}</TableCell>
                       <TableCell>{owner.phone || "N/A"}</TableCell>
                       <TableCell>
-                        <Badge
-                          variant="secondary"
-                          className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                        >
-                          {owner.status}
-                        </Badge>
+                        <StatusBadge
+                          status={owner.status === "pending" ? "pending" : owner.status === "approved" ? "approved" : "rejected"}
+                        />
                       </TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button
                           size="sm"
                           variant="default"
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-success hover:bg-success/90 text-success-foreground"
                           onClick={() => {
                             setActionOwner(owner);
                             setActionType("approve");
@@ -168,7 +165,7 @@ export default function ApprovalsPage() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+                          className="text-destructive border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
                           onClick={() => {
                             setActionOwner(owner);
                             setActionType("delete");
@@ -230,8 +227,8 @@ export default function ApprovalsPage() {
                   onClick={handleAction}
                   className={
                     actionType === "approve"
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-red-600 hover:bg-red-700"
+                      ? "bg-success hover:bg-success/90 text-success-foreground"
+                      : "bg-destructive hover:bg-destructive/90 text-destructive-foreground"
                   }
                 >
                   {actionType === "delete" ? "Delete" : "Confirm"}
