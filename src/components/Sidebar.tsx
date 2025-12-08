@@ -50,6 +50,7 @@ export default function Sidebar({ role }: SidebarProps) {
     { href: "/dashboard/customer", label: "Overview", icon: LayoutDashboard },
     { href: "/dashboard/customer/salons", label: "Browse Salons", icon: Store },
     { href: "/dashboard/customer/appointments", label: "My Appointments", icon: Calendar },
+    { href: "/dashboard/customer/feedback", label: "My Feedback", icon: MessageSquare },
     { href: "/dashboard/customer/profile", label: "Profile", icon: Users },
   ];
 

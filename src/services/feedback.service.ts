@@ -47,4 +47,26 @@ export const feedbackService = {
     const response = await apiClient.put<ApiResponse<Feedback>>(`/feedbacks/${id}/reply`, { reply });
     return response.data;
   },
+
+  async getMyFeedbacks(customerId?: string): Promise<ApiResponse<Feedback[]>> {
+    const params = customerId ? { customerId } : {};
+    const response = await apiClient.get<ApiResponse<Feedback[]>>("/feedbacks/my-feedbacks", { params });
+    return response.data;
+  },
+
+  async createFeedbackWithBooking(data: {
+    bookingId: string;
+    salonId: string;
+    customerId: string;
+    rating: number;
+    comment?: string;
+  }): Promise<ApiResponse<Feedback>> {
+    const response = await apiClient.post<ApiResponse<Feedback>>("/feedbacks/create", {
+      appointmentId: data.bookingId,
+      salonId: data.salonId,
+      rating: data.rating,
+      comments: data.comment,
+    });
+    return response.data;
+  },
 };

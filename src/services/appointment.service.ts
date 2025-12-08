@@ -46,4 +46,10 @@ export const appointmentService = {
     const response = await apiClient.delete<ApiResponse<Appointment>>(`/appointments/${id}`);
     return response.data;
   },
+
+  async getCompletedBookings(customerId?: string): Promise<ApiResponse<Appointment[]>> {
+    const params = customerId ? { customerId } : {};
+    const response = await apiClient.get<ApiResponse<Appointment[]>>("/bookings/completed", { params });
+    return response.data;
+  },
 };
