@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import Image from "next/image";
 
 import {
   Card,
@@ -62,9 +63,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
+    <div className="flex min-h-screen items-center justify-center bg-background p-4 relative">
+      <div 
+        className="absolute inset-0 opacity-5"
+        style={{
+          backgroundImage: "url('/background-pattern.svg')",
+          backgroundRepeat: "repeat",
+          backgroundSize: "200px 200px"
+        }}
+      />
+      <Card className="w-full max-w-md relative z-10">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/logo.png"
+              alt="BlendzHub Logo"
+              width={72}
+              height={72}
+              className="h-20 w-auto"
+            />
+          </div>
           <CardTitle>Login</CardTitle>
           <CardDescription>
             Enter your credentials to access your account

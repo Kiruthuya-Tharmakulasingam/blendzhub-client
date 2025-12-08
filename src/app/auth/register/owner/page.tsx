@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/contexts/AuthContext";
+import Image from "next/image";
 
 import {
   Card,
@@ -73,9 +74,26 @@ export default function OwnerRegister() {
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
       <Navbar />
-      <main className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
+      <main className="flex-1 flex items-center justify-center p-4 relative">
+        <div 
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: "url('/background-pattern.svg')",
+            backgroundRepeat: "repeat",
+            backgroundSize: "200px 200px"
+          }}
+        />
+        <Card className="w-full max-w-md relative z-10">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Image
+                src="/logo.png"
+                alt="BlendzHub Logo"
+                width={72}
+                height={72}
+                className="h-20 w-auto"
+              />
+            </div>
             <CardTitle>Become a Owner</CardTitle>
             <CardDescription>
               Register your business. Approval required from admin.

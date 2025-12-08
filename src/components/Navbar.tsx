@@ -12,14 +12,23 @@ import {
 import { Menu, LogOut, LayoutDashboard } from "lucide-react";
 import { SignInModal } from "./modals/SignInModal";
 import { SignUpModal } from "./modals/SignUpModal";
+import Image from "next/image";
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
 
   return (
     <nav className="flex w-full items-center justify-between px-8 py-4 bg-background shadow-sm border-b border-border sticky top-0 z-50">
-      <Link href="/" className="text-2xl font-bold text-foreground">
-        BlendzHub
+      <Link href="/" className="flex items-center gap-2">
+        <Image
+          src="/logo.png"
+          alt="BlendzHub Logo"
+          width={48}
+          height={48}
+          className="h-10 w-auto"
+          priority
+        />
+        <span className="text-2xl font-bold text-foreground">BlendzHub</span>
       </Link>
 
       <div className="hidden sm:flex gap-4 items-center">

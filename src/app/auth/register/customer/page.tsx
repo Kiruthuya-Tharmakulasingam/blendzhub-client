@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import Image from "next/image";
 
 import {
   Card,
@@ -47,9 +48,26 @@ export default function CustomerRegister() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black p-4 relative">
+      <div 
+        className="absolute inset-0 opacity-5"
+        style={{
+          backgroundImage: "url('/background-pattern.svg')",
+          backgroundRepeat: "repeat",
+          backgroundSize: "200px 200px"
+        }}
+      />
+      <Card className="w-full max-w-md relative z-10">
+        <CardHeader className="text-center">
+          <div className="flex justify-center mb-4">
+            <Image
+              src="/logo.png"
+              alt="BlendzHub Logo"
+              width={72}
+              height={72}
+              className="h-20 w-auto"
+            />
+          </div>
           <CardTitle>Create Account</CardTitle>
           <CardDescription>Sign up as a customer</CardDescription>
         </CardHeader>

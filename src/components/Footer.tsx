@@ -1,9 +1,21 @@
+import Image from "next/image";
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="bg-surface border-t border-border py-12 px-8">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="col-span-1 md:col-span-2">
-          <h2 className="text-2xl font-bold mb-4 text-foreground">BlendzHub</h2>
+          <Link href="/" className="flex items-center gap-2 mb-4">
+            <Image
+              src="/logo.png"
+              alt="BlendzHub Logo"
+              width={48}
+              height={48}
+              className="h-10 w-auto"
+            />
+            <h2 className="text-2xl font-bold text-foreground">BlendzHub</h2>
+          </Link>
           <p className="text-muted-foreground max-w-sm">
             Your premier platform for booking salon and spa appointments. 
             Connect with top beauty professionals in your area.

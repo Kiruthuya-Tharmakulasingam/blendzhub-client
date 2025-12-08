@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -61,8 +62,15 @@ export default function Sidebar({ role }: SidebarProps) {
   return (
     <div className="flex h-screen w-64 flex-col border-r border-border bg-sidebar sticky top-0">
       <div className="p-6 border-b border-border">
-        <Link href="/" className="text-2xl font-bold text-sidebar-foreground">
-          BlendzHub
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logo.png"
+            alt="BlendzHub Logo"
+            width={40}
+            height={40}
+            className="h-10 w-auto"
+          />
+          <span className="text-2xl font-bold text-sidebar-foreground">BlendzHub</span>
         </Link>
         <div className="mt-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
           {role} Portal

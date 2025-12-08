@@ -26,7 +26,7 @@ function HeroSection({
   return (
     <section
       className={cn(
-        "relative py-20 px-8 sm:px-16 border-b",
+        "relative py-20 px-8 sm:px-16 border-b overflow-hidden",
         background === "gradient"
           ? "bg-gradient-to-br from-background via-surface to-muted"
           : "bg-surface",
@@ -34,7 +34,15 @@ function HeroSection({
       )}
       {...props}
     >
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <div 
+        className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
+        style={{
+          backgroundImage: "url('/background-pattern.svg')",
+          backgroundRepeat: "repeat",
+          backgroundSize: "300px 300px"
+        }}
+      />
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
         <div className="flex flex-col gap-6">
           {subtitle && (
             <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
