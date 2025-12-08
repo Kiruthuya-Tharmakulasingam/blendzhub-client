@@ -24,7 +24,7 @@ interface SidebarProps {
 
 export default function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const adminLinks = [
     { href: "/dashboard/admin", label: "Overview", icon: LayoutDashboard },
@@ -54,7 +54,9 @@ export default function Sidebar({ role }: SidebarProps) {
     { href: "/dashboard/customer/profile", label: "Profile", icon: Users },
   ];
 
-  const links = role === "admin" ? adminLinks : role === "owner" ? ownerLinks : customerLinks;
+  // Use role prop first, fallback to user.role from auth context for robustness
+  const effectiveRole = role || user?.role || "customer";
+  const links = effectiveRole === "admin" ? adminLinks : effectiveRole === "owner" ? ownerLinks : customerLinks;
 
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-white dark:bg-zinc-900 sticky top-0">

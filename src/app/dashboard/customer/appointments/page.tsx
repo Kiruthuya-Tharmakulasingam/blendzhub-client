@@ -20,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, MapPin, Clock, X, Star, CalendarClock, Bell } from "lucide-react";
+import { Calendar, MapPin, Clock, X, Star, CalendarClock, Bell, MessageSquare } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { appointmentService } from "@/services/appointment.service";
 import { feedbackService, Feedback } from "@/services/feedback.service";
@@ -497,6 +498,12 @@ export default function MyAppointmentsPage() {
               </p>
             </div>
             <div className="flex items-center gap-4">
+              <Link href="/dashboard/customer/feedback">
+                <Button variant="outline" size="sm">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  My Feedback
+                </Button>
+              </Link>
               {unreadCount > 0 && (
                 <div className="relative">
                   <Bell className="h-5 w-5 text-muted-foreground" />
