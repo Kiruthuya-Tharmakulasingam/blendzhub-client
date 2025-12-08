@@ -26,6 +26,7 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   refreshUser: () => Promise<void>;
+  updateUser: (updatedUser: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,16 +40,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authService.getCurrentUser();
       if (response.success && response.data?.user) {
-        setUser(response.data.user);
-        // Store user in cookie for middleware access
-        Cookies.set("user", JSON.stringify(response.data.user), { expires: 7 });
+        // Merge customer/owner profile data into user object
+        const mergedUser = { ...response.data.user };
+        if (response.data.customer) {
+          mergedUser.phone = response.data.customer.contact || response.data.customer.phone;
+        }
+        if (response.data.owner) {
+          mergedUser.phone = response.data.owner.phone;
+        }
+        setUser(mergedUser);
+        // Store user in cookie for middleware access with proper options
+        // Don't clear existing cookies - just update user cookie
+        const isProduction = process.env.NODE_ENV === "production";
+        Cookies.set("user", JSON.stringify(mergedUser), { 
+          expires: 30, // Match backend cookie expiry
+          secure: isProduction,
+          sameSite: isProduction ? "none" : "lax",
+          path: "/"
+        });
       } else {
         setUser(null);
+        // Only clear cookies if authentication actually failed
+        Cookies.remove("user");
       }
     } catch (error) {
       console.error("Failed to refresh user:", error);
       setUser(null);
+      // Only clear cookies on actual errors
+      Cookies.remove("user");
     }
+  };
+
+  const updateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+    // Store user in cookie for middleware access with proper options
+    // Don't clear token cookie - just update user cookie
+    const isProduction = process.env.NODE_ENV === "production";
+    Cookies.set("user", JSON.stringify(updatedUser), { 
+      expires: 30, // Match backend cookie expiry
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      path: "/"
+    });
   };
 
   useEffect(() => {
@@ -56,11 +89,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const response = await authService.getCurrentUser();
         if (response.success && response.data?.user) {
-          setUser(response.data.user);
-          Cookies.set("user", JSON.stringify(response.data.user), { expires: 7 });
+          // Merge customer/owner profile data into user object
+          const mergedUser = { ...response.data.user };
+          if (response.data.customer) {
+            mergedUser.phone = response.data.customer.contact || response.data.customer.phone;
+          }
+          if (response.data.owner) {
+            mergedUser.phone = response.data.owner.phone;
+          }
+          setUser(mergedUser);
+          // Store user in cookie with proper options
+          const isProduction = process.env.NODE_ENV === "production";
+          Cookies.set("user", JSON.stringify(mergedUser), { 
+            expires: 7,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+            path: "/"
+          });
         } else {
           // 401 is expected when user is not authenticated - don't treat as error
           setUser(null);
+          // Don't clear cookies here - they might be valid but user just not logged in
         }
       } catch (error: unknown) {
         // This should rarely happen since getCurrentUser handles 401 gracefully
@@ -70,6 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error("Auth initialization error:", error);
         }
         setUser(null);
+        // Don't clear cookies on initialization errors - let middleware handle auth
       } finally {
         setLoading(false);
       }
@@ -82,28 +132,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authService.login(credentials);
       if (response.success && response.data?.user) {
-        // Store token in cookie if provided
-        if (response.token) {
-          Cookies.set("token", response.token, { expires: 7 });
+        // Backend sets httpOnly cookie automatically via Set-Cookie header
+        // We don't need to manually set token cookie - it's handled by the backend
+        // The token is stored in httpOnly cookie which is secure and not accessible via JavaScript
+        
+        // Merge customer/owner profile data into user object
+        const mergedUser = { ...response.data.user };
+        if (response.data.customer) {
+          mergedUser.phone = response.data.customer.contact || response.data.customer.phone;
         }
-        setUser(response.data.user);
-        Cookies.set("user", JSON.stringify(response.data.user), { expires: 7 });
+        if (response.data.owner) {
+          mergedUser.phone = response.data.owner.phone;
+        }
+        
+        // Set user state immediately
+        setUser(mergedUser);
+        
+        // Store user in cookie with proper options (for middleware access)
+        const isProduction = process.env.NODE_ENV === "production";
+        Cookies.set("user", JSON.stringify(mergedUser), { 
+          expires: 30, // Match backend cookie expiry (30 days)
+          secure: isProduction,
+          sameSite: isProduction ? "none" : "lax",
+          path: "/"
+        });
+        
         toast.success("Login successful");
 
-        // Redirect based on role
-        switch (response.data.user.role) {
-          case "admin":
-            router.push("/dashboard/admin");
-            break;
-          case "owner":
-            router.push("/dashboard/owner");
-            break;
-          case "customer":
-            router.push("/dashboard/customer");
-            break;
-          default:
-            router.push("/");
-        }
+        // Use dashboardPath from response, or determine based on role
+        const redirectPath = response.dashboardPath || (() => {
+          switch (response.data.user.role) {
+            case "admin":
+              return "/admin/dashboard";
+            case "owner":
+              return "/owner/dashboard";
+            case "customer":
+              return "/customer/dashboard";
+            default:
+              return "/";
+          }
+        })();
+
+        // Wait a moment to ensure state is set, then redirect
+        // Use router.push for client-side navigation (faster than window.location.href)
+        setTimeout(() => {
+          router.push(redirectPath);
+        }, 100);
+      } else {
+        // If response is not successful or missing user data, throw error
+        throw new Error(response.message || "Login failed: Invalid response");
       }
     } catch (error: unknown) {
       const apiError = error as ApiError;
@@ -117,13 +194,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authService.registerCustomer(data);
       if (response.success && response.data?.user) {
-        if (response.token) {
-          Cookies.set("token", response.token, { expires: 7 });
+        // Backend sets httpOnly cookie automatically
+        // Merge customer profile data into user object
+        const mergedUser = { ...response.data.user };
+        if (response.data.customer) {
+          mergedUser.phone = response.data.customer.contact || response.data.customer.phone;
         }
-        setUser(response.data.user);
-        Cookies.set("user", JSON.stringify(response.data.user), { expires: 7 });
+        setUser(mergedUser);
+        
+        const isProduction = process.env.NODE_ENV === "production";
+        Cookies.set("user", JSON.stringify(mergedUser), { 
+          expires: 30, // Match backend cookie expiry
+          secure: isProduction,
+          sameSite: isProduction ? "none" : "lax",
+          path: "/"
+        });
         toast.success("Registration successful");
-        router.push("/dashboard/customer");
+        setTimeout(() => {
+          router.push("/customer/dashboard");
+        }, 100);
       }
     } catch (error: unknown) {
       const apiError = error as ApiError;
@@ -173,6 +262,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         isAuthenticated: !!user,
         refreshUser,
+        updateUser,
       }}
     >
       {children}

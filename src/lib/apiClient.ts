@@ -86,8 +86,14 @@ apiClient.interceptors.response.use(
       const requestUrl = error.config?.url || "";
       // Don't redirect for /auth/me endpoint - it's expected to return 401 when not authenticated
       const isAuthMeEndpoint = requestUrl.includes("/auth/me");
+      // Don't redirect for /profile endpoint - let the component handle the error
+      const isProfileEndpoint = requestUrl.includes("/profile");
+      // Don't redirect for /auth/login - user is already on login page
+      const isLoginEndpoint = requestUrl.includes("/auth/login");
       
-      if (!isAuthMeEndpoint) {
+      // Only clear cookies and redirect for protected endpoints that require auth
+      if (!isAuthMeEndpoint && !isProfileEndpoint && !isLoginEndpoint) {
+        // Clear cookies only when authentication is actually invalid
         Cookies.remove("token");
         Cookies.remove("user");
         if (typeof window !== "undefined") {
