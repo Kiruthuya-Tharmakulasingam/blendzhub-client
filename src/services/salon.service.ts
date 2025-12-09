@@ -76,7 +76,7 @@ export const salonService = {
 
   async updateSalon(id: string, data: UpdateSalonRequest): Promise<ApiResponse<Salon>> {
     try {
-      const response = await apiClient.patch<ApiResponse<Salon>>(`/salons/${id}`, data);
+      const response = await apiClient.put<ApiResponse<Salon>>(`/salons/${id}`, data);
       return response.data;
     } catch (error) {
       return handleApiError<Salon>(error);
