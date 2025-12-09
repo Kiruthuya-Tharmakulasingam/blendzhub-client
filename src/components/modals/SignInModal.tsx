@@ -53,11 +53,11 @@ export function SignInModal({ children }: { children: React.ReactNode }) {
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Image
-              src="/logo.png"
+              src="/noBgColor.png"
               alt="BlendzHub Logo"
-              width={60}
-              height={60}
-              className="h-14 w-auto"
+              width={72}
+              height={72}
+              className="h-16 w-auto"
               style={{ width: "auto", height: "auto" }}
             />
           </div>

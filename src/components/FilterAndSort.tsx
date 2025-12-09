@@ -39,6 +39,9 @@ interface FilterAndSortProps {
   showSearch?: boolean;
   showFilter?: boolean;
   showSort?: boolean;
+  triggerClassName?: string;
+  inputClassName?: string;
+  iconClassName?: string;
 }
 
 export function FilterAndSort({
@@ -58,19 +61,22 @@ export function FilterAndSort({
   showSearch = true,
   showFilter = false,
   showSort = false,
+  triggerClassName,
+  inputClassName,
+  iconClassName,
 }: FilterAndSortProps) {
   return (
     <div className="space-y-4 mb-6">
       <div className="flex flex-col sm:flex-row gap-4">
         {showSearch && (
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 ${iconClassName || "text-muted-foreground"}`} />
             <Input
               type="text"
               placeholder={searchPlaceholder}
               value={searchValue}
               onChange={(e) => onSearchChange?.(e.target.value)}
-              className="pl-10 pr-10"
+              className={`pl-10 pr-10 ${inputClassName || ""}`}
             />
             {searchValue && (
               <button
@@ -97,7 +103,7 @@ export function FilterAndSort({
                 }
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className={triggerClassName}>
                 <SelectValue placeholder={filterLabel} />
               </SelectTrigger>
               <SelectContent>
@@ -117,7 +123,7 @@ export function FilterAndSort({
             <div className="sm:w-48">
               <Label className="sr-only">{sortLabel}</Label>
               <Select value={sortValue || ""} onValueChange={onSortChange}>
-                <SelectTrigger>
+                <SelectTrigger className={triggerClassName}>
                   <SelectValue placeholder={sortLabel} />
                 </SelectTrigger>
                 <SelectContent>
@@ -133,7 +139,7 @@ export function FilterAndSort({
               <div className="sm:w-32">
                 <Label className="sr-only">Order</Label>
                 <Select value={sortOrder} onValueChange={(value) => onSortOrderChange(value as "asc" | "desc")}>
-                  <SelectTrigger>
+                  <SelectTrigger className={triggerClassName}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

@@ -125,7 +125,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background font-sans">
+    <div className="flex min-h-screen flex-col bg-background font-sans home-theme">
       <Navbar />
 
       <main className="flex-1">
@@ -134,7 +134,7 @@ export default function Home() {
           title={
             <>
               Book Your Next <br />
-              <span className="bg-gradient-to-r from-muted-foreground/80 to-muted-foreground/60 bg-clip-text text-transparent">
+              <span className="text-primary">
                 Salon Experience
               </span>
             </>
@@ -148,7 +148,7 @@ export default function Home() {
                 </Button>
               </SignInModal>
               <BecomeOwnerModal>
-                <Button variant="outline" size="lg" className="text-base px-8">
+                <Button variant="outline" size="lg" className="text-base px-8 text-primary border-primary hover:bg-primary hover:text-primary-foreground">
                   For Business
                 </Button>
               </BecomeOwnerModal>
@@ -165,7 +165,7 @@ export default function Home() {
         <section className="py-20 px-8 sm:px-16 bg-background">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4">Our Salons</h2>
+              <h2 className="text-3xl font-bold mb-4 text-primary">Our Salons</h2>
               <p className="text-muted-foreground">
                 Discover top-rated salons and book your appointment
               </p>
@@ -209,6 +209,9 @@ export default function Home() {
                 setSortOrder(order);
                 setPage(1);
               }}
+              triggerClassName="text-primary border-primary"
+              inputClassName="text-foreground border-primary placeholder:text-primary"
+              iconClassName="text-primary"
             />
 
             {error ? (
@@ -263,7 +266,7 @@ export default function Home() {
                         </div>
                       )}
                       <div className="mb-4">
-                        <h3 className="text-xl font-semibold mb-2 group-hover:text-foreground/80 transition-colors">
+                        <h3 className="text-xl font-semibold mb-2 group-hover:text-foreground/80 transition-colors text-primary">
                           {salon.name}
                         </h3>
                         <div className="flex items-center text-sm text-muted-foreground mb-2">
@@ -318,7 +321,7 @@ export default function Home() {
                         ) : (
                           <SignInModal>
                             <Button
-                              className="w-full"
+                              className="w-full text-primary border-primary hover:bg-primary hover:text-primary-foreground"
                               size="lg"
                               variant="outline"
                             >
@@ -351,7 +354,7 @@ export default function Home() {
         <section className="py-20 px-8 sm:px-16 bg-surface">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4">Why Choose BlendzHub?</h2>
+              <h2 className="text-3xl font-bold mb-4 text-primary">Why Choose BlendzHub?</h2>
               <p className="text-muted-foreground">
                 Everything you need for a perfect salon experience
               </p>
@@ -378,7 +381,7 @@ export default function Home() {
                   key={i}
                   className="p-8 bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <h3 className="text-xl font-semibold mb-3">
+                  <h3 className="text-xl font-semibold mb-3 text-primary">
                     {feature.title}
                   </h3>
                   <p className="text-muted-foreground">{feature.description}</p>

@@ -64,11 +64,11 @@ export default function Sidebar({ role }: SidebarProps) {
       <div className="p-6 border-b border-border">
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/logo.png"
+            src="/noBgColor.png"
             alt="BlendzHub Logo"
-            width={40}
-            height={40}
-            className="h-10 w-auto"
+            width={50}
+            height={50}
+            className="h-12 w-auto"
             style={{ width: "auto", height: "auto" }}
           />
           <span className="text-2xl font-bold text-sidebar-foreground">BlendzHub</span>

@@ -7,11 +7,11 @@ export default function SimpleFooter() {
       <div className="flex justify-center mb-4">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <Image
-            src="/logo.png"
+            src="/noBgColor.png"
             alt="BlendzHub Logo"
-            width={32}
-            height={32}
-            className="h-8 w-auto"
+            width={40}
+            height={40}
+            className="h-10 w-auto"
             style={{ width: "auto", height: "auto" }}
           />
           <span className="font-semibold hover:text-black dark:hover:text-white">BlendzHub</span>

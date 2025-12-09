@@ -20,11 +20,11 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
           <header className="mb-8 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Image
-                src="/logo.png"
+                src="/noBgColor.png"
                 alt="BlendzHub Logo"
-                width={48}
-                height={48}
-                className="h-12 w-auto"
+                width={60}
+                height={60}
+                className="h-14 w-auto"
                 style={{ width: "auto", height: "auto" }}
               />
               <div>

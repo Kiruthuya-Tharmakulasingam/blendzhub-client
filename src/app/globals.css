@@ -272,6 +272,45 @@
   --sidebar-ring: oklch(0.85 0.15 85); /* gold */
 }
 
+.home-theme {
+  /* Base colors */
+  --background: oklch(0.145 0 0); /* black background */
+  --foreground: oklch(0.98 0 0); /* light text */
+  
+  /* Primary colors */
+  --primary: oklch(0.85 0.15 85); /* gold */
+  --primary-foreground: oklch(0.145 0 0); /* black text */
+  
+  /* Secondary colors */
+  --secondary: oklch(0.25 0.02 85); /* dark gold */
+  --secondary-foreground: oklch(0.98 0 0); /* light text */
+  
+  /* Accent colors */
+  --accent: oklch(0.85 0.15 85); /* gold */
+  --accent-foreground: oklch(0.145 0 0); /* black text */
+  
+  /* Muted colors */
+  --muted: oklch(0.25 0 0); /* dark gray */
+  --muted-foreground: oklch(0.75 0 0); /* light gray text */
+  
+  /* Surface colors */
+  --surface: oklch(0.145 0 0); /* black surface */
+  --surface-foreground: oklch(0.98 0 0); /* light text */
+  
+  /* Card colors */
+  --card: oklch(0.2 0 0); /* dark card */
+  --card-foreground: oklch(0.98 0 0); /* light text */
+  
+  /* Popover colors */
+  --popover: oklch(0.2 0 0); /* dark popover */
+  --popover-foreground: oklch(0.98 0 0); /* light text */
+  
+  /* Border and input colors */
+  --border: oklch(0.85 0.15 85 / 0.3); /* gold border with opacity */
+  --input: oklch(1 0 0 / 0.1); /* light input with opacity */
+  --ring: oklch(0.85 0.15 85); /* gold ring/focus */
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

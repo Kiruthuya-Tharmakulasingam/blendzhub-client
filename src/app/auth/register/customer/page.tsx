@@ -61,11 +61,11 @@ export default function CustomerRegister() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Image
-              src="/logo.png"
+              src="/noBgColor.png"
               alt="BlendzHub Logo"
-              width={72}
-              height={72}
-              className="h-20 w-auto"
+              width={90}
+              height={90}
+              className="h-24 w-auto"
               style={{ width: "auto", height: "auto" }}
             />
           </div>

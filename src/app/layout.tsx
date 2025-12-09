@@ -18,9 +18,9 @@ export const metadata: Metadata = {
   title: "BlendzHub - Unisex Salon Booking",
   description: "Your premier platform for booking salon and spa appointments",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/noBgColor.png",
+    shortcut: "/noBgColor.png",
+    apple: "/noBgColor.png",
   },
 };
 

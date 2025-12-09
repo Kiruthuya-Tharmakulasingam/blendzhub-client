@@ -8,11 +8,11 @@ export default function Footer() {
         <div className="col-span-1 md:col-span-2">
           <Link href="/" className="flex items-center gap-2 mb-4">
             <Image
-              src="/logo.png"
+              src="/noBgColor.png"
               alt="BlendzHub Logo"
-              width={48}
-              height={48}
-              className="h-10 w-auto"
+              width={60}
+              height={60}
+              className="h-14 w-auto"
               style={{ width: "auto", height: "auto" }}
             />
             <h2 className="text-2xl font-bold text-foreground">BlendzHub</h2>

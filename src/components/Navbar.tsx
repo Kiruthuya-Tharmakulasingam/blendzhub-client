@@ -21,11 +21,11 @@ export default function Navbar() {
     <nav className="flex w-full items-center justify-between px-8 py-4 bg-background shadow-sm border-b border-border sticky top-0 z-50">
       <Link href="/" className="flex items-center gap-2">
         <Image
-          src="/logo.png"
+          src="/noBgColor.png"
           alt="BlendzHub Logo"
-          width={48}
-          height={48}
-          className="h-10 w-auto"
+          width={60}
+          height={60}
+          className="h-14 w-auto"
           style={{ width: "auto", height: "auto" }}
           priority
         />
@@ -50,10 +50,10 @@ export default function Navbar() {
         ) : (
           <>
             <Link href="/auth/register/owner">
-              <Button variant="ghost">Become an Owner</Button>
+              <Button variant="ghost" className="text-primary">Become an Owner</Button>
             </Link>
             <SignUpModal>
-              <Button variant="outline">Sign Up</Button>
+              <Button variant="outline" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">Sign Up</Button>
             </SignUpModal>
             <SignInModal>
               <Button variant="default">Sign In</Button>
