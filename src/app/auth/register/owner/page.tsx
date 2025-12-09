@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 
@@ -72,7 +73,7 @@ export default function OwnerRegister() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black">
+    <div className="flex min-h-screen flex-col bg-background font-sans home-theme">
       <Navbar />
       <main className="flex-1 flex items-center justify-center p-4 relative">
         <div 
@@ -160,11 +161,11 @@ export default function OwnerRegister() {
           </CardContent>
 
           <CardFooter className="flex justify-center">
-            <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
               <Link
                 href="/auth/login"
-                className="text-black font-semibold hover:underline"
+                className="text-foreground font-semibold hover:underline"
               >
                 Login
               </Link>
@@ -172,6 +173,7 @@ export default function OwnerRegister() {
           </CardFooter>
         </Card>
       </main>
+      <Footer />
     </div>
   );
 }

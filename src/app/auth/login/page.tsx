@@ -8,6 +8,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 import {
   Card,
@@ -103,85 +105,89 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4 relative">
-      <div 
-        className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: "url('/background-pattern.svg')",
-          backgroundRepeat: "repeat",
-          backgroundSize: "200px 200px"
-        }}
-      />
-      <Card className="w-full max-w-md relative z-10">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Image
-              src="/noBgColor.png"
-              alt="BlendzHub Logo"
-              width={90}
-              height={90}
-              className="h-24 w-auto"
-              style={{ width: "auto", height: "auto" }}
-            />
-          </div>
-          <CardTitle>Login</CardTitle>
-          <CardDescription>
-            Enter your credentials to access your account
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          {error && (
-            <div className="mb-4 p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
-              {error}
+    <div className="flex min-h-screen flex-col bg-background font-sans home-theme">
+      <Navbar />
+      <main className="flex-1 flex items-center justify-center p-4 relative">
+        <div 
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: "url('/background-pattern.svg')",
+            backgroundRepeat: "repeat",
+            backgroundSize: "200px 200px"
+          }}
+        />
+        <Card className="w-full max-w-md relative z-10">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Image
+                src="/noBgColor.png"
+                alt="BlendzHub Logo"
+                width={90}
+                height={90}
+                className="h-24 w-auto"
+                style={{ width: "auto", height: "auto" }}
+              />
             </div>
-          )}
+            <CardTitle>Login</CardTitle>
+            <CardDescription>
+              Enter your credentials to access your account
+            </CardDescription>
+          </CardHeader>
 
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel>Email</FieldLabel>
-                <Input
-                  {...form.register("email")}
-                  type="email"
-                  placeholder="you@example.com"
-                />
-                <FieldError errors={[form.formState.errors.email]} />
-              </Field>
+          <CardContent>
+            {error && (
+              <div className="mb-4 p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
+                {error}
+              </div>
+            )}
 
-              <Field>
-                <FieldLabel>Password</FieldLabel>
-                <Input
-                  {...form.register("password")}
-                  type="password"
-                  placeholder="Enter your password"
-                />
-                <FieldError errors={[form.formState.errors.password]} />
-              </Field>
-            </FieldGroup>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <FieldGroup>
+                <Field>
+                  <FieldLabel>Email</FieldLabel>
+                  <Input
+                    {...form.register("email")}
+                    type="email"
+                    placeholder="you@example.com"
+                  />
+                  <FieldError errors={[form.formState.errors.email]} />
+                </Field>
 
-            <Button
-              type="submit"
-              className="w-full mt-4"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Logging in..." : "Login"}
-            </Button>
-          </form>
-        </CardContent>
+                <Field>
+                  <FieldLabel>Password</FieldLabel>
+                  <Input
+                    {...form.register("password")}
+                    type="password"
+                    placeholder="Enter your password"
+                  />
+                  <FieldError errors={[form.formState.errors.password]} />
+                </Field>
+              </FieldGroup>
 
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link
-              href="/auth/register/customer"
-              className="text-foreground font-semibold hover:underline"
-            >
-              Sign up
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+              <Button
+                type="submit"
+                className="w-full mt-4"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Logging in..." : "Login"}
+              </Button>
+            </form>
+          </CardContent>
+
+          <CardFooter className="flex justify-center">
+            <p className="text-sm text-muted-foreground">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/auth/register/customer"
+                className="text-foreground font-semibold hover:underline"
+              >
+                Sign up
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </main>
+      <Footer />
     </div>
   );
 }
