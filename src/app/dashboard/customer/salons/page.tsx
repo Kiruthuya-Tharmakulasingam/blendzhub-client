@@ -125,6 +125,13 @@ export default function BrowseSalonsPage() {
     }
 
     try {
+      console.log("Booking payload:", {
+        salonId: selectedSalon._id,
+        serviceId: bookingForm.serviceId,
+        date: bookingForm.date,
+        time: bookingForm.time,
+        notes: bookingForm.notes,
+      });
       const response = await appointmentService.createAppointment({
         salonId: selectedSalon._id,
         serviceId: bookingForm.serviceId,
