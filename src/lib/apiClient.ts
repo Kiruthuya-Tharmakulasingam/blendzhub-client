@@ -9,26 +9,32 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
 // Always use the full backend URL from environment variable
 // Vercel rewrites don't work for external domains, so we need to use the full URL
 const getBaseURL = () => {
-  // Client-side: use relative path to leverage Next.js rewrites
-  if (typeof window !== "undefined") {
-    return "/api";
-  }
+  // Always use the full backend URL, even on the client side.
+  // This bypasses the Next.js rewrite proxy to avoid redirect loops.
 
-  // Server-side: use full URL
-  const isProd = process.env.NODE_ENV === "production";
   let envUrl = process.env.NEXT_PUBLIC_API_URL;
-  const fallbackUrl = "https://blendz-hub-api.vercel.app";
+  const fallbackUrl = "https://blendzhub-api.vercel.app";
+  const localUrl = "http://localhost:5000";
 
-  // Fix for Vercel deployment redirect loop
+  // Determine if we are in production
+  // On client side, we can check window location or just assume prod if not localhost
+  const isProd = process.env.NODE_ENV === "production";
+
   if (isProd) {
-    // If env var is missing, or points to the client itself (causing loop), use fallback
-    if (!envUrl || envUrl.includes("blendzhub-client") || envUrl.includes("localhost") || !envUrl.startsWith("http")) {
+    // Robust check: If envUrl is missing, or points to the client (causing loop), or is localhost, use fallback
+    if (
+      !envUrl ||
+      envUrl.includes("blendzhub-client") ||
+      envUrl.includes("localhost") ||
+      !envUrl.startsWith("http")
+    ) {
+      console.warn(`[ApiClient] Using fallback API URL: ${fallbackUrl}`);
       envUrl = fallbackUrl;
     }
   } else {
-    // Default to localhost for dev if still not set
+    // Development fallback
     if (!envUrl) {
-      envUrl = "http://localhost:5000";
+      envUrl = localUrl;
     }
   }
 
