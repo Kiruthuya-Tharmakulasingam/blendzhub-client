@@ -6,15 +6,9 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   retryCount?: number;
 }
 
-// Use relative path for API calls to leverage Next.js rewrites
-// This ensures cookies are sent correctly as same-origin requests
+// Always use the full backend URL from environment variable
+// Vercel rewrites don't work for external domains, so we need to use the full URL
 const getBaseURL = () => {
-  // In browser, use relative path to go through Next.js proxy
-  if (typeof window !== "undefined") {
-    return "/api";
-  }
-  
-  // On server side (SSR), use absolute URL
   const envUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   const cleanUrl = envUrl.replace(/\/$/, "");
   return cleanUrl.endsWith("/api") ? cleanUrl : `${cleanUrl}/api`;
