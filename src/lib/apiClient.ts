@@ -15,7 +15,23 @@ const getBaseURL = () => {
   }
 
   // Server-side: use full URL
-  const envUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const isProd = process.env.NODE_ENV === "production";
+  let envUrl = process.env.NEXT_PUBLIC_API_URL;
+  const fallbackUrl = "https://blendz-hub-api.vercel.app";
+
+  // Fix for Vercel deployment redirect loop
+  if (isProd) {
+    // If env var is missing, or points to the client itself (causing loop), use fallback
+    if (!envUrl || envUrl.includes("blendzhub-client")) {
+      envUrl = fallbackUrl;
+    }
+  } else {
+    // Default to localhost for dev if still not set
+    if (!envUrl) {
+      envUrl = "http://localhost:5000";
+    }
+  }
+
   const cleanUrl = envUrl.replace(/\/$/, "");
   return cleanUrl.endsWith("/api") ? cleanUrl : `${cleanUrl}/api`;
 };
