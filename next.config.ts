@@ -54,6 +54,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Debug-Fix',
+            value: 'applied',
+          },
+        ],
+      },
+      {
         source: '/salon-wall-mirror-work.png',
         headers: [
           {
