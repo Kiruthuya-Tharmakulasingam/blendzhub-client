@@ -42,6 +42,9 @@ interface FilterAndSortProps {
   triggerClassName?: string;
   inputClassName?: string;
   iconClassName?: string;
+  limit?: number;
+  onLimitChange?: (limit: number) => void;
+  limitOptions?: number[];
 }
 
 export function FilterAndSort({
@@ -64,6 +67,9 @@ export function FilterAndSort({
   triggerClassName,
   inputClassName,
   iconClassName,
+  limit,
+  onLimitChange,
+  limitOptions = [9, 18, 27, 45],
 }: FilterAndSortProps) {
   return (
     <div className="space-y-4 mb-6">
@@ -152,6 +158,29 @@ export function FilterAndSort({
           </>
         )}
       </div>
+
+      {onLimitChange && (
+        <div className="flex justify-end">
+          <div className="flex items-center gap-2">
+            <Label className="text-sm text-muted-foreground whitespace-nowrap">Items per page:</Label>
+            <Select
+              value={limit?.toString()}
+              onValueChange={(value) => onLimitChange(Number(value))}
+            >
+              <SelectTrigger className={`w-[80px] ${triggerClassName}`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {limitOptions.map((option) => (
+                  <SelectItem key={option} value={option.toString()}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

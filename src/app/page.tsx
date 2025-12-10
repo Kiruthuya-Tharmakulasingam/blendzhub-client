@@ -27,7 +27,7 @@ export default function Home() {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [page, setPage] = React.useState(1);
-  const [limit] = React.useState(9);
+  const [limit, setLimit] = React.useState(9);
   const [total, setTotal] = React.useState(0);
   const [totalPages, setTotalPages] = React.useState(0);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -44,7 +44,7 @@ export default function Home() {
   React.useEffect(() => {
     fetchSalons();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, searchQuery, filterType, sortBy, sortOrder]);
+  }, [page, limit, searchQuery, filterType, sortBy, sortOrder]);
 
   const fetchSalons = async () => {
     try {
@@ -213,6 +213,11 @@ export default function Home() {
               triggerClassName="text-primary border-primary"
               inputClassName="text-foreground border-primary placeholder:text-primary"
               iconClassName="text-primary"
+              limit={limit}
+              onLimitChange={(newLimit) => {
+                setLimit(newLimit);
+                setPage(1);
+              }}
             />
 
             {error ? (

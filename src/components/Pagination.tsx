@@ -26,6 +26,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, limit = 10, 
           size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
+          className="text-foreground"
         >
           Previous
         </Button>
@@ -34,6 +35,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, limit = 10, 
           size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
+          className="text-foreground"
         >
           Next
         </Button>
@@ -54,6 +56,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, limit = 10, 
             size="sm"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
+            className="text-foreground"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Previous
@@ -76,7 +79,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, limit = 10, 
                   variant={currentPage === pageNum ? "default" : "outline"}
                   size="sm"
                   onClick={() => onPageChange(pageNum)}
-                  className="min-w-[40px]"
+                  className={`min-w-[40px] ${currentPage !== pageNum ? "text-foreground" : ""}`}
                 >
                   {pageNum}
                 </Button>
@@ -88,6 +91,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, limit = 10, 
             size="sm"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
+            className="text-foreground"
           >
             Next
             <ChevronRight className="h-4 w-4 ml-1" />
