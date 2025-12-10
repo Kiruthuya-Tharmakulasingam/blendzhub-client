@@ -1,17 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Rewrites to proxy API requests to the backend
-  // This solves cross-origin cookie issues by making requests same-origin
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/:path*`,
-      },
-    ];
-  },
+  // Rewrites removed - apiClient now uses full backend URL directly
+  // This prevents redirect loops and works correctly on Vercel
   
+
   // Production optimizations
   productionBrowserSourceMaps: false, // Disable source maps in production to avoid errors
   

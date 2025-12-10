@@ -16,7 +16,10 @@ const getBaseURL = () => {
 
 // Increased timeout for production (30 seconds)
 // Can be configured via environment variable
-const API_TIMEOUT = parseInt(process.env.NEXT_PUBLIC_API_TIMEOUT || "30000", 10);
+const API_TIMEOUT = parseInt(
+  process.env.NEXT_PUBLIC_API_TIMEOUT || "30000",
+  10
+);
 
 const apiClient = axios.create({
   baseURL: getBaseURL(),
@@ -66,9 +69,13 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const config = error.config as ExtendedAxiosRequestConfig | undefined;
-    
+
     // Retry logic - retry on network errors, timeouts, or 5xx errors
-    if (config && shouldRetry(error) && (config.retryCount || 0) < MAX_RETRIES) {
+    if (
+      config &&
+      shouldRetry(error) &&
+      (config.retryCount || 0) < MAX_RETRIES
+    ) {
       // Increment retry count
       config.retryCount = (config.retryCount || 0) + 1;
 
@@ -89,7 +96,7 @@ apiClient.interceptors.response.use(
       const isProfileEndpoint = requestUrl.includes("/profile");
       // Don't redirect for /auth/login - user is already on login page
       const isLoginEndpoint = requestUrl.includes("/auth/login");
-      
+
       // Only clear cookies and redirect for protected endpoints that require auth
       if (!isAuthMeEndpoint && !isProfileEndpoint && !isLoginEndpoint) {
         // Clear cookies only when authentication is actually invalid
@@ -121,4 +128,3 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
-

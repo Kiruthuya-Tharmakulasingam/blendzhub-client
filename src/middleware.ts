@@ -121,12 +121,13 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/",
-    "/dashboard/:path*",
-    "/admin/:path*",
-    "/owner/:path*",
-    "/customer/:path*",
-    "/auth/:path*",
-    "/salons/:path*",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes - should not be intercepted by middleware)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
