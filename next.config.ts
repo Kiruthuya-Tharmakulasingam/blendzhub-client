@@ -1,9 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Rewrites removed - apiClient now uses full backend URL directly
-  // This prevents redirect loops and works correctly on Vercel
-  
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`,
+      },
+    ];
+  },
 
   // Production optimizations
   productionBrowserSourceMaps: false, // Disable source maps in production to avoid errors
