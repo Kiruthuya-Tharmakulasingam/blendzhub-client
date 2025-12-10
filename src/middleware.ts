@@ -6,8 +6,14 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Define public routes - allow access without authentication
+  // Define public routes - allow access without authentication
   const publicRoutes = ["/", "/auth/login", "/auth/register", "/salons"];
-  const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
+  const isPublicRoute = publicRoutes.some((route) => {
+    if (route === "/") {
+      return pathname === "/";
+    }
+    return pathname.startsWith(route);
+  });
   
   // If user is authenticated and tries to access login/register, redirect to their dashboard
   if (token && (pathname.startsWith("/auth/login") || pathname.startsWith("/auth/register"))) {

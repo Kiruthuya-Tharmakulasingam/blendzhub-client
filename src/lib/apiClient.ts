@@ -22,7 +22,7 @@ const getBaseURL = () => {
   // Fix for Vercel deployment redirect loop
   if (isProd) {
     // If env var is missing, or points to the client itself (causing loop), use fallback
-    if (!envUrl || envUrl.includes("blendzhub-client")) {
+    if (!envUrl || envUrl.includes("blendzhub-client") || envUrl.includes("localhost") || !envUrl.startsWith("http")) {
       envUrl = fallbackUrl;
     }
   } else {

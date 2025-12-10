@@ -13,7 +13,8 @@ const nextConfig: NextConfig = {
       if (
         !apiUrl ||
         apiUrl.includes("blendzhub-client") || 
-        !apiUrl.includes("http")
+        apiUrl.includes("localhost") ||
+        !apiUrl.startsWith("http")
       ) {
         console.log(`[NextConfig] Invalid or missing API_URL in production: ${apiUrl}. Using fallback: ${fallbackUrl}`);
         apiUrl = fallbackUrl;
