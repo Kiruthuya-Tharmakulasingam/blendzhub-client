@@ -20,7 +20,7 @@ interface ApiError {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials, shouldRedirect?: boolean) => Promise<void>;
   registerCustomer: (data: RegisterCustomerData) => Promise<void>;
   registerOwner: (data: RegisterOwnerData) => Promise<void>;
   logout: () => void;
@@ -128,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initAuth();
   }, []);
 
-  const login = async (credentials: LoginCredentials) => {
+  const login = async (credentials: LoginCredentials, shouldRedirect: boolean = true) => {
     try {
       const response = await authService.login(credentials);
       if (response.success && response.data?.user) {
@@ -159,25 +159,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         toast.success("Login successful");
 
-        // Use dashboardPath from response, or determine based on role
-        const redirectPath = response.dashboardPath || (() => {
-          switch (response.data.user.role) {
-            case "admin":
-              return "/admin/dashboard";
-            case "owner":
-              return "/owner/dashboard";
-            case "customer":
-              return "/customer/dashboard";
-            default:
-              return "/";
-          }
-        })();
+        if (shouldRedirect) {
+          // Use dashboardPath from response, or determine based on role
+          const redirectPath = response.dashboardPath || (() => {
+            switch (response.data.user.role) {
+              case "admin":
+                return "/admin/dashboard";
+              case "owner":
+                return "/owner/dashboard";
+              case "customer":
+                return "/customer/dashboard";
+              default:
+                return "/";
+            }
+          })();
 
-        // Wait a moment to ensure state is set, then redirect
-        // Use router.push for client-side navigation (faster than window.location.href)
-        setTimeout(() => {
-          router.push(redirectPath);
-        }, 100);
+          // Wait a moment to ensure state is set, then redirect
+          // Use router.push for client-side navigation (faster than window.location.href)
+          setTimeout(() => {
+            router.push(redirectPath);
+          }, 100);
+        }
       } else {
         // If response is not successful or missing user data, throw error
         throw new Error(response.message || "Login failed: Invalid response");

@@ -3,23 +3,39 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Menu, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, LogOut, LayoutDashboard, X } from "lucide-react";
 import { SignInModal } from "./modals/SignInModal";
 import { SignUpModal } from "./modals/SignUpModal";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Prevent scrolling when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
+
+  const toggleMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <nav className="flex w-full items-center justify-between px-8 py-4 bg-background shadow-sm border-b border-border sticky top-0 z-50">
-      <Link href="/" className="flex items-center gap-2">
+      <Link href="/" className="flex items-center gap-2 z-50">
         <Image
           src="/noBgColor.png"
           alt="BlendzHub Logo"
@@ -32,7 +48,8 @@ export default function Navbar() {
         <span className="text-2xl font-bold text-foreground">BlendzHub</span>
       </Link>
 
-      <div className="hidden sm:flex gap-4 items-center">
+      {/* Desktop Navigation */}
+      <div className="hidden md:flex gap-4 items-center">
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
             <span className="text-sm font-medium">Welcome, {user?.name}</span>
@@ -62,44 +79,91 @@ export default function Navbar() {
         )}
       </div>
 
-      <div className="sm:hidden">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            {isAuthenticated ? (
-              <>
-                <DropdownMenuItem asChild>
-                  <Link href={`/dashboard/${user?.role}`} className="cursor-pointer">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
-              </>
-            ) : (
-              <>
-                <div className="p-2 flex flex-col gap-2">
-                  <Link href="/auth/register/owner" className="w-full">
-                    <Button variant="ghost" className="w-full justify-start">Become an Owner</Button>
-                  </Link>
-                  <SignUpModal>
-                    <Button variant="outline" className="w-full justify-start">Sign Up</Button>
-                  </SignUpModal>
-                  <SignInModal>
-                    <Button variant="default" className="w-full">Sign In</Button>
-                  </SignInModal>
-                </div>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {/* Mobile Menu Toggle */}
+      <div className="md:hidden z-50">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={toggleMenu} 
+          aria-label="Toggle menu"
+          className="text-foreground hover:bg-accent hover:text-accent-foreground"
+        >
+          {isMobileMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
+        </Button>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300"
+          onClick={closeMenu}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile Menu Drawer */}
+      <div
+        className={`fixed top-0 right-0 h-full w-[80%] max-w-sm bg-background shadow-xl z-40 transform transition-transform duration-300 ease-in-out md:hidden flex flex-col pt-24 px-6 ${
+          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col gap-6">
+          {isAuthenticated ? (
+            <>
+              <div className="flex flex-col gap-2 pb-4 border-b border-border">
+                <span className="text-lg font-semibold">Welcome, {user?.name}</span>
+                <span className="text-sm text-muted-foreground capitalize">{user?.role}</span>
+              </div>
+              
+              <Link href={`/dashboard/${user?.role}`} onClick={closeMenu}>
+                <Button variant="outline" className="w-full justify-start h-12 text-base">
+                  <LayoutDashboard className="mr-3 h-5 w-5" />
+                  Dashboard
+                </Button>
+              </Link>
+              
+              <Button 
+                variant="ghost" 
+                onClick={() => {
+                  logout();
+                  closeMenu();
+                }}
+                className="w-full justify-start h-12 text-base text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <LogOut className="mr-3 h-5 w-5" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/auth/register/owner" onClick={closeMenu}>
+                <Button variant="ghost" className="w-full justify-start h-12 text-base text-primary">
+                  Become an Owner
+                </Button>
+              </Link>
+              
+              <div onClick={closeMenu}>
+                <SignUpModal>
+                  <Button variant="outline" className="w-full justify-start h-12 text-base text-primary border-primary hover:bg-primary hover:text-primary-foreground">
+                    Sign Up
+                  </Button>
+                </SignUpModal>
+              </div>
+              
+              <div onClick={closeMenu}>
+                <SignInModal>
+                  <Button variant="default" className="w-full h-12 text-base">
+                    Sign In
+                  </Button>
+                </SignInModal>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
