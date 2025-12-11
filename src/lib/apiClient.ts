@@ -12,7 +12,7 @@ const getBaseURL = () => {
   // Always use the full backend URL, even on the client side.
   // This bypasses the Next.js rewrite proxy to avoid redirect loops.
 
-  let envUrl = process.env.NEXT_PUBLIC_API_URL;
+  let envUrl = `${process.env.NEXT_PUBLIC_API_URL}/api`;
   const fallbackUrl = "https://blendzhub-api.vercel.app";
   const localUrl = "http://localhost:5000";
 
