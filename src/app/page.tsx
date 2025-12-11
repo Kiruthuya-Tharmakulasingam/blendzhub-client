@@ -135,9 +135,7 @@ export default function Home() {
           title={
             <>
               Book Your Next <br />
-              <span className="text-primary">
-                Salon Experience
-              </span>
+              <span className="text-primary">Salon Experience</span>
             </>
           }
           description="Discover top-rated salons and spas near you. Book appointments seamlessly and manage your beauty routine with BlendzHub."
@@ -149,14 +147,20 @@ export default function Home() {
                 </Button>
               </SignInModal>
               <BecomeOwnerModal>
-                <Button variant="outline" size="lg" className="text-base px-8 text-primary border-primary hover:bg-primary hover:text-primary-foreground">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="text-base px-8 text-primary border-primary hover:bg-primary hover:text-primary-foreground"
+                >
                   For Business
                 </Button>
               </BecomeOwnerModal>
             </>
           }
           image={{
-            src: process.env.NEXT_PUBLIC_HERO_IMAGE_URL || "https://res.cloudinary.com/dzu243cya/image/upload/v1765204576/blendzhub/hero-salon-image.jpg",
+            src:
+              process.env.NEXT_PUBLIC_HERO_IMAGE_URL ||
+              "https://res.cloudinary.com/dzu243cya/image/upload/v1765204576/blendzhub/hero-salon-image.jpg",
             alt: "Modern salon interior",
           }}
           background="gradient"
@@ -166,7 +170,9 @@ export default function Home() {
         <section className="py-20 px-8 sm:px-16 bg-background">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold mb-4 text-primary">Our Salons</h2>
+              <h2 className="text-3xl font-bold mb-4 text-primary">
+                Our Salons
+              </h2>
               <p className="text-muted-foreground">
                 Discover top-rated salons and book your appointment
               </p>
@@ -309,7 +315,10 @@ export default function Home() {
 
                       <div
                         className="mt-4"
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
                       >
                         {isAuthenticated && user?.role === "customer" ? (
                           <Button
@@ -325,14 +334,17 @@ export default function Home() {
                             Book Now
                           </Button>
                         ) : (
-                          <SignInModal>
+                          <SignInModal
+                            redirectOnLogin={false}
+                            redirectTo="/dashboard/customer/salons"
+                          >
                             <Button
                               className="w-full text-primary border-primary hover:bg-primary hover:text-primary-foreground"
                               size="lg"
                               variant="outline"
                             >
                               <Calendar className="mr-2 h-4 w-4" />
-                              Sign in to Book
+                              Book Now
                             </Button>
                           </SignInModal>
                         )}
@@ -360,7 +372,9 @@ export default function Home() {
         <section className="py-20 px-8 sm:px-16 bg-surface">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold mb-4 text-primary">Why Choose BlendzHub?</h2>
+              <h2 className="text-3xl font-bold mb-4 text-primary">
+                Why Choose BlendzHub?
+              </h2>
               <p className="text-muted-foreground">
                 Everything you need for a perfect salon experience
               </p>

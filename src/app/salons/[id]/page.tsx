@@ -13,7 +13,19 @@ import { Salon } from "@/types/salon.types";
 import { serviceService } from "@/services/service.service";
 import { feedbackService, Feedback } from "@/services/feedback.service";
 import { Service } from "@/types/service.types";
-import { MapPin, Phone, Mail, Clock, Calendar, ArrowLeft, DollarSign, Scissors, Loader2, Star, MessageSquare } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Calendar,
+  ArrowLeft,
+  DollarSign,
+  Scissors,
+  Loader2,
+  Star,
+  MessageSquare,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
@@ -35,7 +47,9 @@ export default function SalonDetailPage() {
   const [servicesTotalPages, setServicesTotalPages] = React.useState(0);
   const [servicesSearch, setServicesSearch] = React.useState("");
   const [servicesSortBy, setServicesSortBy] = React.useState("createdAt");
-  const [servicesSortOrder, setServicesSortOrder] = React.useState<"asc" | "desc">("desc");
+  const [servicesSortOrder, setServicesSortOrder] = React.useState<
+    "asc" | "desc"
+  >("desc");
 
   // Feedbacks pagination/filtering/sorting
   const [feedbacksPage, setFeedbacksPage] = React.useState(1);
@@ -45,7 +59,9 @@ export default function SalonDetailPage() {
   const [feedbacksSearch, setFeedbacksSearch] = React.useState("");
   const [feedbacksFilterRating, setFeedbacksFilterRating] = React.useState("");
   const [feedbacksSortBy, setFeedbacksSortBy] = React.useState("createdAt");
-  const [feedbacksSortOrder, setFeedbacksSortOrder] = React.useState<"asc" | "desc">("desc");
+  const [feedbacksSortOrder, setFeedbacksSortOrder] = React.useState<
+    "asc" | "desc"
+  >("desc");
 
   React.useEffect(() => {
     if (salonId) {
@@ -59,14 +75,27 @@ export default function SalonDetailPage() {
       fetchServices();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [salonId, servicesPage, servicesSearch, servicesSortBy, servicesSortOrder]);
+  }, [
+    salonId,
+    servicesPage,
+    servicesSearch,
+    servicesSortBy,
+    servicesSortOrder,
+  ]);
 
   React.useEffect(() => {
     if (salonId) {
       fetchFeedbacks();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [salonId, feedbacksPage, feedbacksSearch, feedbacksFilterRating, feedbacksSortBy, feedbacksSortOrder]);
+  }, [
+    salonId,
+    feedbacksPage,
+    feedbacksSearch,
+    feedbacksFilterRating,
+    feedbacksSortBy,
+    feedbacksSortOrder,
+  ]);
 
   const fetchSalon = async () => {
     try {
@@ -162,8 +191,8 @@ export default function SalonDetailPage() {
             key={star}
             className={`${sizeClasses[size]} ${
               star <= rating
-                ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300 dark:text-gray-600"
+                ? "fill-primary text-primary"
+                : "text-muted-foreground/30"
             }`}
           />
         ))}
@@ -179,10 +208,10 @@ export default function SalonDetailPage() {
 
   if (loading && !salon) {
     return (
-      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
+      <div className="flex min-h-screen flex-col bg-background font-sans home-theme">
         <Navbar />
         <main className="flex-1 flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-zinc-600 dark:text-zinc-400" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </main>
         <Footer />
       </div>
@@ -191,13 +220,13 @@ export default function SalonDetailPage() {
 
   if (!salon) {
     return (
-      <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
+      <div className="flex min-h-screen flex-col bg-background font-sans home-theme">
         <Navbar />
         <main className="flex-1 flex items-center justify-center py-20 px-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Salon not found</h1>
+            <h1 className="text-2xl font-bold mb-4 text-primary">Salon not found</h1>
             <Link href="/">
-              <Button variant="outline">Go back to home</Button>
+              <Button variant="outline" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">Go back to home</Button>
             </Link>
           </div>
         </main>
@@ -207,22 +236,22 @@ export default function SalonDetailPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 dark:bg-black font-sans">
+    <div className="flex min-h-screen flex-col bg-background font-sans home-theme">
       <Navbar />
 
       <main className="flex-1">
         {/* Header Section */}
-        <section className="py-12 px-8 sm:px-16 bg-white dark:bg-zinc-950 border-b">
+        <section className="py-12 px-8 sm:px-16 bg-background border-b border-border">
           <div className="max-w-7xl mx-auto">
             <Link href="/">
-              <Button variant="ghost" className="mb-6">
+              <Button variant="ghost" className="mb-6 text-muted-foreground hover:text-primary">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Salons
               </Button>
             </Link>
 
             {salon.imageUrl && (
-              <div className="mb-6 rounded-lg overflow-hidden">
+              <div className="mb-6 rounded-lg overflow-hidden border border-border">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={salon.imageUrl}
@@ -237,8 +266,8 @@ export default function SalonDetailPage() {
 
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-bold mb-4">{salon.name}</h1>
-                <div className="flex flex-wrap items-center gap-4 text-zinc-600 dark:text-zinc-400">
+                <h1 className="text-4xl font-bold mb-4 text-primary">{salon.name}</h1>
+                <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
                   <div className="flex items-center">
                     <MapPin className="h-5 w-5 mr-2" />
                     {salon.location}
@@ -263,24 +292,28 @@ export default function SalonDetailPage() {
                   )}
                 </div>
                 <div className="mt-4">
-                  <span className="inline-block px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full text-sm font-medium capitalize">
+                  <span className="inline-block px-4 py-2 bg-muted text-muted-foreground rounded-full text-sm font-medium capitalize">
                     {salon.type}
                   </span>
                 </div>
               </div>
 
               {isAuthenticated && user?.role === "customer" ? (
-                <Link href="/dashboard/customer/salons">
-                  <Button size="lg" className="w-full md:w-auto">
+                <Link href="/auth/login">
+                  <Button size="lg" className="w-full md:w-auto text-base px-8">
                     <Calendar className="mr-2 h-4 w-4" />
-                    Book Appointment
+                    Book Now
                   </Button>
                 </Link>
               ) : (
                 <SignInModal>
-                  <Button size="lg" variant="outline" className="w-full md:w-auto">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full md:w-auto text-base px-8 text-primary border-primary hover:bg-primary hover:text-primary-foreground"
+                  >
                     <Calendar className="mr-2 h-4 w-4" />
-                    Sign in to Book
+                    Book Now
                   </Button>
                 </SignInModal>
               )}
@@ -293,7 +326,7 @@ export default function SalonDetailPage() {
           <div className="max-w-7xl mx-auto space-y-12">
             {/* Services Section */}
             <div>
-              <h2 className="text-3xl font-bold mb-6">Services Offered</h2>
+              <h2 className="text-3xl font-bold mb-6 text-primary">Services Offered</h2>
               <FilterAndSort
                 searchValue={servicesSearch}
                 onSearchChange={(value) => {
@@ -321,14 +354,20 @@ export default function SalonDetailPage() {
                   setServicesSortOrder(order);
                   setServicesPage(1);
                 }}
+                triggerClassName="text-primary border-primary"
+                inputClassName="text-foreground border-primary placeholder:text-primary"
+                iconClassName="text-primary"
               />
               {services.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                     {services.map((service) => (
-                      <Card key={service._id} className="hover:shadow-lg transition-shadow">
+                      <Card
+                        key={service._id}
+                        className="bg-gradient-to-br from-card to-surface border-border shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                      >
                         {service.imageUrl ? (
-                          <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800">
+                          <div className="w-full h-48 overflow-hidden rounded-t-lg bg-muted">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={service.imageUrl}
@@ -339,20 +378,21 @@ export default function SalonDetailPage() {
                                 target.style.display = "none";
                                 const parent = target.parentElement;
                                 if (parent) {
-                                  parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="h-16 w-16 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 15.536c-1.171 1.952-3.07 1.952-4.242 0-1.172-1.952-1.172-5.119 0-7.072 1.172-1.952 3.07-1.952 4.242 0M8 10.5h4m-4 3h4m9-1.5a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>';
+                                  parent.innerHTML =
+                                    '<div class="w-full h-full flex items-center justify-center"><svg class="h-16 w-16 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 15.536c-1.171 1.952-3.07 1.952-4.242 0-1.172-1.952-1.172-5.119 0-7.072 1.172-1.952 3.07-1.952 4.242 0M8 10.5h4m-4 3h4m9-1.5a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>';
                                 }
                               }}
                             />
                           </div>
                         ) : (
-                          <div className="w-full h-48 overflow-hidden rounded-t-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                            <Scissors className="h-16 w-16 text-zinc-400" />
+                          <div className="w-full h-48 overflow-hidden rounded-t-lg bg-muted flex items-center justify-center">
+                            <Scissors className="h-16 w-16 text-muted-foreground/30" />
                           </div>
                         )}
                         <CardHeader>
-                          <CardTitle className="flex items-start justify-between">
+                          <CardTitle className="flex items-start justify-between text-primary">
                             <span>{service.name}</span>
-                            <div className="flex items-center gap-1 text-lg font-bold text-green-600 dark:text-green-400">
+                            <div className="flex items-center gap-1 text-lg font-bold text-primary">
                               <DollarSign className="h-5 w-5" />
                               {service.price}
                             </div>
@@ -360,17 +400,17 @@ export default function SalonDetailPage() {
                         </CardHeader>
                         <CardContent>
                           {service.description && (
-                            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-3">
+                            <p className="text-sm text-muted-foreground mb-3">
                               {service.description}
                             </p>
                           )}
-                          <div className="flex items-center gap-4 text-sm text-zinc-500 dark:text-zinc-500">
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center">
                               <Clock className="h-4 w-4 mr-1" />
                               {service.duration} min
                             </div>
                             {service.discount && service.discount > 0 && (
-                              <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full text-xs font-medium">
+                              <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
                                 {service.discount}% OFF
                               </span>
                             )}
@@ -390,9 +430,11 @@ export default function SalonDetailPage() {
                   )}
                 </>
               ) : (
-                <Card>
+                <Card className="bg-card border-border">
                   <CardContent className="py-12 text-center">
-                    <p className="text-muted-foreground">No services available</p>
+                    <p className="text-muted-foreground">
+                      No services available
+                    </p>
                   </CardContent>
                 </Card>
               )}
@@ -402,15 +444,21 @@ export default function SalonDetailPage() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-3xl font-bold">Customer Reviews</h2>
+                  <h2 className="text-3xl font-bold text-primary">Customer Reviews</h2>
                   {feedbacks.length > 0 && (
                     <div className="flex items-center gap-2 mt-2">
                       <div className="flex items-center">
-                        {renderStars(Math.round(parseFloat(calculateAverageRating())), "lg")}
+                        {renderStars(
+                          Math.round(parseFloat(calculateAverageRating())),
+                          "lg"
+                        )}
                       </div>
-                      <span className="text-lg font-semibold">{calculateAverageRating()}</span>
+                      <span className="text-lg font-semibold text-foreground">
+                        {calculateAverageRating()}
+                      </span>
                       <span className="text-sm text-muted-foreground">
-                        ({feedbacksTotal} {feedbacksTotal === 1 ? 'review' : 'reviews'})
+                        ({feedbacksTotal}{" "}
+                        {feedbacksTotal === 1 ? "review" : "reviews"})
                       </span>
                     </div>
                   )}
@@ -454,12 +502,18 @@ export default function SalonDetailPage() {
                   setFeedbacksSortOrder(order);
                   setFeedbacksPage(1);
                 }}
+                triggerClassName="text-primary border-primary"
+                inputClassName="text-foreground border-primary placeholder:text-primary"
+                iconClassName="text-primary"
               />
               {feedbacks.length > 0 ? (
                 <>
                   <div className="space-y-4 mb-6">
                     {feedbacks.map((feedback) => (
-                      <Card key={feedback._id} className="hover:shadow-md transition-shadow">
+                      <Card
+                        key={feedback._id}
+                        className="bg-card border-border hover:shadow-md transition-shadow"
+                      >
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
@@ -470,17 +524,20 @@ export default function SalonDetailPage() {
                                     {feedback.rating}/5
                                   </span>
                                 </div>
-                                {feedback.customerId && typeof feedback.customerId === 'object' && (
-                                  <span className="text-sm font-medium">
-                                    {feedback.customerId.name}
-                                  </span>
-                                )}
+                                {feedback.customerId &&
+                                  typeof feedback.customerId === "object" && (
+                                    <span className="text-sm font-medium text-foreground">
+                                      {feedback.customerId.name}
+                                    </span>
+                                  )}
                                 <span className="text-xs text-muted-foreground">
-                                  {new Date(feedback.createdAt).toLocaleDateString()}
+                                  {new Date(
+                                    feedback.createdAt
+                                  ).toLocaleDateString()}
                                 </span>
                               </div>
                               {feedback.comments && (
-                                <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-3">
+                                <p className="text-sm text-muted-foreground mb-3">
                                   {feedback.comments}
                                 </p>
                               )}
@@ -497,7 +554,9 @@ export default function SalonDetailPage() {
                                   </p>
                                   {feedback.repliedAt && (
                                     <span className="text-xs text-muted-foreground mt-1 block">
-                                      {new Date(feedback.repliedAt).toLocaleDateString()}
+                                      {new Date(
+                                        feedback.repliedAt
+                                      ).toLocaleDateString()}
                                     </span>
                                   )}
                                 </div>
@@ -519,9 +578,9 @@ export default function SalonDetailPage() {
                   )}
                 </>
               ) : (
-                <Card>
+                <Card className="bg-card border-border">
                   <CardContent className="py-12 text-center">
-                    <Star className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <Star className="h-12 w-12 mx-auto mb-4 opacity-20 text-primary" />
                     <p className="text-muted-foreground">No reviews yet</p>
                     <p className="text-sm text-muted-foreground mt-2">
                       Be the first to review this salon!
@@ -538,4 +597,3 @@ export default function SalonDetailPage() {
     </div>
   );
 }
-
