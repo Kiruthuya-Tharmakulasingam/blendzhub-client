@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "./Sidebar";
+import CustomerNavbar from "./CustomerNavbar";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
 
@@ -11,6 +12,18 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, role }: DashboardLayoutProps) {
   const { user } = useAuth();
+  const isCustomer = role === "customer";
+
+  if (isCustomer) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <CustomerNavbar />
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-background">
