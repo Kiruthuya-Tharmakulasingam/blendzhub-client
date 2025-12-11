@@ -241,15 +241,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = () => {
     try {
+      // Call backend to clear HttpOnly session cookie
       authService.logout();
     } catch {
-      // Ignore errors
+      // Ignore logout errors – we still want to clear client state
     } finally {
-      Cookies.remove("token");
-      Cookies.remove("user");
+      // Remove any client‑side cookies we set (e.g., user info)
+      Cookies.remove('token');
+      Cookies.remove('user');
       setUser(null);
-      router.push("/auth/login");
-      toast.success("Logged out successfully");
+      // Use a full reload to bypass any client‑side auth guards that would
+      // automatically redirect unauthenticated users to the login page.
+      // This ensures the user lands on the public home page.
+      window.location.href = '/';
+      toast.success('Logged out successfully');
     }
   };
 
