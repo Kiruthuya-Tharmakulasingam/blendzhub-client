@@ -82,4 +82,13 @@ export const salonService = {
       return handleApiError<Salon>(error);
     }
   },
+
+  async deleteSalon(id: string): Promise<ApiResponse<null>> {
+    try {
+      const response = await apiClient.delete<ApiResponse<null>>(`/salons/${id}`);
+      return response.data;
+    } catch (error) {
+      return handleApiError<null>(error);
+    }
+  },
 };

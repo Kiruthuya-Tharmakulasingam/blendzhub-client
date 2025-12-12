@@ -11,8 +11,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapPin, Phone, Mail, MoreHorizontal, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { salonService } from "@/services/salon.service";
 import { Salon } from "@/types/salon.types";
@@ -38,6 +46,23 @@ export default function SalonsPage() {
     }
   };
 
+  const handleDeleteSalon = async (salonId: string, salonName: string) => {
+    if (!confirm(`Are you sure you want to delete "${salonName}"? This action cannot be undone.`)) return;
+
+    try {
+      const response = await salonService.deleteSalon(salonId);
+      if (response.success) {
+        toast.success("Salon deleted successfully");
+        fetchSalons();
+      } else {
+        toast.error(response.message || "Failed to delete salon");
+      }
+    } catch (error) {
+      console.error("Failed to delete salon:", error);
+      toast.error("Failed to delete salon");
+    }
+  };
+
   const getTypeBadgeColor = (type: string) => {
     switch (type) {
       case "men":
@@ -58,7 +83,7 @@ export default function SalonsPage() {
           <div>
             <h1 className="text-3xl font-bold">Salons Management</h1>
             <p className="text-muted-foreground mt-2">
-              View all registered salons
+              View and manage all registered salons
             </p>
           </div>
 
@@ -72,18 +97,19 @@ export default function SalonsPage() {
                   <TableHead>Contact</TableHead>
                   <TableHead>Opening Hours</TableHead>
                   <TableHead>Created</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
+                    <TableCell colSpan={7} className="text-center py-8">
                       Loading...
                     </TableCell>
                   </TableRow>
                 ) : salons.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No salons found
                     </TableCell>
                   </TableRow>
@@ -123,6 +149,26 @@ export default function SalonsPage() {
                       </TableCell>
                       <TableCell>
                         {new Date(salon.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => handleDeleteSalon(salon._id, salon.name)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Salon
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))

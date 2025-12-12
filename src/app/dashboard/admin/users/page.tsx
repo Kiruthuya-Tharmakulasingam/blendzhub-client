@@ -19,11 +19,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Search, MoreHorizontal, Trash2, Shield } from "lucide-react";
+import { Search, MoreHorizontal, Trash2 } from "lucide-react";
 import { userService } from "@/services/user.service";
 import { User } from "@/types/auth.types";
 import { toast } from "sonner";
@@ -85,16 +84,7 @@ export default function UsersPage() {
     }
   };
 
-  const handleRoleUpdate = async (userId: string, newRole: "admin" | "owner" | "customer") => {
-    try {
-      await userService.updateUserRole(userId, newRole);
-      toast.success("User role updated successfully");
-      fetchUsers();
-    } catch (error) {
-      console.error("Failed to update role:", error);
-      toast.error("Failed to update user role");
-    }
-  };
+
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
@@ -184,25 +174,6 @@ export default function UsersPage() {
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                <DropdownMenuItem
-                                  onClick={() => navigator.clipboard.writeText(user._id)}
-                                >
-                                  Copy ID
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleRoleUpdate(user._id, "admin")}>
-                                  <Shield className="mr-2 h-4 w-4" />
-                                  Make Admin
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleRoleUpdate(user._id, "owner")}>
-                                  <Shield className="mr-2 h-4 w-4" />
-                                  Make Owner
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleRoleUpdate(user._id, "customer")}>
-                                  <Shield className="mr-2 h-4 w-4" />
-                                  Make Customer
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                   className="text-red-600"
                                   onClick={() => handleDeleteUser(user._id)}

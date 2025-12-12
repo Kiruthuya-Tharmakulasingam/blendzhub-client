@@ -1,110 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
-import { User, Mail, Phone } from "lucide-react";
-import { profileService } from "@/services/profile.service";
-import { uploadService } from "@/services/upload.service";
+import { User, Mail, Phone, ShieldCheck } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Camera, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default function AdminProfilePage() {
-  const { user, updateUser } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    image: "",
-  });
-
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        image: user.image || "",
-      });
-    }
-  }, [user]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const response = await profileService.updateProfile(formData);
-      if (response.success && response.data) {
-        // Update user state immediately with the response data
-        updateUser(response.data);
-        toast.success("Profile updated successfully");
-        setIsEditing(false);
-      }
-    } catch (error: unknown) {
-      const apiError = error as { response?: { data?: { message?: string } } };
-      const errorMessage =
-        apiError?.response?.data?.message || "Failed to update profile";
-      toast.error(errorMessage);
-    }
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    const uploadFormData = new FormData();
-    uploadFormData.append("image", file);
-
-    try {
-      const uploadResponse = await uploadService.uploadImage(file);
-
-      if (uploadResponse.success && uploadResponse.data) {
-        const imageUrl = uploadResponse.data.url;
-        setFormData((prev) => ({ ...prev, image: imageUrl }));
-        
-        // Update user profile immediately with new image
-        const profileResponse = await profileService.updateProfile({ ...formData, image: imageUrl });
-        
-        if (profileResponse.success && profileResponse.data) {
-          // Update user state immediately with the response data
-          updateUser(profileResponse.data);
-          toast.success("Profile image updated successfully");
-        }
-      }
-    } catch (error: unknown) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload image");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleRemoveImage = async () => {
-    try {
-      setFormData((prev) => ({ ...prev, image: "" }));
-      
-      // Update user profile immediately with empty image
-      const response = await profileService.updateProfile({ ...formData, image: "" });
-      
-      if (response.success && response.data) {
-        // Update user state immediately with the response data
-        updateUser(response.data);
-        toast.success("Profile image removed successfully");
-      }
-    } catch (error: unknown) {
-      console.error("Remove image error:", error);
-      toast.error("Failed to remove image");
-    }
-  };
+  const { user } = useAuth();
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
@@ -113,7 +18,7 @@ export default function AdminProfilePage() {
           <div>
             <h1 className="text-3xl font-bold">My Profile</h1>
             <p className="text-muted-foreground mt-2">
-              Manage your account information
+              View your account information
             </p>
           </div>
 
@@ -121,127 +26,47 @@ export default function AdminProfilePage() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Personal Information</CardTitle>
-                {!isEditing && (
-                  <Button onClick={() => setIsEditing(true)}>
-                    Edit Profile
-                  </Button>
-                )}
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <ShieldCheck className="h-3 w-3" />
+                  Admin
+                </Badge>
               </div>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center mb-6">
-                <div className="relative">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={formData.image || undefined} alt={formData.name} />
-                    <AvatarFallback>
-                      <User className="h-12 w-12 text-muted-foreground" />
-                    </AvatarFallback>
-                  </Avatar>
-                  {isEditing && (
-                    <div className="absolute bottom-0 right-0 flex gap-2">
-                      <Label
-                        htmlFor="image-upload"
-                        className="cursor-pointer bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors flex items-center justify-center shadow-sm"
-                      >
-                        <Camera className="h-4 w-4" />
-                        <Input
-                          id="image-upload"
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleImageUpload}
-                          disabled={isUploading}
-                        />
-                      </Label>
-                      {formData.image && (
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="h-8 w-8 rounded-full shadow-sm"
-                          onClick={handleRemoveImage}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
-                {isUploading && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={user?.image || undefined} alt={user?.name || "Admin"} />
+                  <AvatarFallback>
+                    <User className="h-12 w-12 text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Full Name</Label>
-                  <div className="flex items-center">
-                    <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      disabled={!isEditing}
-                      required
-                    />
+              <div className="space-y-4">
+                <div className="flex items-center p-3 rounded-lg bg-muted/50">
+                  <User className="h-4 w-4 mr-3 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Full Name</p>
+                    <p className="font-medium">{user?.name || "N/A"}</p>
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      disabled={!isEditing}
-                      required
-                    />
+                <div className="flex items-center p-3 rounded-lg bg-muted/50">
+                  <Mail className="h-4 w-4 mr-3 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Email</p>
+                    <p className="font-medium">{user?.email || "N/A"}</p>
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="phone">Phone</Label>
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                      disabled={!isEditing}
-                    />
+                <div className="flex items-center p-3 rounded-lg bg-muted/50">
+                  <Phone className="h-4 w-4 mr-3 text-muted-foreground" />
+                  <div>
+                    <p className="text-xs text-muted-foreground">Phone</p>
+                    <p className="font-medium">{user?.phone || "Not provided"}</p>
                   </div>
                 </div>
-
-                {isEditing && (
-                  <div className="flex gap-2">
-                    <Button type="submit">Save Changes</Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setIsEditing(false);
-                        if (user) {
-                          setFormData({
-                            name: user.name || "",
-                            email: user.email || "",
-                            phone: user.phone || "",
-                            image: user.image || "",
-                          });
-                        }
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                )}
-              </form>
+              </div>
             </CardContent>
           </Card>
 
@@ -256,9 +81,9 @@ export default function AdminProfilePage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Account Status:</span>
-                <span className="font-medium">
+                <Badge variant={user?.isActive ? "outline" : "destructive"} className={user?.isActive ? "text-green-600 border-green-600" : ""}>
                   {user?.isActive ? "Active" : "Inactive"}
-                </span>
+                </Badge>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Member Since:</span>
@@ -275,3 +100,4 @@ export default function AdminProfilePage() {
     </ProtectedRoute>
   );
 }
+
