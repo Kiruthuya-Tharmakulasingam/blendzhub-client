@@ -86,6 +86,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const initAuth = async () => {
+      // Check if user cookie exists before making the request
+      // This prevents unnecessary 401 errors in the console for unauthenticated users
+      const userCookie = Cookies.get("user");
+      
+      if (!userCookie) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await authService.getCurrentUser();
         if (response.success && response.data?.user) {
@@ -109,7 +118,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           // 401 is expected when user is not authenticated - don't treat as error
           setUser(null);
-          // Don't clear cookies here - they might be valid but user just not logged in
+          // If the API call fails (e.g. invalid token), clear the user cookie
+          // so we don't keep trying to fetch the user on next reload
+          Cookies.remove("user");
         }
       } catch (error: unknown) {
         // This should rarely happen since getCurrentUser handles 401 gracefully
@@ -119,7 +130,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error("Auth initialization error:", error);
         }
         setUser(null);
-        // Don't clear cookies on initialization errors - let middleware handle auth
+        // Clear cookie on error to prevent loop
+        Cookies.remove("user");
       } finally {
         setLoading(false);
       }

@@ -38,13 +38,13 @@ export const authService = {
   getCurrentUser: async (): Promise<AuthResponse> => {
     // Check if token exists before making the request
     // This prevents unnecessary 401 errors in the console
-    const token = Cookies.get("token");
-    if (!token) {
-      return {
-        success: false,
-        message: "Not authenticated",
-      } as AuthResponse;
-    }
+    // const token = Cookies.get("token");
+    // if (!token) {
+    //   return {
+    //     success: false,
+    //     message: "Not authenticated",
+    //   } as AuthResponse;
+    // }
 
     try {
       const response = await apiClient.get<AuthResponse>("/auth/me", {

@@ -15,9 +15,12 @@ export function middleware(request: NextRequest) {
     return pathname.startsWith(route);
   });
   
+  // Check for either token OR user cookie to avoid redirect loops
+  // AuthContext sets 'user' cookie, while backend sets 'token' (which might be HttpOnly/hidden)
+  const userCookie = request.cookies.get("user")?.value;
+  
   // If user is authenticated and tries to access login/register, redirect to their dashboard
-  if (token && (pathname.startsWith("/auth/login") || pathname.startsWith("/auth/register"))) {
-    const userCookie = request.cookies.get("user")?.value;
+  if ((token || userCookie) && (pathname.startsWith("/auth/login") || pathname.startsWith("/auth/register"))) {
     if (userCookie) {
       try {
         const user = JSON.parse(userCookie);
@@ -46,12 +49,11 @@ export function middleware(request: NextRequest) {
   }
 
   // Protected routes - require authentication
-  if (!token) {
+  if (!token && !userCookie) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
   }
 
   // Role-based access control
-  const userCookie = request.cookies.get("user")?.value;
   if (userCookie) {
     try {
       const user = JSON.parse(userCookie);
