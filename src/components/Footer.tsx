@@ -36,7 +36,7 @@ export default function Footer() {
         <div>
           <h3 className="font-semibold mb-4 text-foreground">For Business</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><a href="/auth/register/owner" className="hover:text-foreground transition-colors">Partner with Us</a></li>
+            <li><Link href="/auth/register/owner" className="hover:text-foreground transition-colors">Partner with Us</Link></li>
             <li><a href="#" className="hover:text-foreground transition-colors">Owner Support</a></li>
             <li><a href="#" className="hover:text-foreground transition-colors">Success Stories</a></li>
           </ul>
