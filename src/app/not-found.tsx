@@ -1,12 +1,8 @@
-"use client";
-
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import GoBackButton from "@/components/GoBackButton";
 
 export default function NotFound() {
-  const router = useRouter();
-
   return (
     <div className="flex min-h-screen flex-col bg-background font-sans home-theme">
       <main className="flex-1 flex flex-col items-center justify-center p-4">
@@ -46,14 +42,7 @@ export default function NotFound() {
               </Link>
             </Button>
             
-            <Button 
-              variant="outline" 
-              size="lg" 
-              onClick={() => router.back()}
-              className="min-w-[140px] border-primary/20 hover:bg-primary/5 hover:text-primary"
-            >
-              Go Back
-            </Button>
+            <GoBackButton />
           </div>
         </div>
       </main>
