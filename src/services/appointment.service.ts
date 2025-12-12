@@ -52,4 +52,11 @@ export const appointmentService = {
     const response = await apiClient.get<ApiResponse<Appointment[]>>("/bookings/completed", { params });
     return response.data;
   },
+
+  async getSalonAppointmentsByDate(salonId: string, date: string): Promise<ApiResponse<Appointment[]>> {
+    const response = await apiClient.get<ApiResponse<Appointment[]>>("/appointments", { 
+      params: { salonId, date } 
+    });
+    return response.data;
+  },
 };

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, LogOut, LayoutDashboard, X } from "lucide-react";
+import { Menu, LogOut, LayoutDashboard, X, User, Calendar } from "lucide-react";
 import { SignInModal } from "./modals/SignInModal";
 import { SignUpModal } from "./modals/SignUpModal";
 import Image from "next/image";
@@ -35,7 +35,7 @@ export default function Navbar() {
 
   return (
     <nav className="flex w-full items-center justify-between px-8 py-4 bg-background shadow-sm border-b border-border sticky top-0 z-50">
-      <Link href="/" className="flex items-center gap-2 z-50">
+      <Link href={isAuthenticated && user?.role === "customer" ? "/dashboard/customer" : "/"} className="flex items-center gap-2 z-50">
         <Image
           src="/noBgColor.png"
           alt="BlendzHub Logo"
@@ -50,7 +50,7 @@ export default function Navbar() {
 
       {/* Desktop Navigation */}
       <div className="hidden md:flex gap-4 items-center">
-        <Link href="/">
+        <Link href={isAuthenticated && user?.role === "customer" ? "/dashboard/customer" : "/"}>
           <Button variant="ghost" className="text-primary">Home</Button>
         </Link>
         <Link href="/about">
@@ -59,12 +59,29 @@ export default function Navbar() {
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
             <span className="text-sm font-medium">Welcome, {user?.name}</span>
-            <Link href={`/dashboard/${user?.role}`}>
-              <Button variant="outline" size="sm">
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                Dashboard
-              </Button>
-            </Link>
+            {user?.role === "customer" ? (
+              <>
+                <Link href="/dashboard/customer/appointments">
+                  <Button variant="ghost" size="sm" className="text-primary">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    My Appointments
+                  </Button>
+                </Link>
+                <Link href="/dashboard/customer/profile">
+                  <Button variant="outline" size="sm">
+                    <User className="mr-2 h-4 w-4" />
+                    My Profile
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <Link href={`/dashboard/${user?.role}`}>
+                <Button variant="outline" size="sm">
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
+            )}
             <Button variant="ghost" size="sm" onClick={() => logout()}>
               <LogOut className="mr-2 h-4 w-4" />
               Logout
@@ -125,12 +142,35 @@ export default function Navbar() {
                 <span className="text-sm text-muted-foreground capitalize">{user?.role}</span>
               </div>
               
-              <Link href={`/dashboard/${user?.role}`} onClick={closeMenu}>
-                <Button variant="outline" className="w-full justify-start h-12 text-base">
-                  <LayoutDashboard className="mr-3 h-5 w-5" />
-                  Dashboard
-                </Button>
-              </Link>
+              {user?.role === "customer" ? (
+                <>
+                  <Link href="/dashboard/customer" onClick={closeMenu}>
+                    <Button variant="outline" className="w-full justify-start h-12 text-base">
+                      <LayoutDashboard className="mr-3 h-5 w-5" />
+                      Home
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard/customer/appointments" onClick={closeMenu}>
+                    <Button variant="ghost" className="w-full justify-start h-12 text-base text-primary">
+                      <Calendar className="mr-3 h-5 w-5" />
+                      My Appointments
+                    </Button>
+                  </Link>
+                  <Link href="/dashboard/customer/profile" onClick={closeMenu}>
+                    <Button variant="ghost" className="w-full justify-start h-12 text-base text-primary">
+                      <User className="mr-3 h-5 w-5" />
+                      My Profile
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <Link href={`/dashboard/${user?.role}`} onClick={closeMenu}>
+                  <Button variant="outline" className="w-full justify-start h-12 text-base">
+                    <LayoutDashboard className="mr-3 h-5 w-5" />
+                    Dashboard
+                  </Button>
+                </Link>
+              )}
               
               <Button 
                 variant="ghost" 

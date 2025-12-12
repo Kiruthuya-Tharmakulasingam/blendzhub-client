@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,6 @@ export default function ProfilePage() {
     try {
       const response = await profileService.updateProfile(formData);
       if (response.success && response.data) {
-        // Update user state immediately with the response data
         updateUser(response.data);
         toast.success("Profile updated successfully");
         setIsEditing(false);
@@ -61,8 +61,6 @@ export default function ProfilePage() {
     if (!file) return;
 
     setIsUploading(true);
-    const uploadFormData = new FormData();
-    uploadFormData.append("image", file);
 
     try {
       const uploadResponse = await uploadService.uploadImage(file);
@@ -71,11 +69,9 @@ export default function ProfilePage() {
         const imageUrl = uploadResponse.data.url;
         setFormData((prev) => ({ ...prev, image: imageUrl }));
         
-        // Update user profile immediately with new image
         const profileResponse = await profileService.updateProfile({ ...formData, image: imageUrl });
         
         if (profileResponse.success && profileResponse.data) {
-          // Update user state immediately with the response data
           updateUser(profileResponse.data);
           toast.success("Profile image updated successfully");
         }
@@ -92,11 +88,9 @@ export default function ProfilePage() {
     try {
       setFormData((prev) => ({ ...prev, image: "" }));
       
-      // Update user profile immediately with empty image
       const response = await profileService.updateProfile({ ...formData, image: "" });
       
       if (response.success && response.data) {
-        // Update user state immediately with the response data
         updateUser(response.data);
         toast.success("Profile image removed successfully");
       }
@@ -108,170 +102,176 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute allowedRoles={["customer"]}>
-      <DashboardLayout role="customer">
-        <div className="space-y-6 max-w-2xl">
-          <div>
-            <h1 className="text-3xl font-bold">My Profile</h1>
-            <p className="text-muted-foreground mt-2">
-              Manage your account information
-            </p>
-          </div>
+      <div className="flex min-h-screen flex-col bg-background font-sans home-theme">
+        <Navbar />
 
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle>Personal Information</CardTitle>
-                {!isEditing && (
-                  <Button onClick={() => setIsEditing(true)}>
-                    Edit Profile
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center mb-6">
-                <div className="relative">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={formData.image || undefined} alt={formData.name} />
-                    <AvatarFallback>
-                      <User className="h-12 w-12 text-muted-foreground" />
-                    </AvatarFallback>
-                  </Avatar>
-                  {isEditing && (
-                    <div className="absolute bottom-0 right-0 flex gap-2">
-                      <Label
-                        htmlFor="image-upload"
-                        className="cursor-pointer bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors flex items-center justify-center shadow-sm"
-                      >
-                        <Camera className="h-4 w-4" />
-                        <Input
-                          id="image-upload"
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleImageUpload}
-                          disabled={isUploading}
-                        />
-                      </Label>
-                      {formData.image && (
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="h-8 w-8 rounded-full shadow-sm"
-                          onClick={handleRemoveImage}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
+        <main className="flex-1 py-12 px-8 sm:px-16">
+          <div className="max-w-2xl mx-auto space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold text-primary">My Profile</h1>
+              <p className="text-muted-foreground mt-2">
+                Manage your account information
+              </p>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Personal Information</CardTitle>
+                  {!isEditing && (
+                    <Button onClick={() => setIsEditing(true)}>
+                      Edit Profile
+                    </Button>
                   )}
                 </div>
-                {isUploading && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Full Name</Label>
-                  <div className="flex items-center">
-                    <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      disabled={!isEditing}
-                      required
-                    />
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center mb-6">
+                  <div className="relative">
+                    <Avatar className="h-24 w-24">
+                      <AvatarImage src={formData.image || undefined} alt={formData.name} />
+                      <AvatarFallback>
+                        <User className="h-12 w-12 text-muted-foreground" />
+                      </AvatarFallback>
+                    </Avatar>
+                    {isEditing && (
+                      <div className="absolute bottom-0 right-0 flex gap-2">
+                        <Label
+                          htmlFor="image-upload"
+                          className="cursor-pointer bg-primary text-primary-foreground p-2 rounded-full hover:bg-primary/90 transition-colors flex items-center justify-center shadow-sm"
+                        >
+                          <Camera className="h-4 w-4" />
+                          <Input
+                            id="image-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageUpload}
+                            disabled={isUploading}
+                          />
+                        </Label>
+                        {formData.image && (
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="h-8 w-8 rounded-full shadow-sm"
+                            onClick={handleRemoveImage}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
+                  {isUploading && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
                 </div>
 
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      disabled={!isEditing}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="phone">Phone</Label>
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                      disabled={!isEditing}
-                    />
-                  </div>
-                </div>
-
-                {isEditing && (
-                  <div className="flex gap-2">
-                    <Button type="submit">Save Changes</Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        setIsEditing(false);
-                        if (user) {
-                          setFormData({
-                            name: user.name || "",
-                            email: user.email || "",
-                            phone: user.phone || "",
-                            image: user.image || "",
-                          });
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Full Name</Label>
+                    <div className="flex items-center">
+                      <User className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
                         }
-                      }}
-                    >
-                      Cancel
-                    </Button>
+                        disabled={!isEditing}
+                        required
+                      />
+                    </div>
                   </div>
-                )}
-              </form>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Role:</span>
-                <span className="font-medium capitalize">{user?.role}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Account Status:</span>
-                <span className="font-medium">
-                  {user?.isActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Member Since:</span>
-                <span className="font-medium">
-                  {user?.createdAt
-                    ? new Date(user.createdAt).toLocaleDateString()
-                    : "N/A"}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </DashboardLayout>
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <div className="flex items-center">
+                      <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
+                        disabled={!isEditing}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="phone">Phone</Label>
+                    <div className="flex items-center">
+                      <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) =>
+                          setFormData({ ...formData, phone: e.target.value })
+                        }
+                        disabled={!isEditing}
+                      />
+                    </div>
+                  </div>
+
+                  {isEditing && (
+                    <div className="flex gap-2">
+                      <Button type="submit">Save Changes</Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setIsEditing(false);
+                          if (user) {
+                            setFormData({
+                              name: user.name || "",
+                              email: user.email || "",
+                              phone: user.phone || "",
+                              image: user.image || "",
+                            });
+                          }
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Role:</span>
+                  <span className="font-medium capitalize">{user?.role}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Account Status:</span>
+                  <span className="font-medium">
+                    {user?.isActive ? "Active" : "Inactive"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Member Since:</span>
+                  <span className="font-medium">
+                    {user?.createdAt
+                      ? new Date(user.createdAt).toLocaleDateString()
+                      : "N/A"}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+
+        <Footer />
+      </div>
     </ProtectedRoute>
   );
 }
