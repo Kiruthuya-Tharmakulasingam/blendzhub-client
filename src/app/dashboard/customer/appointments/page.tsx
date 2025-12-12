@@ -746,7 +746,7 @@ export default function MyAppointmentsPage() {
           )}
 
           <Dialog open={feedbackModalOpen} onOpenChange={setFeedbackModalOpen}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md home-theme text-foreground">
               <DialogHeader>
                 <DialogTitle>
                   Leave Feedback for {selectedAppointment ? getSalonName(selectedAppointment.salonId) : 'Salon'}
@@ -819,7 +819,7 @@ export default function MyAppointmentsPage() {
 
           {/* Reschedule Modal */}
           <Dialog open={rescheduleModalOpen} onOpenChange={setRescheduleModalOpen}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md home-theme text-foreground">
               <DialogHeader>
                 <DialogTitle>Reschedule Appointment</DialogTitle>
               </DialogHeader>

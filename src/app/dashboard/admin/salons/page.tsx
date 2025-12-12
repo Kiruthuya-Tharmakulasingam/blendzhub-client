@@ -41,13 +41,13 @@ export default function SalonsPage() {
   const getTypeBadgeColor = (type: string) => {
     switch (type) {
       case "men":
-        return "bg-blue-100 text-blue-800";
+        return "bg-blue-500/15 text-blue-500 hover:bg-blue-500/25 border-blue-500/50";
       case "women":
-        return "bg-pink-100 text-pink-800";
+        return "bg-pink-500/15 text-pink-500 hover:bg-pink-500/25 border-pink-500/50";
       case "unisex":
-        return "bg-purple-100 text-purple-800";
+        return "bg-purple-500/15 text-purple-500 hover:bg-purple-500/25 border-purple-500/50";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-secondary/50 text-secondary-foreground hover:bg-secondary/70 border-secondary";
     }
   };
 
@@ -57,7 +57,7 @@ export default function SalonsPage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Salons Management</h1>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+            <p className="text-muted-foreground mt-2">
               View all registered salons
             </p>
           </div>
@@ -83,7 +83,7 @@ export default function SalonsPage() {
                   </TableRow>
                 ) : salons.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-zinc-500">
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       No salons found
                     </TableCell>
                   </TableRow>

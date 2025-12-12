@@ -84,8 +84,8 @@ export default function OwnerDashboard() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-2">
-              Overview of your salon operations
+            <p className="text-muted-foreground mt-2">
+              Manage your salon, appointments, and services
             </p>
           </div>
           

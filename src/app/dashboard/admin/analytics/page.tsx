@@ -59,7 +59,7 @@ export default function AnalyticsPage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Analytics</h1>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+            <p className="text-muted-foreground mt-2">
               System-wide statistics and insights
             </p>
           </div>

@@ -112,7 +112,7 @@ export default function OwnerProfilePage() {
         <div className="space-y-6 max-w-2xl">
           <div>
             <h1 className="text-3xl font-bold">My Profile</h1>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+            <p className="text-muted-foreground mt-2">
               Manage your account information
             </p>
           </div>

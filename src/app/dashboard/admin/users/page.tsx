@@ -103,7 +103,7 @@ export default function UsersPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">Users Management</h1>
-              <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 View and manage all system users
               </p>
             </div>
@@ -113,7 +113,7 @@ export default function UsersPage() {
             <CardHeader>
               <div className="flex items-center gap-4">
                 <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-zinc-500" />
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search users..."
                     className="pl-9"
@@ -230,7 +230,7 @@ export default function UsersPage() {
                   >
                     Previous
                   </Button>
-                  <span className="py-2 text-sm text-zinc-600">
+                  <span className="py-2 text-sm text-muted-foreground">
                     Page {page} of {totalPages}
                   </span>
                   <Button

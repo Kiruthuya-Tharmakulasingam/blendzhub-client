@@ -215,8 +215,8 @@ export default function BrowseSalonsPage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Browse Salons</h1>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-2">
-              Find and book appointments at your favorite salons
+            <p className="text-muted-foreground mt-2">
+              Browse and book appointments at top-rated salons
             </p>
           </div>
 
@@ -330,7 +330,7 @@ export default function BrowseSalonsPage() {
 
           {/* Booking Modal */}
           <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md home-theme">
               <DialogHeader>
                 <DialogTitle>
                   Book Appointment at {selectedSalon?.name}

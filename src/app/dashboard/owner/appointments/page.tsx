@@ -161,8 +161,8 @@ export default function AppointmentsPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">Appointments</h1>
-              <p className="text-zinc-600 dark:text-zinc-400 mt-2">
-                Manage your salon appointments
+              <p className="text-muted-foreground mt-2">
+                Manage your upcoming and past appointments
               </p>
             </div>
           </div>

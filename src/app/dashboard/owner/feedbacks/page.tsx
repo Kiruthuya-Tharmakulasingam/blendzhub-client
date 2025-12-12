@@ -82,7 +82,7 @@ export default function FeedbacksPage() {
             className={`h-4 w-4 ${
               star <= rating
                 ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300"
+                : "text-muted"
             }`}
           />
         ))}
@@ -299,7 +299,7 @@ export default function FeedbacksPage() {
                         className={`h-6 w-6 ${
                           star <= editRating
                             ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-300"
+                            : "text-muted"
                         }`}
                       />
                     </button>

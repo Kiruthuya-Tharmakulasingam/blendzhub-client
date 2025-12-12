@@ -116,7 +116,7 @@ export default function AdminAppointmentsPage() {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold">All Appointments</h1>
-              <p className="text-zinc-600 dark:text-zinc-400 mt-2">
+              <p className="text-muted-foreground mt-2">
                 Manage and monitor all appointments across the platform
               </p>
             </div>

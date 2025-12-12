@@ -82,7 +82,7 @@ export default function Feedbacks() {
             className={`h-4 w-4 ${
               star <= rating
                 ? "fill-yellow-400 text-yellow-400"
-                : "text-gray-300"
+                              : "text-muted"
             }`}
           />
         ))}
@@ -186,7 +186,7 @@ export default function Feedbacks() {
             <Card>
               <CardContent className="py-8">
                 <div className="text-center text-muted-foreground">
-                  <Star className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <Star className="h-12 w-12 mx-auto mb-4 text-muted" />
                   <p className="text-lg font-medium">No feedbacks yet</p>
                   <p className="text-sm mt-2">
                     Your feedbacks will appear here once you submit them.
@@ -275,7 +275,7 @@ export default function Feedbacks() {
 
           {/* Edit Feedback Dialog */}
           <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
-            <DialogContent>
+            <DialogContent className="home-theme">
               <DialogHeader>
                 <DialogTitle>Edit Feedback</DialogTitle>
               </DialogHeader>
@@ -294,7 +294,7 @@ export default function Feedbacks() {
                           className={`h-6 w-6 ${
                             star <= editRating
                               ? "fill-yellow-400 text-yellow-400"
-                              : "text-gray-300"
+                                            : "text-muted"
                           }`}
                         />
                       </button>
@@ -328,7 +328,7 @@ export default function Feedbacks() {
 
           {/* Delete Confirmation Dialog */}
           <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-            <AlertDialogContent>
+            <AlertDialogContent className="home-theme">
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>

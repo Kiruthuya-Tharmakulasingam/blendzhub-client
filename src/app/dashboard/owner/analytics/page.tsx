@@ -133,8 +133,8 @@ export default function OwnerAnalyticsPage() {
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold">Analytics</h1>
-            <p className="text-zinc-600 dark:text-zinc-400 mt-2">
-              Track your salon&apos;s performance and insights
+            <p className="text-muted-foreground mt-2">
+              Track your salon's performance and insights
             </p>
           </div>
 
