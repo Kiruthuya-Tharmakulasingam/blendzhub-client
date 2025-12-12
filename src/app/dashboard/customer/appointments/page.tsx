@@ -470,16 +470,16 @@ export default function MyAppointmentsPage() {
       <div className="flex min-h-screen flex-col bg-background font-sans home-theme">
         <Navbar />
 
-        <main className="flex-1 py-12 px-8 sm:px-16">
+        <main className="flex-1 py-6 sm:py-12 px-4 sm:px-8 lg:px-16">
           <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-primary">My Appointments</h1>
                 <p className="text-muted-foreground mt-2">
                   View and manage your appointments
                 </p>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 <Link href="/dashboard/customer/feedback">
                   <Button variant="outline" size="sm">
                     <MessageSquare className="h-4 w-4 mr-2" />
@@ -570,8 +570,8 @@ export default function MyAppointmentsPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="rounded-md border">
-                <Table>
+              <div className="rounded-md border overflow-x-auto">
+                <Table className="min-w-[700px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Salon</TableHead>

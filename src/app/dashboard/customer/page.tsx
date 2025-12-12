@@ -398,7 +398,7 @@ export default function CustomerPortal() {
           />
 
           {/* Salons Section */}
-          <section className="py-20 px-8 sm:px-16">
+          <section className="py-12 sm:py-20 px-4 sm:px-8 lg:px-16">
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-16">
                 <h2 className="text-3xl font-bold mb-4 text-primary">
@@ -585,7 +585,7 @@ export default function CustomerPortal() {
           </section>
 
           {/* Features Section */}
-          <section className="py-20 px-8 sm:px-16 bg-surface">
+          <section className="py-12 sm:py-20 px-4 sm:px-8 lg:px-16 bg-surface">
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-16">
                 <h2 className="text-3xl font-bold mb-4 text-primary">

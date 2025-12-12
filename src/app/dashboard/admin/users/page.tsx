@@ -100,7 +100,7 @@ export default function UsersPage() {
     <ProtectedRoute allowedRoles={["admin"]}>
       <DashboardLayout role="admin">
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold">Users Management</h1>
               <p className="text-muted-foreground mt-2">
@@ -111,8 +111,8 @@ export default function UsersPage() {
 
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-4">
-                <div className="relative flex-1 max-w-sm">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full">
+                <div className="relative flex-1 sm:max-w-sm">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search users..."
@@ -124,8 +124,8 @@ export default function UsersPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border">
-                <Table>
+              <div className="rounded-md border overflow-x-auto">
+                <Table className="min-w-[600px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>

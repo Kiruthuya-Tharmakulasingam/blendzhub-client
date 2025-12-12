@@ -166,7 +166,7 @@ export default function AppointmentsPage() {
     <ProtectedRoute allowedRoles={["owner"]}>
       <DashboardLayout role="owner">
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="text-3xl font-bold">Appointments</h1>
               <p className="text-muted-foreground mt-2">
@@ -218,8 +218,8 @@ export default function AppointmentsPage() {
             }}
           />
 
-          <div className="rounded-md border">
-            <Table>
+          <div className="rounded-md border overflow-x-auto">
+            <Table className="min-w-[700px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Customer</TableHead>
