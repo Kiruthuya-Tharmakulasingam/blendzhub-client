@@ -24,6 +24,7 @@ import { MapPin, Phone, Mail, MoreHorizontal, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { salonService } from "@/services/salon.service";
 import { Salon } from "@/types/salon.types";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function SalonsPage() {
   const [salons, setSalons] = useState<Salon[]>([]);
@@ -46,8 +47,17 @@ export default function SalonsPage() {
     }
   };
 
+  const { confirm } = useConfirmDialog();
+
   const handleDeleteSalon = async (salonId: string, salonName: string) => {
-    if (!confirm(`Are you sure you want to delete "${salonName}"? This action cannot be undone.`)) return;
+    const confirmed = await confirm({
+      title: "Delete Salon",
+      message: `Are you sure you want to delete "${salonName}"? This action cannot be undone.`,
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
 
     try {
       const response = await salonService.deleteSalon(salonId);

@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { uploadService } from "@/services/upload.service";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -141,15 +142,24 @@ export default function ProductsPage() {
     }
   };
 
+  const { confirm } = useConfirmDialog();
+
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this product?")) {
-      try {
-        await productService.deleteProduct(id);
-        toast.success("Product deleted successfully");
-        fetchProducts();
+    const confirmed = await confirm({
+      title: "Delete Product",
+      message: "Are you sure you want to delete this product? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
+
+    try {
+      await productService.deleteProduct(id);
+      toast.success("Product deleted successfully");
+      fetchProducts();
     } catch {
       toast.error("Failed to delete product");
-    }
     }
   };
 

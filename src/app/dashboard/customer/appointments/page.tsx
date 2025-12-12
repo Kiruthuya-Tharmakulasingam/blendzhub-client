@@ -38,6 +38,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 import { StatusBadge } from "@/components/ui/status-badge";
 
 interface Appointment {
@@ -289,8 +290,17 @@ export default function MyAppointmentsPage() {
     }
   };
 
+  const { confirm } = useConfirmDialog();
+
   const handleCancelAppointment = async (id: string) => {
-    if (!confirm("Are you sure you want to cancel this appointment?")) return;
+    const confirmed = await confirm({
+      title: "Cancel Appointment",
+      message: "Are you sure you want to cancel this appointment? This action cannot be undone.",
+      confirmText: "Yes, Cancel",
+      cancelText: "No, Keep It",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
 
     try {
       const response = await appointmentService.cancelAppointment(id);

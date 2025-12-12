@@ -27,6 +27,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
 import { Calendar, Clock, User, Scissors, CheckCircle, XCircle } from "lucide-react";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -121,10 +122,17 @@ export default function AppointmentsPage() {
     await handleStatusChange(id, "accepted");
   };
 
+  const { confirm } = useConfirmDialog();
+
   const handleReject = async (id: string) => {
-    if (!confirm("Are you sure you want to reject this appointment? The customer will be notified.")) {
-      return;
-    }
+    const confirmed = await confirm({
+      title: "Reject Appointment",
+      message: "Are you sure you want to reject this appointment? The customer will be notified.",
+      confirmText: "Reject",
+      cancelText: "Cancel",
+      variant: "warning",
+    });
+    if (!confirmed) return;
     await handleStatusChange(id, "rejected");
   };
 

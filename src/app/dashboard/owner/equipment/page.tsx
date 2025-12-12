@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { uploadService } from "@/services/upload.service";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function EquipmentPage() {
   const [equipmentList, setEquipmentList] = useState<Equipment[]>([]);
@@ -115,15 +116,24 @@ export default function EquipmentPage() {
     }
   };
 
+  const { confirm } = useConfirmDialog();
+
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this equipment?")) {
-      try {
-        await equipmentService.deleteEquipment(id);
-        toast.success("Equipment deleted successfully");
-        fetchEquipment();
+    const confirmed = await confirm({
+      title: "Delete Equipment",
+      message: "Are you sure you want to delete this equipment? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
+
+    try {
+      await equipmentService.deleteEquipment(id);
+      toast.success("Equipment deleted successfully");
+      fetchEquipment();
     } catch {
       toast.error("Failed to delete equipment");
-    }
     }
   };
 

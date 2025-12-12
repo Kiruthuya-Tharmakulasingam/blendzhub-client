@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { uploadService } from "@/services/upload.service";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
@@ -140,15 +141,24 @@ export default function ServicesPage() {
     }
   };
 
+  const { confirm } = useConfirmDialog();
+
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this service?")) {
-      try {
-        await serviceService.deleteService(id);
-        toast.success("Service deleted successfully");
-        fetchServices();
+    const confirmed = await confirm({
+      title: "Delete Service",
+      message: "Are you sure you want to delete this service? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
+
+    try {
+      await serviceService.deleteService(id);
+      toast.success("Service deleted successfully");
+      fetchServices();
     } catch {
       toast.error("Failed to delete service");
-    }
     }
   };
 

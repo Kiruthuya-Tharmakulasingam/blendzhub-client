@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import Hash404Handler from "@/components/Hash404Handler";
+import { ConfirmDialogProvider } from "@/components/ui/confirm-dialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,13 +44,16 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <Hash404Handler>
-              {children}
-            </Hash404Handler>
-            <Toaster />
+            <ConfirmDialogProvider>
+              <Hash404Handler>
+                {children}
+              </Hash404Handler>
+              <Toaster />
+            </ConfirmDialogProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
   );
 }
+

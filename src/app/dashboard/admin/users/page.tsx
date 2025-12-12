@@ -26,6 +26,7 @@ import { Search, MoreHorizontal, Trash2 } from "lucide-react";
 import { userService } from "@/services/user.service";
 import { User } from "@/types/auth.types";
 import { toast } from "sonner";
+import { useConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -71,8 +72,17 @@ export default function UsersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, page]);
 
+  const { confirm } = useConfirmDialog();
+
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
+    const confirmed = await confirm({
+      title: "Delete User",
+      message: "Are you sure you want to delete this user? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+    if (!confirmed) return;
 
     try {
       await userService.deleteUser(userId);
