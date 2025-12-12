@@ -6,7 +6,6 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Define public routes - allow access without authentication
-  // Define public routes - allow access without authentication
   const publicRoutes = ["/", "/auth/login", "/auth/register", "/salons", "/about"];
   const isPublicRoute = publicRoutes.some((route) => {
     if (route === "/") {
@@ -14,6 +13,17 @@ export function middleware(request: NextRequest) {
     }
     return pathname.startsWith(route);
   });
+  
+  // Define protected route patterns that require authentication
+  const protectedRoutePatterns = [
+    "/dashboard/admin",
+    "/admin/dashboard",
+    "/dashboard/owner",
+    "/owner/dashboard",
+    "/dashboard/customer",
+    "/customer/dashboard"
+  ];
+  const isProtectedRoute = protectedRoutePatterns.some(pattern => pathname.startsWith(pattern));
   
   // Check for either token OR user cookie to avoid redirect loops
   // AuthContext sets 'user' cookie, while backend sets 'token' (which might be HttpOnly/hidden)
@@ -43,14 +53,21 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Allow public routes
+  // Allow public routes to pass through without authentication
   if (isPublicRoute) {
     return NextResponse.next();
   }
 
-  // Protected routes - require authentication
-  if (!token && !userCookie) {
+  // Only require authentication for explicitly protected routes
+  // Unknown routes (404s) will pass through here and be handled by Next.js's 404 page
+  if (isProtectedRoute && !token && !userCookie) {
     return NextResponse.redirect(new URL("/auth/login", request.url));
+  }
+  
+  // If it's not a protected route and not a public route, allow it to pass through
+  // This includes unknown routes that will trigger the 404 page
+  if (!isProtectedRoute) {
+    return NextResponse.next();
   }
 
   // Role-based access control
