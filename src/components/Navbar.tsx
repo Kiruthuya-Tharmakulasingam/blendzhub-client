@@ -50,6 +50,9 @@ export default function Navbar() {
 
       {/* Desktop Navigation */}
       <div className="hidden md:flex gap-4 items-center">
+        <Link href="/about">
+          <Button variant="ghost" className="text-foreground hover:text-primary">About Us</Button>
+        </Link>
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
             <span className="text-sm font-medium">Welcome, {user?.name}</span>
@@ -140,6 +143,11 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              <Link href="/about" onClick={closeMenu}>
+                <Button variant="ghost" className="w-full justify-start h-12 text-base text-foreground">
+                  About Us
+                </Button>
+              </Link>
               <Link href="/auth/register/owner" onClick={closeMenu}>
                 <Button variant="ghost" className="w-full justify-start h-12 text-base text-primary">
                   Become an Owner
