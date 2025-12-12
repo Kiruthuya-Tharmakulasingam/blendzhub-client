@@ -328,4 +328,24 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Global cursor pointer for clickable elements */
+  button,
+  a,
+  [role="button"],
+  [role="link"],
+  [onclick],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"] {
+    cursor: pointer;
+  }
+
+  /* Disabled state cursor */
+  button:disabled,
+  input:disabled,
+  [aria-disabled="true"],
+  [disabled] {
+    cursor: not-allowed;
+  }
 }
