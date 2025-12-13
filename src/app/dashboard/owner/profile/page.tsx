@@ -170,8 +170,8 @@ export default function OwnerProfilePage() {
                 {isUploading && <p className="text-sm text-muted-foreground mt-2">Uploading...</p>}
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <div className="flex items-center">
                     <User className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -187,7 +187,7 @@ export default function OwnerProfilePage() {
                   </div>
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <div className="flex items-center">
                     <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -204,7 +204,7 @@ export default function OwnerProfilePage() {
                   </div>
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="phone">Phone</Label>
                   <div className="flex items-center">
                     <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
