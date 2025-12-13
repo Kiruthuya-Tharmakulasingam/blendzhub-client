@@ -395,6 +395,13 @@ export default function CustomerPortal() {
                 </Button>
               </>
             }
+            image={{
+              src:
+                process.env.NEXT_PUBLIC_HERO_IMAGE_URL ||
+                "https://res.cloudinary.com/dzu243cya/image/upload/v1765204576/blendzhub/hero-salon-image.jpg",
+              alt: "Modern salon interior",
+            }}
+            background="gradient"
           />
 
           {/* Salons Section */}
