@@ -12,7 +12,15 @@ import { serviceService } from "@/services/service.service";
 import { appointmentService } from "@/services/appointment.service";
 import { Salon } from "@/types/salon.types";
 import { Service } from "@/types/service.types";
-import { MapPin, Phone, Mail, Clock, Calendar, RefreshCw, Check } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Calendar,
+  RefreshCw,
+  Check,
+} from "lucide-react";
 import { AxiosError } from "axios";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
@@ -20,6 +28,7 @@ import { HeroSection } from "@/components/ui/hero-section";
 import { AlertBanner } from "@/components/ui/alert-banner";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
@@ -44,34 +53,42 @@ const generateTimeSlots = (
   closingTime: string = "18:00"
 ): GeneratedSlot[] => {
   const slots: GeneratedSlot[] = [];
-  
+
   const [openHour, openMin] = openingTime.split(":").map(Number);
   const [closeHour, closeMin] = closingTime.split(":").map(Number);
-  
+
   const openingMinutes = openHour * 60 + openMin;
   const closingMinutes = closeHour * 60 + closeMin;
-  
-  // Generate slots at 30-minute intervals
-  const interval = 30;
-  
-  for (let startMinutes = openingMinutes; startMinutes < closingMinutes; startMinutes += interval) {
+
+  // Generate slots based on total duration
+  const interval = totalDuration;
+
+  for (
+    let startMinutes = openingMinutes;
+    startMinutes < closingMinutes;
+    startMinutes += interval
+  ) {
     const endMinutes = startMinutes + totalDuration;
-    
+
     // Only include slots that end before or at closing time
     if (endMinutes <= closingMinutes) {
       const startHour = Math.floor(startMinutes / 60);
       const startMin = startMinutes % 60;
       const endHour = Math.floor(endMinutes / 60);
       const endMin = endMinutes % 60;
-      
-      const startTime = `${startHour.toString().padStart(2, "0")}:${startMin.toString().padStart(2, "0")}`;
-      const endTime = `${endHour.toString().padStart(2, "0")}:${endMin.toString().padStart(2, "0")}`;
-      
+
+      const startTime = `${startHour.toString().padStart(2, "0")}:${startMin
+        .toString()
+        .padStart(2, "0")}`;
+      const endTime = `${endHour.toString().padStart(2, "0")}:${endMin
+        .toString()
+        .padStart(2, "0")}`;
+
       // Check if this slot overlaps with any booked time
-      const isBooked = bookedTimes.some(bookedTime => {
+      const isBooked = bookedTimes.some((bookedTime) => {
         return startTime === bookedTime;
       });
-      
+
       slots.push({
         start: startTime,
         end: endTime,
@@ -79,7 +96,7 @@ const generateTimeSlots = (
       });
     }
   }
-  
+
   return slots;
 };
 
@@ -128,7 +145,9 @@ export default function CustomerPortal() {
   const [selectedSalon, setSelectedSalon] = React.useState<Salon | null>(null);
   const [services, setServices] = React.useState<Service[]>([]);
   const [selectedServices, setSelectedServices] = React.useState<string[]>([]);
-  const [generatedSlots, setGeneratedSlots] = React.useState<GeneratedSlot[]>([]);
+  const [generatedSlots, setGeneratedSlots] = React.useState<GeneratedSlot[]>(
+    []
+  );
   const [bookedTimes, setBookedTimes] = React.useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = React.useState(false);
   const [bookingForm, setBookingForm] = React.useState({
@@ -140,38 +159,56 @@ export default function CustomerPortal() {
   // Calculate total duration and price from selected services
   const selectedServiceDetails = React.useMemo(() => {
     const selected = services.filter((s) => selectedServices.includes(s._id));
-    const totalDuration = selected.reduce((sum, s) => sum + (s.duration || 0), 0);
+    const totalDuration = selected.reduce(
+      (sum, s) => sum + (s.duration || 0),
+      0
+    );
     const totalPrice = selected.reduce((sum, s) => sum + (s.price || 0), 0);
     return { selected, totalDuration, totalPrice };
   }, [services, selectedServices]);
 
   // Fetch booked appointments when date changes
-  const fetchBookedSlots = React.useCallback(async (date: string, salonId: string) => {
-    try {
-      setLoadingSlots(true);
-      const response = await appointmentService.getSalonAppointmentsByDate(salonId, date);
-      if (response.success && response.data) {
-        // Extract booked times from appointments (filter out cancelled/rejected)
-        const times = response.data
-          .filter(apt => apt.status !== 'cancelled' && apt.status !== 'rejected')
-          .map(apt => apt.time)
-          .filter(Boolean);
-        setBookedTimes(times);
-      } else {
+  const fetchBookedSlots = React.useCallback(
+    async (date: string, salonId: string) => {
+      try {
+        setLoadingSlots(true);
+        const response = await appointmentService.getSalonAppointmentsByDate(
+          salonId,
+          date
+        );
+        if (response.success && response.data) {
+          // Extract booked times from appointments (filter out cancelled/rejected)
+          const times = response.data
+            .filter(
+              (apt) => apt.status !== "cancelled" && apt.status !== "rejected"
+            )
+            .map((apt) => apt.time)
+            .filter(Boolean);
+          setBookedTimes(times);
+        } else {
+          setBookedTimes([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch booked slots:", error);
         setBookedTimes([]);
+      } finally {
+        setLoadingSlots(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch booked slots:", error);
-      setBookedTimes([]);
-    } finally {
-      setLoadingSlots(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   // Generate time slots when duration, date, or booked times change
   React.useEffect(() => {
-    if (selectedServiceDetails.totalDuration > 0 && bookingForm.date && isWeekday(bookingForm.date)) {
-      const slots = generateTimeSlots(selectedServiceDetails.totalDuration, bookedTimes);
+    if (
+      selectedServiceDetails.totalDuration > 0 &&
+      bookingForm.date &&
+      isWeekday(bookingForm.date)
+    ) {
+      const slots = generateTimeSlots(
+        selectedServiceDetails.totalDuration,
+        bookedTimes
+      );
       setGeneratedSlots(slots);
     } else {
       setGeneratedSlots([]);
@@ -289,11 +326,13 @@ export default function CustomerPortal() {
   const handleDateChange = async (date: string) => {
     // Check if it's a weekday
     if (date && !isWeekday(date)) {
-      toast.error("Please select a weekday (Monday to Friday). Weekends are not available.");
+      toast.error(
+        "Please select a weekday (Monday to Friday). Weekends are not available."
+      );
       return;
     }
     setBookingForm({ ...bookingForm, date, time: "" });
-    
+
     // Fetch booked slots for this date
     if (date && selectedSalon) {
       await fetchBookedSlots(date, selectedSalon._id);
@@ -304,7 +343,11 @@ export default function CustomerPortal() {
     e.preventDefault();
     if (!selectedSalon) return;
 
-    if (selectedServices.length === 0 || !bookingForm.date || !bookingForm.time) {
+    if (
+      selectedServices.length === 0 ||
+      !bookingForm.date ||
+      !bookingForm.time
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -315,9 +358,12 @@ export default function CustomerPortal() {
         serviceId: selectedServices[0],
         date: bookingForm.date,
         time: bookingForm.time,
-        notes: selectedServices.length > 1 
-          ? `Multiple services: ${selectedServiceDetails.selected.map(s => s.name).join(", ")}. ${bookingForm.notes}`.trim()
-          : bookingForm.notes,
+        notes:
+          selectedServices.length > 1
+            ? `Multiple services: ${selectedServiceDetails.selected
+                .map((s) => s.name)
+                .join(", ")}. ${bookingForm.notes}`.trim()
+            : bookingForm.notes,
       });
 
       if (response.success) {
@@ -327,8 +373,14 @@ export default function CustomerPortal() {
         router.push("/dashboard/customer/appointments");
       }
     } catch (error: unknown) {
-      const apiError = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
-      const errorMessage = apiError?.response?.data?.message || apiError?.message || "Failed to book appointment";
+      const apiError = error as {
+        response?: { status?: number; data?: { message?: string } };
+        message?: string;
+      };
+      const errorMessage =
+        apiError?.response?.data?.message ||
+        apiError?.message ||
+        "Failed to book appointment";
       toast.error(errorMessage);
       console.error("Booking error:", error);
     }
@@ -378,10 +430,12 @@ export default function CustomerPortal() {
             description="Browse top-rated salons and spas near you. Book appointments seamlessly and manage your beauty routine with BlendzHub."
             actions={
               <>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="text-base px-8"
-                  onClick={() => router.push("/dashboard/customer/appointments")}
+                  onClick={() =>
+                    router.push("/dashboard/customer/appointments")
+                  }
                 >
                   My Appointments
                 </Button>
@@ -515,7 +569,8 @@ export default function CustomerPortal() {
                               alt={salon.name}
                               className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = "none";
+                                (e.target as HTMLImageElement).style.display =
+                                  "none";
                               }}
                             />
                           </div>
@@ -549,7 +604,9 @@ export default function CustomerPortal() {
                           {salon.openingHours && (
                             <div className="flex items-start text-muted-foreground">
                               <Clock className="h-4 w-4 mr-2 mt-0.5" />
-                              <span className="text-xs">{salon.openingHours}</span>
+                              <span className="text-xs">
+                                {salon.openingHours}
+                              </span>
                             </div>
                           )}
                         </div>
@@ -627,7 +684,9 @@ export default function CustomerPortal() {
                     <h3 className="text-xl font-semibold mb-3 text-primary">
                       {feature.title}
                     </h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
+                    <p className="text-muted-foreground">
+                      {feature.description}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -639,198 +698,270 @@ export default function CustomerPortal() {
 
         {/* Enhanced Booking Modal */}
         <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
-          <DialogContent className="max-w-lg home-theme max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-7xl w-[95vw] min-w-[50vw] home-theme max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 Book Appointment at {selectedSalon?.name}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleBookingSubmit} className="space-y-6">
-              {/* Services Selection with Checkboxes */}
-              <div className="space-y-3">
-                <Label className="text-base font-semibold">Select Services *</Label>
-                <p className="text-sm text-muted-foreground">
-                  Choose one or more services
-                </p>
-                <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
-                  {services.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      Loading services...
-                    </p>
-                  ) : (
-                    services.map((service) => (
-                      <label
-                        key={service._id}
-                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
-                          selectedServices.includes(service._id)
-                            ? "bg-primary/10 border-primary"
-                            : "bg-background border-border hover:bg-muted/50"
-                        }`}
-                      >
-                        <Checkbox
-                          checked={selectedServices.includes(service._id)}
-                          onCheckedChange={() => handleServiceToggle(service._id)}
-                          className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium">{service.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            Rs. {service.price} • {service.duration} min
-                          </div>
-                        </div>
-                        {selectedServices.includes(service._id) && (
-                          <Check className="h-4 w-4 text-primary" />
-                        )}
-                      </label>
-                    ))
-                  )}
-                </div>
-
-                {/* Total Duration and Price */}
-                {selectedServices.length > 0 && (
-                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Selected Services:</span>
-                      <span className="text-sm text-muted-foreground">
-                        {selectedServices.length} service{selectedServices.length > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Total Duration:</span>
-                      <span className="text-sm font-semibold text-primary">
-                        {formatDuration(selectedServiceDetails.totalDuration)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center border-t border-primary/20 pt-2 mt-2">
-                      <span className="font-medium">Total Price:</span>
-                      <span className="font-bold text-lg text-primary">
-                        Rs. {selectedServiceDetails.totalPrice}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Date Selection - Weekdays Only */}
-              <div className="space-y-2">
-                <Label htmlFor="date" className="text-base font-semibold">
-                  Select Date *
-                </Label>
-                <p className="text-sm text-muted-foreground flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Monday to Friday only (Weekends unavailable)
-                </p>
-                <Input
-                  id="date"
-                  type="date"
-                  value={bookingForm.date}
-                  onChange={(e) => handleDateChange(e.target.value)}
-                  min={minDate}
-                  max={maxDate}
-                  required
-                  className="w-full"
-                />
-                {bookingForm.date && !isWeekday(bookingForm.date) && (
-                  <p className="text-sm text-destructive font-medium">
-                    ⚠️ Weekends are not available. Please select a weekday.
-                  </p>
-                )}
-              </div>
-
-              {/* Time Slots */}
-              <div className="space-y-2">
-                <Label className="text-base font-semibold">Select Time Slot *</Label>
-                {selectedServices.length === 0 ? (
-                  <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
-                    Please select at least one service first
-                  </div>
-                ) : !bookingForm.date ? (
-                  <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
-                    Please select a date to see available time slots
-                  </div>
-                ) : loadingSlots ? (
-                  <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
-                    <div className="animate-pulse">Loading available slots...</div>
-                  </div>
-                ) : generatedSlots.length === 0 ? (
-                  <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
-                    No time slots available. The selected services require {formatDuration(selectedServiceDetails.totalDuration)}.
-                  </div>
-                ) : (
-                  <>
+            <form onSubmit={handleBookingSubmit}>
+              <div className="grid grid-cols-1 md:grid-cols-[2fr_auto_1fr] gap-6">
+                {/* Left Column: Selection */}
+                <div className="space-y-6">
+                  {/* Services Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">
+                      Select Services *
+                    </Label>
                     <p className="text-sm text-muted-foreground">
-                      Working hours: 9:00 AM – 6:00 PM • Duration: {formatDuration(selectedServiceDetails.totalDuration)}
+                      Choose one or more services
                     </p>
-                    <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto p-2 border rounded-lg">
-                      {generatedSlots.map((slot, index) => (
-                        <button
-                          key={index}
-                          type="button"
-                          disabled={slot.isBooked}
-                          onClick={() => !slot.isBooked && setBookingForm({ ...bookingForm, time: slot.start })}
-                          className={`p-3 text-sm rounded-lg border transition-all ${
-                            slot.isBooked
-                              ? "bg-muted/70 text-muted-foreground/50 cursor-not-allowed border-muted line-through opacity-60"
-                              : bookingForm.time === slot.start
-                              ? "bg-primary text-primary-foreground border-primary shadow-md"
-                              : "bg-background hover:bg-muted border-border hover:border-primary/50"
-                          }`}
-                          title={slot.isBooked ? "This slot is already booked" : `Book ${slot.start} – ${slot.end}`}
-                        >
-                          <span className="font-medium">{slot.start}</span>
-                          <span className="text-xs opacity-80"> – {slot.end}</span>
-                          {slot.isBooked && (
-                            <span className="block text-xs mt-1">Booked</span>
-                          )}
-                        </button>
-                      ))}
+                    <div className="space-y-2 max-h-60 overflow-y-auto border rounded-lg p-3">
+                      {services.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          Loading services...
+                        </p>
+                      ) : (
+                        services.map((service) => (
+                          <label
+                            key={service._id}
+                            className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                              selectedServices.includes(service._id)
+                                ? "bg-primary/10 border-primary"
+                                : "bg-background border-border hover:bg-muted/50"
+                            }`}
+                          >
+                            <Checkbox
+                              checked={selectedServices.includes(service._id)}
+                              onCheckedChange={() =>
+                                handleServiceToggle(service._id)
+                              }
+                              className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium">{service.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                Rs. {service.price} • {service.duration} min
+                              </div>
+                            </div>
+                            {selectedServices.includes(service._id) && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                          </label>
+                        ))
+                      )}
                     </div>
-                    {bookingForm.time && (
-                      <p className="text-sm text-primary font-medium flex items-center gap-2">
-                        <Check className="h-4 w-4" />
-                        Selected: {bookingForm.time} – {
-                          generatedSlots.find(s => s.start === bookingForm.time)?.end
-                        }
+                  </div>
+
+                  {/* Date Selection */}
+                  <div className="space-y-2">
+                    <Label htmlFor="date" className="text-base font-semibold">
+                      Select Date *
+                    </Label>
+                    <p className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Monday to Friday only (Weekends unavailable)
+                    </p>
+                    <Input
+                      id="date"
+                      type="date"
+                      value={bookingForm.date}
+                      onChange={(e) => handleDateChange(e.target.value)}
+                      min={minDate}
+                      max={maxDate}
+                      required
+                      className="w-full"
+                    />
+                    {bookingForm.date && !isWeekday(bookingForm.date) && (
+                      <p className="text-sm text-destructive font-medium">
+                        ⚠️ Weekends are not available. Please select a weekday.
                       </p>
                     )}
-                  </>
-                )}
-              </div>
+                  </div>
 
-              {/* Notes */}
-              <div className="space-y-2">
-                <Label htmlFor="notes" className="text-base font-semibold">
-                  Notes (Optional)
-                </Label>
-                <Input
-                  id="notes"
-                  value={bookingForm.notes}
-                  onChange={(e) =>
-                    setBookingForm({ ...bookingForm, notes: e.target.value })
-                  }
-                  placeholder="Any special requests?"
-                />
-              </div>
+                  {/* Time Slots */}
+                  <div className="space-y-2">
+                    <Label className="text-base font-semibold">
+                      Select Time Slot *
+                    </Label>
+                    {selectedServices.length === 0 ? (
+                      <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
+                        Please select at least one service first
+                      </div>
+                    ) : !bookingForm.date ? (
+                      <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
+                        Please select a date to see available time slots
+                      </div>
+                    ) : loadingSlots ? (
+                      <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
+                        <div className="animate-pulse">
+                          Loading available slots...
+                        </div>
+                      </div>
+                    ) : generatedSlots.length === 0 ? (
+                      <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
+                        No time slots available. The selected services require{" "}
+                        {formatDuration(selectedServiceDetails.totalDuration)}.
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          Working hours: 9:00 AM – 6:00 PM • Duration:{" "}
+                          {formatDuration(selectedServiceDetails.totalDuration)}
+                        </p>
+                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 max-h-56 overflow-y-auto p-2 border rounded-lg">
+                          {generatedSlots.map((slot, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              disabled={slot.isBooked}
+                              onClick={() =>
+                                !slot.isBooked &&
+                                setBookingForm({
+                                  ...bookingForm,
+                                  time: slot.start,
+                                })
+                              }
+                              className={`p-3 text-sm rounded-lg border transition-all ${
+                                slot.isBooked
+                                  ? "bg-muted/70 text-muted-foreground/50 cursor-not-allowed border-muted line-through opacity-60"
+                                  : bookingForm.time === slot.start
+                                  ? "bg-primary text-primary-foreground border-primary shadow-md"
+                                  : "bg-background hover:bg-muted border-border hover:border-primary/50"
+                              }`}
+                              title={
+                                slot.isBooked
+                                  ? "This slot is already booked"
+                                  : `Book ${slot.start} – ${slot.end}`
+                              }
+                            >
+                              <span className="font-medium">{slot.start}</span>
+                              <span className="text-xs opacity-80">
+                                {" "}
+                                – {slot.end}
+                              </span>
+                              {slot.isBooked && (
+                                <span className="block text-xs mt-1">
+                                  Booked
+                                </span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-2">
-                <Button 
-                  type="submit" 
-                  className="flex-1"
-                  disabled={selectedServices.length === 0 || !bookingForm.date || !bookingForm.time}
-                >
-                  Confirm Booking
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsBookingModalOpen(false);
-                    resetBookingForm();
-                  }}
-                >
-                  Cancel
-                </Button>
+                {/* Vertical Divider */}
+                <div className="hidden md:block w-px border-r border-dashed border-border h-full mx-auto"></div>
+
+                {/* Right Column: Details & Summary */}
+                <div className="space-y-6 flex flex-col h-full">
+                  <div className="flex-1 space-y-6">
+                    {/* Selected Time Slot Display */}
+                    {bookingForm.time && (
+                      <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 text-center">
+                        <Label className="text-sm text-muted-foreground block mb-1">
+                          Selected Time Slot
+                        </Label>
+                        <div className="text-xl font-bold text-primary flex items-center justify-center gap-2">
+                          <Clock className="h-5 w-5" />
+                          {bookingForm.time} –{" "}
+                          {
+                            generatedSlots.find(
+                              (s) => s.start === bookingForm.time
+                            )?.end
+                          }
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Notes */}
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="notes"
+                        className="text-base font-semibold"
+                      >
+                        Notes (Optional)
+                      </Label>
+                      <Textarea
+                        id="notes"
+                        value={bookingForm.notes}
+                        onChange={(e) =>
+                          setBookingForm({
+                            ...bookingForm,
+                            notes: e.target.value,
+                          })
+                        }
+                        placeholder="Any special requests?"
+                        className="min-h-[120px] resize-none"
+                      />
+                    </div>
+
+                    {/* Price Summary */}
+                    {selectedServices.length > 0 && (
+                      <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 space-y-3 mt-auto">
+                        <h4 className="font-semibold text-primary mb-2">
+                          Booking Summary
+                        </h4>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">
+                            Selected Services:
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {selectedServices.length} service
+                            {selectedServices.length > 1 ? "s" : ""}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm font-medium">
+                            Total Duration:
+                          </span>
+                          <span className="text-sm font-semibold text-primary">
+                            {formatDuration(
+                              selectedServiceDetails.totalDuration
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center border-t border-primary/20 pt-3 mt-2">
+                          <span className="font-medium text-lg">
+                            Total Price:
+                          </span>
+                          <span className="font-bold text-2xl text-primary">
+                            Rs. {selectedServiceDetails.totalPrice}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4 border-t mt-auto">
+                    <Button
+                      type="submit"
+                      className="flex-1 h-12 text-base"
+                      disabled={
+                        selectedServices.length === 0 ||
+                        !bookingForm.date ||
+                        !bookingForm.time
+                      }
+                    >
+                      Confirm Booking
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-12 px-6"
+                      onClick={() => {
+                        setIsBookingModalOpen(false);
+                        resetBookingForm();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
               </div>
             </form>
           </DialogContent>

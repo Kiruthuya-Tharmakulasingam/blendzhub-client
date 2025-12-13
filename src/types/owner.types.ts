@@ -37,6 +37,7 @@ export interface Appointment {
     _id: string;
     name: string;
     price: number;
+    duration: number;
   };
   salonId: string | {
     _id: string;

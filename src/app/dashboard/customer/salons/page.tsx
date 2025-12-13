@@ -34,41 +34,62 @@ interface GeneratedSlot {
   isBooked: boolean;
 }
 
+// Helper to convert time string (HH:MM) to minutes
+const timeToMinutes = (time: string): number => {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+};
+
+// Helper to convert minutes to time string (HH:MM)
+const minutesToTime = (minutes: number): string => {
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+};
+
+interface BookedInterval {
+  start: number; // in minutes
+  end: number;   // in minutes
+}
+
 const generateTimeSlots = (
   totalDuration: number,
-  bookedTimes: string[],
+  bookedIntervals: BookedInterval[],
   openingTime: string = "09:00",
   closingTime: string = "18:00"
 ): GeneratedSlot[] => {
   const slots: GeneratedSlot[] = [];
   
-  const [openHour, openMin] = openingTime.split(":").map(Number);
-  const [closeHour, closeMin] = closingTime.split(":").map(Number);
+  const openingMinutes = timeToMinutes(openingTime);
+  const closingMinutes = timeToMinutes(closingTime);
   
-  const openingMinutes = openHour * 60 + openMin;
-  const closingMinutes = closeHour * 60 + closeMin;
-  
-  const interval = 30;
+  const interval = totalDuration;
   
   for (let startMinutes = openingMinutes; startMinutes < closingMinutes; startMinutes += interval) {
     const endMinutes = startMinutes + totalDuration;
     
+    // Check if the slot fits within closing time
     if (endMinutes <= closingMinutes) {
-      const startHour = Math.floor(startMinutes / 60);
-      const startMin = startMinutes % 60;
-      const endHour = Math.floor(endMinutes / 60);
-      const endMin = endMinutes % 60;
+      // Check for overlaps with any booked interval
+      // Overlap condition: (StartA < EndB) && (EndA > StartB)
+      const isOverlapping = bookedIntervals.some(booked => 
+        startMinutes < booked.end && endMinutes > booked.start
+      );
       
-      const startTime = `${startHour.toString().padStart(2, "0")}:${startMin.toString().padStart(2, "0")}`;
-      const endTime = `${endHour.toString().padStart(2, "0")}:${endMin.toString().padStart(2, "0")}`;
+      // Only add the slot if it's not overlapping (available)
+      // Requirement: "Do NOT show partial or insufficient time slots"
+      // So we only push if !isOverlapping. 
+      // However, the existing code pushed everything and marked isBooked.
+      // The requirement says "In the time slot list, show only those time slots where... available."
+      // So we should filter them out.
       
-      const isBooked = bookedTimes.some(bookedTime => startTime === bookedTime);
-      
-      slots.push({
-        start: startTime,
-        end: endTime,
-        isBooked,
-      });
+      if (!isOverlapping) {
+        slots.push({
+          start: minutesToTime(startMinutes),
+          end: minutesToTime(endMinutes),
+          isBooked: false, // It's available
+        });
+      }
     }
   }
   
@@ -106,7 +127,7 @@ export default function BrowseSalonsPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [generatedSlots, setGeneratedSlots] = useState<GeneratedSlot[]>([]);
-  const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+  const [bookedIntervals, setBookedIntervals] = useState<BookedInterval[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [bookingForm, setBookingForm] = useState({
     date: "",
@@ -138,17 +159,24 @@ export default function BrowseSalonsPage() {
       setLoadingSlots(true);
       const response = await appointmentService.getSalonAppointmentsByDate(salonId, date);
       if (response.success && response.data) {
-        const times = response.data
+        const intervals: BookedInterval[] = response.data
           .filter(apt => apt.status !== 'cancelled' && apt.status !== 'rejected')
-          .map(apt => apt.time)
-          .filter(Boolean);
-        setBookedTimes(times);
+          .map(apt => {
+            const start = timeToMinutes(apt.time);
+            // Use duration from serviceId if available, else default to 60
+            const duration = apt.serviceId.duration || 60; 
+            return {
+              start,
+              end: start + duration
+            };
+          });
+        setBookedIntervals(intervals);
       } else {
-        setBookedTimes([]);
+        setBookedIntervals([]);
       }
     } catch (error) {
       console.error("Failed to fetch booked slots:", error);
-      setBookedTimes([]);
+      setBookedIntervals([]);
     } finally {
       setLoadingSlots(false);
     }
@@ -157,12 +185,12 @@ export default function BrowseSalonsPage() {
   // Generate time slots when duration, date, or booked times change
   useEffect(() => {
     if (selectedServiceDetails.totalDuration > 0 && bookingForm.date && isWeekday(bookingForm.date)) {
-      const slots = generateTimeSlots(selectedServiceDetails.totalDuration, bookedTimes);
+      const slots = generateTimeSlots(selectedServiceDetails.totalDuration, bookedIntervals);
       setGeneratedSlots(slots);
     } else {
       setGeneratedSlots([]);
     }
-  }, [selectedServiceDetails.totalDuration, bookingForm.date, bookedTimes]);
+  }, [selectedServiceDetails.totalDuration, bookingForm.date, bookedIntervals]);
 
   useEffect(() => {
     fetchSalons();
@@ -290,12 +318,15 @@ export default function BrowseSalonsPage() {
     setServices([]);
     setSelectedServices([]);
     setGeneratedSlots([]);
-    setBookedTimes([]);
+    setBookedIntervals([]);
   };
 
   const minDate = useMemo(() => {
     const today = new Date();
-    const nextWeekday = getNextWeekday(today);
+    // Restriction: Must book at least 1 day in advance
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const nextWeekday = getNextWeekday(tomorrow);
     return nextWeekday.toISOString().split("T")[0];
   }, []);
 
