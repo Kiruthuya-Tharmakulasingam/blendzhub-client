@@ -14,12 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Field,
-  FieldLabel,
-  FieldError,
-  FieldGroup,
-} from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginFormData, loginSchema } from "@/lib/validations/auth.schema";
 import { useState } from "react";
@@ -74,16 +69,8 @@ export function SignInModal({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] home-theme bg-card text-card-foreground border-border">
-        <div 
-          className="absolute inset-0 opacity-5 pointer-events-none"
-          style={{
-            backgroundImage: "url('/background-pattern.svg')",
-            backgroundRepeat: "repeat",
-            backgroundSize: "200px 200px"
-          }}
-        />
-        <DialogHeader className="text-center relative z-10">
+      <DialogContent className="sm:max-w-[425px] home-theme bg-card text-card-foreground border-border z-[100]">
+        <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Image
               src="/noBgColor.png"
@@ -100,43 +87,57 @@ export function SignInModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="relative z-10">
+        <div>
           {error && (
             <div className="mb-4 p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md">
               {error}
             </div>
           )}
 
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FieldGroup>
-              <Field>
-                <FieldLabel>Email</FieldLabel>
+          <form onSubmit={(e) => {
+            form.handleSubmit(onSubmit)(e);
+          }}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
                 <Input
+                  id="email"
                   {...form.register("email")}
                   type="email"
                   placeholder="you@example.com"
                 />
-                <FieldError errors={[form.formState.errors.email]} />
-              </Field>
+                {form.formState.errors.email && (
+                  <p className="text-sm text-destructive">{form.formState.errors.email.message}</p>
+                )}
+              </div>
 
-              <Field>
-                <FieldLabel>Password</FieldLabel>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
                 <Input
+                  id="password"
                   {...form.register("password")}
                   type="password"
                   placeholder="Enter your password"
                 />
-                <FieldError errors={[form.formState.errors.password]} />
-              </Field>
-            </FieldGroup>
+                {form.formState.errors.password && (
+                  <p className="text-sm text-destructive">{form.formState.errors.password.message}</p>
+                )}
+              </div>
+            </div>
 
-            <Button
-              type="submit"
-              className="w-full mt-4"
+            {/* Hidden submit button to enable Enter key submission */}
+            <button type="submit" className="hidden" />
+
+            <button
+              type="button"
+              className="w-full mt-4 h-10 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background"
               disabled={form.formState.isSubmitting}
+              onClick={(e) => {
+                form.handleSubmit(onSubmit)(e);
+              }}
             >
               {form.formState.isSubmitting ? "Logging in..." : "Login"}
-            </Button>
+            </button>
           </form>
 
           <div className="flex justify-center mt-6">
