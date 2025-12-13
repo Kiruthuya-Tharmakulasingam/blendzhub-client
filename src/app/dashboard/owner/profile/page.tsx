@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Trash2 } from "lucide-react";
 
 export default function OwnerProfilePage() {
-  const { user, updateUser } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
@@ -44,7 +44,7 @@ export default function OwnerProfilePage() {
       const response = await profileService.updateProfile(formData);
       if (response.success && response.data) {
         // Update user state immediately with the response data
-        updateUser(response.data);
+        await refreshUser();
         toast.success("Profile updated successfully");
         setIsEditing(false);
       }
@@ -76,7 +76,7 @@ export default function OwnerProfilePage() {
         
         if (profileResponse.success && profileResponse.data) {
           // Update user state immediately with the response data
-          updateUser(profileResponse.data);
+          await refreshUser();
           toast.success("Profile image updated successfully");
         }
       }
@@ -97,7 +97,7 @@ export default function OwnerProfilePage() {
       
       if (response.success && response.data) {
         // Update user state immediately with the response data
-        updateUser(response.data);
+        await refreshUser();
         toast.success("Profile image removed successfully");
       }
     } catch (error: unknown) {
