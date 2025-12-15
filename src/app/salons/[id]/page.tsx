@@ -20,7 +20,6 @@ import {
   Clock,
   Calendar,
   ArrowLeft,
-  DollarSign,
   Scissors,
   Loader2,
   Star,
@@ -224,9 +223,16 @@ export default function SalonDetailPage() {
         <Navbar />
         <main className="flex-1 flex items-center justify-center py-20 px-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4 text-primary">Salon not found</h1>
+            <h1 className="text-2xl font-bold mb-4 text-primary">
+              Salon not found
+            </h1>
             <Link href="/">
-              <Button variant="outline" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">Go back to home</Button>
+              <Button
+                variant="outline"
+                className="text-primary border-primary hover:bg-primary hover:text-primary-foreground"
+              >
+                Go back to home
+              </Button>
             </Link>
           </div>
         </main>
@@ -244,7 +250,10 @@ export default function SalonDetailPage() {
         <section className="py-12 px-8 sm:px-16 bg-background border-b border-border">
           <div className="max-w-7xl mx-auto">
             <Link href="/">
-              <Button variant="ghost" className="mb-6 text-muted-foreground hover:text-primary">
+              <Button
+                variant="ghost"
+                className="mb-6 text-muted-foreground hover:text-primary"
+              >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Salons
               </Button>
@@ -266,7 +275,9 @@ export default function SalonDetailPage() {
 
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-bold mb-4 text-primary">{salon.name}</h1>
+                <h1 className="text-4xl font-bold mb-4 text-primary">
+                  {salon.name}
+                </h1>
                 <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
                   <div className="flex items-center">
                     <MapPin className="h-5 w-5 mr-2" />
@@ -326,7 +337,9 @@ export default function SalonDetailPage() {
           <div className="max-w-7xl mx-auto space-y-12">
             {/* Services Section */}
             <div>
-              <h2 className="text-3xl font-bold mb-6 text-primary">Services Offered</h2>
+              <h2 className="text-3xl font-bold mb-6 text-primary">
+                Services Offered
+              </h2>
               <FilterAndSort
                 searchValue={servicesSearch}
                 onSearchChange={(value) => {
@@ -393,8 +406,7 @@ export default function SalonDetailPage() {
                           <CardTitle className="flex items-start justify-between text-primary">
                             <span>{service.name}</span>
                             <div className="flex items-center gap-1 text-lg font-bold text-primary">
-                              <DollarSign className="h-5 w-5" />
-                              {service.price}
+                              LKR {service.price}
                             </div>
                           </CardTitle>
                         </CardHeader>
@@ -444,7 +456,9 @@ export default function SalonDetailPage() {
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-3xl font-bold text-primary">Customer Reviews</h2>
+                  <h2 className="text-3xl font-bold text-primary">
+                    Customer Reviews
+                  </h2>
                   {feedbacks.length > 0 && (
                     <div className="flex items-center gap-2 mt-2">
                       <div className="flex items-center">
