@@ -21,13 +21,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, MapPin, Clock, X, Star, CalendarClock, Bell, MessageSquare } from "lucide-react";
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  X,
+  Star,
+  CalendarClock,
+  Bell,
+  MessageSquare,
+} from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { appointmentService } from "@/services/appointment.service";
 import { feedbackService, Feedback } from "@/services/feedback.service";
 import { slotService, TimeSlot } from "@/services/slot.service";
-import { notificationService, Notification } from "@/services/notification.service";
+import {
+  notificationService,
+  Notification,
+} from "@/services/notification.service";
 import {
   Dialog,
   DialogContent,
@@ -44,111 +56,124 @@ import { StatusBadge } from "@/components/ui/status-badge";
 interface Appointment {
   _id: string;
   salonId: string | { _id: string; name: string; location: string } | null;
-  serviceId: string | { _id: string; name: string; price: number; duration?: number } | null;
+  serviceId:
+    | string
+    | { _id: string; name: string; price: number; duration?: number }
+    | null;
   customerId: string | { _id: string; name: string; email: string } | null;
   date: string;
-  status: "pending" | "accepted" | "rejected" | "in-progress" | "completed" | "cancelled" | "no-show";
+  status:
+    | "pending"
+    | "accepted"
+    | "rejected"
+    | "in-progress"
+    | "completed"
+    | "cancelled"
+    | "no-show";
   notes?: string;
   createdAt: string;
 }
 
 // Helper functions to safely access nested properties using optional chaining
-const getSalonName = (salonId: Appointment['salonId']): string => {
+const getSalonName = (salonId: Appointment["salonId"]): string => {
   try {
     if (!salonId || salonId === null) return "N/A";
-    if (typeof salonId === 'string') return "N/A";
-    if (typeof salonId !== 'object') return "N/A";
+    if (typeof salonId === "string") return "N/A";
+    if (typeof salonId !== "object") return "N/A";
     const name = salonId?.name;
-    if (name === null || name === undefined || name === '') return "N/A";
+    if (name === null || name === undefined || name === "") return "N/A";
     return String(name);
   } catch (error) {
-    console.error('Error getting salon name:', error);
+    console.error("Error getting salon name:", error);
     return "N/A";
   }
 };
 
-const getSalonLocation = (salonId: Appointment['salonId']): string => {
+const getSalonLocation = (salonId: Appointment["salonId"]): string => {
   try {
     if (!salonId || salonId === null) return "N/A";
-    if (typeof salonId === 'string') return "N/A";
-    if (typeof salonId !== 'object') return "N/A";
+    if (typeof salonId === "string") return "N/A";
+    if (typeof salonId !== "object") return "N/A";
     const location = salonId?.location;
-    if (location === null || location === undefined || location === '') return "N/A";
+    if (location === null || location === undefined || location === "")
+      return "N/A";
     return String(location);
   } catch (error) {
-    console.error('Error getting salon location:', error);
+    console.error("Error getting salon location:", error);
     return "N/A";
   }
 };
 
-const getServiceName = (serviceId: Appointment['serviceId']): string => {
+const getServiceName = (serviceId: Appointment["serviceId"]): string => {
   try {
     if (!serviceId || serviceId === null) return "N/A";
-    if (typeof serviceId === 'string') return "N/A";
-    if (typeof serviceId !== 'object') return "N/A";
+    if (typeof serviceId === "string") return "N/A";
+    if (typeof serviceId !== "object") return "N/A";
     const name = serviceId?.name;
-    if (name === null || name === undefined || name === '') return "N/A";
+    if (name === null || name === undefined || name === "") return "N/A";
     return String(name);
   } catch (error) {
-    console.error('Error getting service name:', error);
+    console.error("Error getting service name:", error);
     return "N/A";
   }
 };
 
-const getServicePrice = (serviceId: Appointment['serviceId']): number => {
+const getServicePrice = (serviceId: Appointment["serviceId"]): number => {
   try {
     if (!serviceId || serviceId === null) return 0;
-    if (typeof serviceId === 'string') return 0;
-    if (typeof serviceId !== 'object') return 0;
+    if (typeof serviceId === "string") return 0;
+    if (typeof serviceId !== "object") return 0;
     const price = serviceId?.price;
     if (price === null || price === undefined) return 0;
     const numPrice = Number(price);
     return isNaN(numPrice) ? 0 : numPrice;
   } catch (error) {
-    console.error('Error getting service price:', error);
+    console.error("Error getting service price:", error);
     return 0;
   }
 };
 
-const getServiceDuration = (serviceId: Appointment['serviceId']): number => {
+const getServiceDuration = (serviceId: Appointment["serviceId"]): number => {
   try {
     if (!serviceId || serviceId === null) return 0;
-    if (typeof serviceId === 'string') return 0;
-    if (typeof serviceId !== 'object') return 0;
+    if (typeof serviceId === "string") return 0;
+    if (typeof serviceId !== "object") return 0;
     const duration = serviceId?.duration;
     if (duration === null || duration === undefined) return 0;
     const numDuration = Number(duration);
     return isNaN(numDuration) ? 0 : numDuration;
   } catch (error) {
-    console.error('Error getting service duration:', error);
+    console.error("Error getting service duration:", error);
     return 0;
   }
 };
 
-const getSalonIdValue = (salonId: Appointment['salonId']): string | null => {
+const getSalonIdValue = (salonId: Appointment["salonId"]): string | null => {
   try {
     if (!salonId) return null;
-    if (typeof salonId === 'string') return salonId;
-    if (typeof salonId !== 'object' || salonId === null) return null;
+    if (typeof salonId === "string") return salonId;
+    if (typeof salonId !== "object" || salonId === null) return null;
     const id = salonId?._id ?? null;
     if (!id) return null;
     return String(id);
   } catch (error) {
-    console.error('Error getting salon ID:', error);
+    console.error("Error getting salon ID:", error);
     return null;
   }
 };
 
-const getServiceIdValue = (serviceId: Appointment['serviceId']): string | null => {
+const getServiceIdValue = (
+  serviceId: Appointment["serviceId"]
+): string | null => {
   try {
     if (!serviceId) return null;
-    if (typeof serviceId === 'string') return serviceId;
-    if (typeof serviceId !== 'object' || serviceId === null) return null;
+    if (typeof serviceId === "string") return serviceId;
+    if (typeof serviceId !== "object" || serviceId === null) return null;
     const id = serviceId?._id ?? null;
     if (!id) return null;
     return String(id);
   } catch (error) {
-    console.error('Error getting service ID:', error);
+    console.error("Error getting service ID:", error);
     return null;
   }
 };
@@ -160,10 +185,11 @@ export default function MyAppointmentsPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
-  
+
   // Feedback state
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
-  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<Appointment | null>(null);
   const [rating, setRating] = useState(5);
   const [comments, setComments] = useState("");
   const [submittingFeedback, setSubmittingFeedback] = useState(false);
@@ -198,10 +224,13 @@ export default function MyAppointmentsPage() {
 
   const fetchNotifications = async () => {
     try {
-      const response = await notificationService.getNotifications({ limit: 10 });
+      const response = await notificationService.getNotifications({
+        limit: 10,
+      });
       if (response.success && response.data) {
-        const validNotifications = (response.data.data || [])
-          .filter((notif: Notification) => notif && notif._id && notif.message);
+        const validNotifications = (response.data.data || []).filter(
+          (notif: Notification) => notif && notif._id && notif.message
+        );
         setNotifications(validNotifications);
         setUnreadCount(response.data.unreadCount || 0);
       } else {
@@ -229,50 +258,61 @@ export default function MyAppointmentsPage() {
     try {
       const response = await appointmentService.getAppointments();
       if (response.success && response.data) {
-        const appointmentsData = Array.isArray(response.data) ? response.data : [];
-        type RawAppointment = Partial<Appointment> & { 
-          _id?: string; 
-          date?: string; 
-          status?: Appointment['status']; 
+        const appointmentsData = Array.isArray(response.data)
+          ? response.data
+          : [];
+        type RawAppointment = Partial<Appointment> & {
+          _id?: string;
+          date?: string;
+          status?: Appointment["status"];
           createdAt?: string;
         };
         const sanitizedAppointments = appointmentsData
           .filter((apt: RawAppointment) => apt && apt._id)
           .map((apt: RawAppointment): Appointment => {
-            let salonId: Appointment['salonId'] = null;
+            let salonId: Appointment["salonId"] = null;
             if (apt.salonId) {
-              if (typeof apt.salonId === 'string') {
+              if (typeof apt.salonId === "string") {
                 salonId = apt.salonId;
-              } else if (typeof apt.salonId === 'object' && apt.salonId !== null) {
+              } else if (
+                typeof apt.salonId === "object" &&
+                apt.salonId !== null
+              ) {
                 salonId = apt.salonId;
               }
             }
 
-            let serviceId: Appointment['serviceId'] = null;
+            let serviceId: Appointment["serviceId"] = null;
             if (apt.serviceId) {
-              if (typeof apt.serviceId === 'string') {
+              if (typeof apt.serviceId === "string") {
                 serviceId = apt.serviceId;
-              } else if (typeof apt.serviceId === 'object' && apt.serviceId !== null) {
+              } else if (
+                typeof apt.serviceId === "object" &&
+                apt.serviceId !== null
+              ) {
                 serviceId = apt.serviceId;
               }
             }
 
-            let customerId: Appointment['customerId'] = null;
+            let customerId: Appointment["customerId"] = null;
             if (apt.customerId) {
-              if (typeof apt.customerId === 'string') {
+              if (typeof apt.customerId === "string") {
                 customerId = apt.customerId;
-              } else if (typeof apt.customerId === 'object' && apt.customerId !== null) {
+              } else if (
+                typeof apt.customerId === "object" &&
+                apt.customerId !== null
+              ) {
                 customerId = apt.customerId;
               }
             }
 
             return {
-              _id: apt._id || '',
+              _id: apt._id || "",
               salonId,
               serviceId,
               customerId,
               date: apt.date || new Date().toISOString(),
-              status: apt.status || 'pending',
+              status: apt.status || "pending",
               notes: apt.notes,
               createdAt: apt.createdAt || new Date().toISOString(),
             };
@@ -282,7 +322,7 @@ export default function MyAppointmentsPage() {
         setAppointments([]);
       }
     } catch (error) {
-      console.error('Failed to fetch appointments:', error);
+      console.error("Failed to fetch appointments:", error);
       toast.error("Failed to fetch appointments");
       setAppointments([]);
     } finally {
@@ -295,7 +335,8 @@ export default function MyAppointmentsPage() {
   const handleCancelAppointment = async (id: string) => {
     const confirmed = await confirm({
       title: "Cancel Appointment",
-      message: "Are you sure you want to cancel this appointment? This action cannot be undone.",
+      message:
+        "Are you sure you want to cancel this appointment? This action cannot be undone.",
       confirmText: "Yes, Cancel",
       cancelText: "No, Keep It",
       variant: "destructive",
@@ -310,14 +351,15 @@ export default function MyAppointmentsPage() {
       }
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { message?: string } } };
-      const errorMessage = apiError?.response?.data?.message || "Failed to cancel appointment";
+      const errorMessage =
+        apiError?.response?.data?.message || "Failed to cancel appointment";
       toast.error(errorMessage);
     }
   };
 
   const handleOpenReschedule = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
-    setRescheduleDate(new Date(appointment.date).toISOString().split('T')[0]);
+    setRescheduleDate(new Date(appointment.date).toISOString().split("T")[0]);
     setRescheduleTime("");
     setAvailableSlots([]);
     setRescheduleModalOpen(true);
@@ -330,17 +372,23 @@ export default function MyAppointmentsPage() {
       setLoadingSlots(true);
       const salonId = getSalonIdValue(selectedAppointment.salonId);
       const serviceId = getServiceIdValue(selectedAppointment.serviceId);
-      
+
       if (!salonId || !serviceId) {
         toast.error("Invalid appointment data");
         return;
       }
-      
-      const response = await slotService.getAvailableSlots(date, serviceId, salonId);
+
+      const response = await slotService.getAvailableSlots(
+        date,
+        serviceId,
+        salonId
+      );
       setAvailableSlots(response.slots || []);
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { message?: string } } };
-      toast.error(apiError?.response?.data?.message || "Failed to fetch available slots");
+      toast.error(
+        apiError?.response?.data?.message || "Failed to fetch available slots"
+      );
       setAvailableSlots([]);
     } finally {
       setLoadingSlots(false);
@@ -359,7 +407,7 @@ export default function MyAppointmentsPage() {
         rescheduleDate,
         rescheduleTime
       );
-      
+
       if (response.success) {
         toast.success("Appointment rescheduled successfully!");
         setRescheduleModalOpen(false);
@@ -367,7 +415,8 @@ export default function MyAppointmentsPage() {
       }
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { message?: string } } };
-      const errorMessage = apiError?.response?.data?.message || "Failed to reschedule appointment";
+      const errorMessage =
+        apiError?.response?.data?.message || "Failed to reschedule appointment";
       toast.error(errorMessage);
     }
   };
@@ -395,14 +444,14 @@ export default function MyAppointmentsPage() {
         setSubmittingFeedback(false);
         return;
       }
-      
+
       const response = await feedbackService.createFeedback({
         salonId,
         appointmentId: selectedAppointment._id,
         rating,
         comments: comments.trim() || undefined,
       });
-      
+
       if (response.success) {
         toast.success("Feedback submitted successfully!");
         setFeedbackModalOpen(false);
@@ -412,7 +461,8 @@ export default function MyAppointmentsPage() {
       }
     } catch (error: unknown) {
       const apiError = error as { response?: { data?: { message?: string } } };
-      const errorMessage = apiError?.response?.data?.message || "Failed to submit feedback";
+      const errorMessage =
+        apiError?.response?.data?.message || "Failed to submit feedback";
       toast.error(errorMessage);
     } finally {
       setSubmittingFeedback(false);
@@ -422,10 +472,18 @@ export default function MyAppointmentsPage() {
   const filteredAppointments = appointments.filter((apt) => {
     if (filter === "all") return true;
     if (filter === "upcoming") {
-      return apt.status === "pending" || apt.status === "accepted" || apt.status === "in-progress";
+      return (
+        apt.status === "pending" ||
+        apt.status === "accepted" ||
+        apt.status === "in-progress"
+      );
     }
     if (filter === "past") {
-      return apt.status === "completed" || apt.status === "cancelled" || apt.status === "rejected";
+      return (
+        apt.status === "completed" ||
+        apt.status === "cancelled" ||
+        apt.status === "rejected"
+      );
     }
     return apt.status === filter;
   });
@@ -437,13 +495,16 @@ export default function MyAppointmentsPage() {
       }
       return feedbacks.find((f) => {
         if (!f || !f.appointmentId) return false;
-        const fAppId = f.appointmentId && typeof f.appointmentId === 'object' && f.appointmentId !== null
-          ? f.appointmentId._id
-          : f.appointmentId;
+        const fAppId =
+          f.appointmentId &&
+          typeof f.appointmentId === "object" &&
+          f.appointmentId !== null
+            ? f.appointmentId._id
+            : f.appointmentId;
         return fAppId === appointmentId;
       });
     } catch (error) {
-      console.error('Error getting feedback for appointment:', error);
+      console.error("Error getting feedback for appointment:", error);
       return undefined;
     }
   };
@@ -474,7 +535,9 @@ export default function MyAppointmentsPage() {
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-primary">My Appointments</h1>
+                <h1 className="text-3xl font-bold text-primary">
+                  My Appointments
+                </h1>
                 <p className="text-muted-foreground mt-2">
                   View and manage your appointments
                 </p>
@@ -491,27 +554,27 @@ export default function MyAppointmentsPage() {
                     <Bell className="h-5 w-5 text-muted-foreground" />
                     {unreadCount > 0 && (
                       <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {unreadCount > 9 ? '9+' : unreadCount}
+                        {unreadCount > 9 ? "9+" : unreadCount}
                       </span>
                     )}
                   </div>
                 )}
                 <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="upcoming">Upcoming</SelectItem>
-                  <SelectItem value="past">Past</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="accepted">Accepted</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                  <SelectItem value="in-progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="upcoming">Upcoming</SelectItem>
+                    <SelectItem value="past">Past</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="accepted">Accepted</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -519,7 +582,11 @@ export default function MyAppointmentsPage() {
             {notifications.length > 0 && (
               <div className="space-y-2">
                 {notifications.slice(0, 5).map((notification) => {
-                  if (!notification || !notification._id || !notification.message) {
+                  if (
+                    !notification ||
+                    !notification._id ||
+                    !notification.message
+                  ) {
                     return null;
                   }
                   return (
@@ -537,12 +604,18 @@ export default function MyAppointmentsPage() {
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <p className={`text-sm ${!notification.read ? "font-semibold" : ""}`}>
+                            <p
+                              className={`text-sm ${
+                                !notification.read ? "font-semibold" : ""
+                              }`}
+                            >
                               {notification.message || "No message"}
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
-                              {notification.createdAt 
-                                ? new Date(notification.createdAt).toLocaleString()
+                              {notification.createdAt
+                                ? new Date(
+                                    notification.createdAt
+                                  ).toLocaleString()
                                 : "Unknown date"}
                             </p>
                           </div>
@@ -563,7 +636,9 @@ export default function MyAppointmentsPage() {
               <Card>
                 <CardContent className="py-12 text-center">
                   <Calendar className="h-12 w-12 mx-auto mb-4 opacity-20" />
-                  <p className="text-muted-foreground mb-4">No appointments found</p>
+                  <p className="text-muted-foreground mb-4">
+                    No appointments found
+                  </p>
                   <Link href="/dashboard/customer">
                     <Button>Browse Salons</Button>
                   </Link>
@@ -594,16 +669,20 @@ export default function MyAppointmentsPage() {
                             salonId: appointment.salonId ?? null,
                             serviceId: appointment.serviceId ?? null,
                             date: appointment.date ?? new Date().toISOString(),
-                            status: appointment.status ?? 'pending' as const,
+                            status: appointment.status ?? ("pending" as const),
                           };
 
-                          const feedback = getFeedbackForAppointment(safeAppointment._id);
+                          const feedback = getFeedbackForAppointment(
+                            safeAppointment._id
+                          );
 
                           return (
                             <TableRow key={safeAppointment._id}>
                               <TableCell>
                                 <div>
-                                  <div className="font-medium">{getSalonName(safeAppointment.salonId)}</div>
+                                  <div className="font-medium">
+                                    {getSalonName(safeAppointment.salonId)}
+                                  </div>
                                   <div className="text-sm text-muted-foreground flex items-center">
                                     <MapPin className="h-3 w-3 mr-1" />
                                     {getSalonLocation(safeAppointment.salonId)}
@@ -612,17 +691,27 @@ export default function MyAppointmentsPage() {
                               </TableCell>
                               <TableCell>
                                 <div>
-                                  <div className="font-medium">{getServiceName(safeAppointment.serviceId)}</div>
+                                  <div className="font-medium">
+                                    {getServiceName(safeAppointment.serviceId)}
+                                  </div>
                                   <div className="text-sm text-muted-foreground">
-                                    Rs. {getServicePrice(safeAppointment.serviceId)} • {getServiceDuration(safeAppointment.serviceId)} min
+                                    Rs.{" "}
+                                    {getServicePrice(safeAppointment.serviceId)}{" "}
+                                    •{" "}
+                                    {getServiceDuration(
+                                      safeAppointment.serviceId
+                                    )}{" "}
+                                    min
                                   </div>
                                 </div>
                               </TableCell>
                               <TableCell>
                                 <div className="flex items-center">
                                   <Clock className="h-4 w-4 mr-2" />
-                                  {safeAppointment.date 
-                                    ? new Date(safeAppointment.date).toLocaleString()
+                                  {safeAppointment.date
+                                    ? new Date(
+                                        safeAppointment.date
+                                      ).toLocaleString()
                                     : "Invalid date"}
                                 </div>
                               </TableCell>
@@ -633,7 +722,7 @@ export default function MyAppointmentsPage() {
                                       ? "in-progress"
                                       : safeAppointment.status === "no-show"
                                       ? "no-show"
-                                      : (safeAppointment.status as 
+                                      : (safeAppointment.status as
                                           | "pending"
                                           | "accepted"
                                           | "approved"
@@ -663,7 +752,9 @@ export default function MyAppointmentsPage() {
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => handleOpenReschedule(safeAppointment)}
+                                      onClick={() =>
+                                        handleOpenReschedule(safeAppointment)
+                                      }
                                     >
                                       <CalendarClock className="h-4 w-4 mr-1" />
                                       Reschedule
@@ -672,7 +763,11 @@ export default function MyAppointmentsPage() {
                                       variant="ghost"
                                       size="sm"
                                       className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                      onClick={() => handleCancelAppointment(safeAppointment._id)}
+                                      onClick={() =>
+                                        handleCancelAppointment(
+                                          safeAppointment._id
+                                        )
+                                      }
                                     >
                                       <X className="h-4 w-4 mr-1" />
                                       Cancel
@@ -684,7 +779,9 @@ export default function MyAppointmentsPage() {
                                     {feedback ? (
                                       <div className="text-left space-y-2">
                                         <div className="flex items-center gap-2">
-                                          <span className="text-sm font-medium">Your Feedback:</span>
+                                          <span className="text-sm font-medium">
+                                            Your Feedback:
+                                          </span>
                                           {renderStars(feedback.rating || 0)}
                                         </div>
                                         {feedback.comments && (
@@ -707,7 +804,9 @@ export default function MyAppointmentsPage() {
                                       <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => handleOpenFeedback(safeAppointment)}
+                                        onClick={() =>
+                                          handleOpenFeedback(safeAppointment)
+                                        }
                                         className="w-full sm:w-auto"
                                       >
                                         <Star className="h-4 w-4 mr-1" />
@@ -720,10 +819,19 @@ export default function MyAppointmentsPage() {
                             </TableRow>
                           );
                         } catch (error) {
-                          console.error('Error rendering appointment:', error, appointment);
+                          console.error(
+                            "Error rendering appointment:",
+                            error,
+                            appointment
+                          );
                           return (
-                            <TableRow key={appointment._id || `error-${Math.random()}`}>
-                              <TableCell colSpan={5} className="text-center text-red-500">
+                            <TableRow
+                              key={appointment._id || `error-${Math.random()}`}
+                            >
+                              <TableCell
+                                colSpan={5}
+                                className="text-center text-red-500"
+                              >
                                 Error loading appointment data
                               </TableCell>
                             </TableRow>
@@ -744,10 +852,19 @@ export default function MyAppointmentsPage() {
           <DialogContent className="max-w-md home-theme text-foreground">
             <DialogHeader>
               <DialogTitle>
-                Leave Feedback for {selectedAppointment ? getSalonName(selectedAppointment.salonId) : 'Salon'}
+                Leave Feedback for{" "}
+                {selectedAppointment
+                  ? getSalonName(selectedAppointment.salonId)
+                  : "Salon"}
               </DialogTitle>
             </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); handleSubmitFeedback(); }} className="space-y-4 py-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmitFeedback();
+              }}
+              className="space-y-4 py-4"
+            >
               <div className="space-y-2">
                 <Label>Rating *</Label>
                 <div className="flex gap-2">
@@ -757,7 +874,7 @@ export default function MyAppointmentsPage() {
                       type="button"
                       onClick={() => setRating(star)}
                       className="focus:outline-none transition-transform hover:scale-110"
-                      aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                      aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
                     >
                       <Star
                         className={`h-8 w-8 transition-colors ${
@@ -808,7 +925,10 @@ export default function MyAppointmentsPage() {
         </Dialog>
 
         {/* Reschedule Modal */}
-        <Dialog open={rescheduleModalOpen} onOpenChange={setRescheduleModalOpen}>
+        <Dialog
+          open={rescheduleModalOpen}
+          onOpenChange={setRescheduleModalOpen}
+        >
           <DialogContent className="max-w-md home-theme text-foreground">
             <DialogHeader>
               <DialogTitle>Reschedule Appointment</DialogTitle>
@@ -825,11 +945,11 @@ export default function MyAppointmentsPage() {
                     setRescheduleTime("");
                     fetchRescheduleSlots(e.target.value);
                   }}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toISOString().split("T")[0]}
                   max={(() => {
                     const maxDate = new Date();
                     maxDate.setDate(maxDate.getDate() + 30);
-                    return maxDate.toISOString().split('T')[0];
+                    return maxDate.toISOString().split("T")[0];
                   })()}
                 />
               </div>
@@ -845,10 +965,11 @@ export default function MyAppointmentsPage() {
                   </div>
                 ) : availableSlots.length === 0 ? (
                   <div className="text-sm text-muted-foreground p-4 border rounded-md bg-muted/50 text-center">
-                    No available time slots for this date. Please try another date.
+                    No available time slots for this date. Please try another
+                    date.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto p-2 border rounded-md">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-2 border rounded-md">
                     {availableSlots.map((slot, index) => (
                       <button
                         key={index}
@@ -859,6 +980,7 @@ export default function MyAppointmentsPage() {
                             ? "bg-primary text-primary-foreground border-primary"
                             : "bg-background hover:bg-muted border-border"
                         }`}
+                        title={`Select ${slot.start} - ${slot.end}`}
                       >
                         {slot.start} - {slot.end}
                       </button>

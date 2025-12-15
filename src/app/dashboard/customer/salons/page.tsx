@@ -22,7 +22,15 @@ import { serviceService } from "@/services/service.service";
 import { Service } from "@/types/service.types";
 import { appointmentService } from "@/services/appointment.service";
 import { toast } from "sonner";
-import { MapPin, Phone, Mail, Clock, Calendar, RefreshCw, Check } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Calendar,
+  RefreshCw,
+  Check,
+} from "lucide-react";
 import { FilterAndSort } from "@/components/FilterAndSort";
 import { Pagination } from "@/components/Pagination";
 import { AlertBanner } from "@/components/ui/alert-banner";
@@ -34,65 +42,52 @@ interface GeneratedSlot {
   isBooked: boolean;
 }
 
-// Helper to convert time string (HH:MM) to minutes
-const timeToMinutes = (time: string): number => {
-  const [hours, minutes] = time.split(":").map(Number);
-  return hours * 60 + minutes;
-};
-
-// Helper to convert minutes to time string (HH:MM)
-const minutesToTime = (minutes: number): string => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
-};
-
-interface BookedInterval {
-  start: number; // in minutes
-  end: number;   // in minutes
-}
-
 const generateTimeSlots = (
   totalDuration: number,
-  bookedIntervals: BookedInterval[],
+  bookedTimes: string[],
   openingTime: string = "09:00",
   closingTime: string = "18:00"
 ): GeneratedSlot[] => {
   const slots: GeneratedSlot[] = [];
-  
-  const openingMinutes = timeToMinutes(openingTime);
-  const closingMinutes = timeToMinutes(closingTime);
-  
-  const interval = totalDuration;
-  
-  for (let startMinutes = openingMinutes; startMinutes < closingMinutes; startMinutes += interval) {
-    const endMinutes = startMinutes + totalDuration;
-    
-    // Check if the slot fits within closing time
-    if (endMinutes <= closingMinutes) {
-      // Check for overlaps with any booked interval
-      // Overlap condition: (StartA < EndB) && (EndA > StartB)
-      const isOverlapping = bookedIntervals.some(booked => 
-        startMinutes < booked.end && endMinutes > booked.start
-      );
-      
-      // Only add the slot if it's not overlapping (available)
-      // Requirement: "Do NOT show partial or insufficient time slots"
-      // So we only push if !isOverlapping. 
-      // However, the existing code pushed everything and marked isBooked.
-      // The requirement says "In the time slot list, show only those time slots where... available."
-      // So we should filter them out.
-      
-      if (!isOverlapping) {
-        slots.push({
-          start: minutesToTime(startMinutes),
-          end: minutesToTime(endMinutes),
-          isBooked: false, // It's available
-        });
-      }
-    }
+
+  // Use the same logic as backend - generate 30-minute slots and group them
+  const interval = 30; // Same as backend default
+  const blocksNeeded = Math.ceil(totalDuration / interval);
+
+  // Generate slots using the same method as backend
+  const allSlots: string[] = [];
+  const [openHour, openMin] = openingTime.split(":").map(Number);
+  const [closeHour, closeMin] = closingTime.split(":").map(Number);
+
+  let current = new Date();
+  current.setHours(openHour, openMin, 0, 0);
+
+  const end = new Date();
+  end.setHours(closeHour, closeMin, 0, 0);
+
+  while (current < end) {
+    allSlots.push(current.toTimeString().slice(0, 5)); // "HH:MM"
+    current = new Date(current.getTime() + interval * 60000);
   }
-  
+
+  // Group slots into blocks based on service duration
+  for (let i = 0; i <= allSlots.length - blocksNeeded; i++) {
+    const needed = allSlots.slice(i, i + blocksNeeded);
+    const startTime = needed[0];
+    const endTime = needed[needed.length - 1];
+
+    // Check if this slot overlaps with any booked time
+    const isBooked = bookedTimes.some((bookedTime) => {
+      return startTime === bookedTime;
+    });
+
+    slots.push({
+      start: startTime,
+      end: endTime,
+      isBooked,
+    });
+  }
+
   return slots;
 };
 
@@ -127,7 +122,7 @@ export default function BrowseSalonsPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [generatedSlots, setGeneratedSlots] = useState<GeneratedSlot[]>([]);
-  const [bookedIntervals, setBookedIntervals] = useState<BookedInterval[]>([]);
+  const [bookedTimes, setBookedTimes] = useState<string[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [bookingForm, setBookingForm] = useState({
     date: "",
@@ -148,49 +143,106 @@ export default function BrowseSalonsPage() {
   // Calculate total duration and price from selected services
   const selectedServiceDetails = useMemo(() => {
     const selected = services.filter((s) => selectedServices.includes(s._id));
-    const totalDuration = selected.reduce((sum, s) => sum + (s.duration || 0), 0);
+    const totalDuration = selected.reduce(
+      (sum, s) => sum + (s.duration || 0),
+      0
+    );
     const totalPrice = selected.reduce((sum, s) => sum + (s.price || 0), 0);
     return { selected, totalDuration, totalPrice };
   }, [services, selectedServices]);
 
   // Fetch booked appointments when date changes
-  const fetchBookedSlots = useCallback(async (date: string, salonId: string) => {
-    try {
-      setLoadingSlots(true);
-      const response = await appointmentService.getSalonAppointmentsByDate(salonId, date);
-      if (response.success && response.data) {
-        const intervals: BookedInterval[] = response.data
-          .filter(apt => apt.status !== 'cancelled' && apt.status !== 'rejected')
-          .map(apt => {
-            const start = timeToMinutes(apt.time);
-            // Use duration from serviceId if available, else default to 60
-            const duration = apt.serviceId.duration || 60; 
-            return {
-              start,
-              end: start + duration
-            };
-          });
-        setBookedIntervals(intervals);
-      } else {
-        setBookedIntervals([]);
+  const fetchBookedSlots = useCallback(
+    async (date: string, salonId: string) => {
+      try {
+        setLoadingSlots(true);
+        const response = await appointmentService.getSalonAppointmentsByDate(
+          salonId,
+          date
+        );
+        if (response.success && response.data) {
+          // Extract booked times from appointments (filter out cancelled/rejected)
+          const times = response.data
+            .filter(
+              (apt) => apt.status !== "cancelled" && apt.status !== "rejected"
+            )
+            .map((apt) => apt.time)
+            .filter(Boolean);
+          setBookedTimes(times);
+        } else {
+          setBookedTimes([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch booked slots:", error);
+        setBookedTimes([]);
+      } finally {
+        setLoadingSlots(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch booked slots:", error);
-      setBookedIntervals([]);
-    } finally {
-      setLoadingSlots(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   // Generate time slots when duration, date, or booked times change
   useEffect(() => {
-    if (selectedServiceDetails.totalDuration > 0 && bookingForm.date && isWeekday(bookingForm.date)) {
-      const slots = generateTimeSlots(selectedServiceDetails.totalDuration, bookedIntervals);
+    if (
+      selectedServiceDetails.totalDuration > 0 &&
+      bookingForm.date &&
+      isWeekday(bookingForm.date) &&
+      selectedSalon
+    ) {
+      // Get the salon's operating hours for the selected day
+      const selectedDate = new Date(bookingForm.date);
+      const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const dayNames = [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+      ] as const;
+      const dayName = dayNames[dayOfWeek];
+
+      // Default operating hours
+      let openingTime = "09:00";
+      let closingTime = "18:00";
+
+      // Use salon's operating hours if available
+      if (
+        selectedSalon.operatingHours &&
+        selectedSalon.operatingHours[dayName]
+      ) {
+        const dayHours = selectedSalon.operatingHours[dayName];
+        // Check if the salon is closed on this day
+        if (dayHours.closed) {
+          // Salon is closed, generate no slots
+          setGeneratedSlots([]);
+          return;
+        } else if (dayHours.open && dayHours.close) {
+          // Use specified open/close times
+          openingTime = dayHours.open;
+          closingTime = dayHours.close;
+        }
+        // If open/close times are not specified but not closed, use defaults
+      }
+
+      const slots = generateTimeSlots(
+        selectedServiceDetails.totalDuration,
+        bookedTimes,
+        openingTime,
+        closingTime
+      );
       setGeneratedSlots(slots);
     } else {
       setGeneratedSlots([]);
     }
-  }, [selectedServiceDetails.totalDuration, bookingForm.date, bookedIntervals]);
+  }, [
+    selectedServiceDetails.totalDuration,
+    bookingForm.date,
+    bookedTimes,
+    selectedSalon,
+  ]);
 
   useEffect(() => {
     fetchSalons();
@@ -264,11 +316,13 @@ export default function BrowseSalonsPage() {
 
   const handleDateChange = async (date: string) => {
     if (date && !isWeekday(date)) {
-      toast.error("Please select a weekday (Monday to Friday). Weekends are not available.");
+      toast.error(
+        "Please select a weekday (Monday to Friday). Weekends are not available."
+      );
       return;
     }
     setBookingForm({ ...bookingForm, date, time: "" });
-    
+
     if (date && selectedSalon) {
       await fetchBookedSlots(date, selectedSalon._id);
     }
@@ -278,7 +332,11 @@ export default function BrowseSalonsPage() {
     e.preventDefault();
     if (!selectedSalon) return;
 
-    if (selectedServices.length === 0 || !bookingForm.date || !bookingForm.time) {
+    if (
+      selectedServices.length === 0 ||
+      !bookingForm.date ||
+      !bookingForm.time
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -289,9 +347,12 @@ export default function BrowseSalonsPage() {
         serviceId: selectedServices[0],
         date: bookingForm.date,
         time: bookingForm.time,
-        notes: selectedServices.length > 1 
-          ? `Multiple services: ${selectedServiceDetails.selected.map(s => s.name).join(", ")}. ${bookingForm.notes}`.trim()
-          : bookingForm.notes,
+        notes:
+          selectedServices.length > 1
+            ? `Multiple services: ${selectedServiceDetails.selected
+                .map((s) => s.name)
+                .join(", ")}. ${bookingForm.notes}`.trim()
+            : bookingForm.notes,
       });
 
       if (response.success) {
@@ -301,8 +362,14 @@ export default function BrowseSalonsPage() {
         router.push("/dashboard/customer/appointments");
       }
     } catch (error: unknown) {
-      const apiError = error as { response?: { status?: number; data?: { message?: string } }; message?: string };
-      const errorMessage = apiError?.response?.data?.message || apiError?.message || "Failed to book appointment";
+      const apiError = error as {
+        response?: { status?: number; data?: { message?: string } };
+        message?: string;
+      };
+      const errorMessage =
+        apiError?.response?.data?.message ||
+        apiError?.message ||
+        "Failed to book appointment";
       toast.error(errorMessage);
       console.error("Booking error:", error);
     }
@@ -318,7 +385,7 @@ export default function BrowseSalonsPage() {
     setServices([]);
     setSelectedServices([]);
     setGeneratedSlots([]);
-    setBookedIntervals([]);
+    setBookedTimes([]);
   };
 
   const minDate = useMemo(() => {
@@ -447,7 +514,8 @@ export default function BrowseSalonsPage() {
                             alt={salon.name}
                             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = "none";
+                              (e.target as HTMLImageElement).style.display =
+                                "none";
                             }}
                           />
                         </div>
@@ -481,7 +549,9 @@ export default function BrowseSalonsPage() {
                         {salon.openingHours && (
                           <div className="flex items-start text-muted-foreground">
                             <Clock className="h-4 w-4 mr-2 mt-0.5" />
-                            <span className="text-xs">{salon.openingHours}</span>
+                            <span className="text-xs">
+                              {salon.openingHours}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -536,7 +606,9 @@ export default function BrowseSalonsPage() {
             <form onSubmit={handleBookingSubmit} className="space-y-6">
               {/* Services Selection with Checkboxes */}
               <div className="space-y-3">
-                <Label className="text-base font-semibold">Select Services *</Label>
+                <Label className="text-base font-semibold">
+                  Select Services *
+                </Label>
                 <p className="text-sm text-muted-foreground">
                   Choose one or more services
                 </p>
@@ -557,7 +629,9 @@ export default function BrowseSalonsPage() {
                       >
                         <Checkbox
                           checked={selectedServices.includes(service._id)}
-                          onCheckedChange={() => handleServiceToggle(service._id)}
+                          onCheckedChange={() =>
+                            handleServiceToggle(service._id)
+                          }
                           className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                         />
                         <div className="flex-1">
@@ -578,13 +652,18 @@ export default function BrowseSalonsPage() {
                 {selectedServices.length > 0 && (
                   <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Selected Services:</span>
+                      <span className="text-sm font-medium">
+                        Selected Services:
+                      </span>
                       <span className="text-sm text-muted-foreground">
-                        {selectedServices.length} service{selectedServices.length > 1 ? "s" : ""}
+                        {selectedServices.length} service
+                        {selectedServices.length > 1 ? "s" : ""}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium">Total Duration:</span>
+                      <span className="text-sm font-medium">
+                        Total Duration:
+                      </span>
                       <span className="text-sm font-semibold text-primary">
                         {formatDuration(selectedServiceDetails.totalDuration)}
                       </span>
@@ -627,7 +706,9 @@ export default function BrowseSalonsPage() {
 
               {/* Time Slots */}
               <div className="space-y-2">
-                <Label className="text-base font-semibold">Select Time Slot *</Label>
+                <Label className="text-base font-semibold">
+                  Select Time Slot *
+                </Label>
                 {selectedServices.length === 0 ? (
                   <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
                     Please select at least one service first
@@ -638,16 +719,84 @@ export default function BrowseSalonsPage() {
                   </div>
                 ) : loadingSlots ? (
                   <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
-                    <div className="animate-pulse">Loading available slots...</div>
+                    <div className="animate-pulse">
+                      Loading available slots...
+                    </div>
                   </div>
                 ) : generatedSlots.length === 0 ? (
                   <div className="text-sm text-muted-foreground p-4 border rounded-lg bg-muted/50 text-center">
-                    No time slots available. The selected services require {formatDuration(selectedServiceDetails.totalDuration)}.
+                    No time slots available. The selected services require{" "}
+                    {formatDuration(selectedServiceDetails.totalDuration)}.
                   </div>
                 ) : (
                   <>
                     <p className="text-sm text-muted-foreground">
-                      Working hours: 9:00 AM – 6:00 PM • Duration: {formatDuration(selectedServiceDetails.totalDuration)}
+                      {(() => {
+                        // Get the salon's operating hours for the selected day
+                        let openingTime = "9:00 AM";
+                        let closingTime = "6:00 PM";
+
+                        if (bookingForm.date && selectedSalon) {
+                          const selectedDate = new Date(bookingForm.date);
+                          const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+                          const dayNames = [
+                            "sunday",
+                            "monday",
+                            "tuesday",
+                            "wednesday",
+                            "thursday",
+                            "friday",
+                            "saturday",
+                          ] as const;
+                          const dayName = dayNames[dayOfWeek];
+
+                          // Use salon's operating hours if available
+                          if (
+                            selectedSalon.operatingHours &&
+                            selectedSalon.operatingHours[dayName]
+                          ) {
+                            const dayHours =
+                              selectedSalon.operatingHours[dayName];
+                            // Check if the salon is closed on this day
+                            if (dayHours.closed) {
+                              // Salon is closed, but we still need to show some working hours for display
+                              openingTime = "Closed";
+                              closingTime = "";
+                            } else if (dayHours.open && dayHours.close) {
+                              // Convert 24-hour format to 12-hour format for display
+                              const formatTime = (timeStr: string) => {
+                                const [hours, minutes] = timeStr
+                                  .split(":")
+                                  .map(Number);
+                                const period = hours >= 12 ? "PM" : "AM";
+                                const displayHours = hours % 12 || 12;
+                                return `${displayHours}:${minutes
+                                  .toString()
+                                  .padStart(2, "0")} ${period}`;
+                              };
+
+                              openingTime = formatTime(dayHours.open);
+                              closingTime = formatTime(dayHours.close);
+                            } else {
+                              // If open/close times are not specified but not closed, use defaults
+                              openingTime = "9:00 AM";
+                              closingTime = "6:00 PM";
+                            }
+                          } else {
+                            // If no operating hours specified for this day, use defaults
+                            openingTime = "9:00 AM";
+                            closingTime = "6:00 PM";
+                          }
+                        }
+
+                        const workingHoursText = closingTime
+                          ? `Working hours: ${openingTime} – ${closingTime}`
+                          : `Working hours: ${openingTime}`;
+
+                        return `${workingHoursText} • Duration: ${formatDuration(
+                          selectedServiceDetails.totalDuration
+                        )}`;
+                      })()}
                     </p>
                     <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto p-2 border rounded-lg">
                       {generatedSlots.map((slot, index) => (
@@ -655,7 +804,10 @@ export default function BrowseSalonsPage() {
                           key={index}
                           type="button"
                           disabled={slot.isBooked}
-                          onClick={() => !slot.isBooked && setBookingForm({ ...bookingForm, time: slot.start })}
+                          onClick={() =>
+                            !slot.isBooked &&
+                            setBookingForm({ ...bookingForm, time: slot.start })
+                          }
                           className={`p-3 text-sm rounded-lg border transition-all ${
                             slot.isBooked
                               ? "bg-muted/70 text-muted-foreground/50 cursor-not-allowed border-muted line-through opacity-60"
@@ -663,10 +815,17 @@ export default function BrowseSalonsPage() {
                               ? "bg-primary text-primary-foreground border-primary shadow-md"
                               : "bg-background hover:bg-muted border-border hover:border-primary/50"
                           }`}
-                          title={slot.isBooked ? "This slot is already booked" : `Book ${slot.start} – ${slot.end}`}
+                          title={
+                            slot.isBooked
+                              ? "This slot is already booked"
+                              : `Book ${slot.start} – ${slot.end}`
+                          }
                         >
                           <span className="font-medium">{slot.start}</span>
-                          <span className="text-xs opacity-80"> – {slot.end}</span>
+                          <span className="text-xs opacity-80">
+                            {" "}
+                            – {slot.end}
+                          </span>
                           {slot.isBooked && (
                             <span className="block text-xs mt-1">Booked</span>
                           )}
@@ -676,8 +835,11 @@ export default function BrowseSalonsPage() {
                     {bookingForm.time && (
                       <p className="text-sm text-primary font-medium flex items-center gap-2">
                         <Check className="h-4 w-4" />
-                        Selected: {bookingForm.time} – {
-                          generatedSlots.find(s => s.start === bookingForm.time)?.end
+                        Selected: {bookingForm.time} –{" "}
+                        {
+                          generatedSlots.find(
+                            (s) => s.start === bookingForm.time
+                          )?.end
                         }
                       </p>
                     )}
@@ -702,10 +864,14 @@ export default function BrowseSalonsPage() {
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-2">
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="flex-1"
-                  disabled={selectedServices.length === 0 || !bookingForm.date || !bookingForm.time}
+                  disabled={
+                    selectedServices.length === 0 ||
+                    !bookingForm.date ||
+                    !bookingForm.time
+                  }
                 >
                   Confirm Booking
                 </Button>

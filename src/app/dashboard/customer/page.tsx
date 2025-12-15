@@ -54,47 +54,49 @@ const generateTimeSlots = (
 ): GeneratedSlot[] => {
   const slots: GeneratedSlot[] = [];
 
+  // Use the same logic as backend - generate 30-minute slots and group them
+  const interval = 30; // Same as backend default
+  const blocksNeeded = Math.ceil(totalDuration / interval);
+
+  // Generate slots using the same method as backend
+  const allSlots: string[] = [];
   const [openHour, openMin] = openingTime.split(":").map(Number);
   const [closeHour, closeMin] = closingTime.split(":").map(Number);
 
-  const openingMinutes = openHour * 60 + openMin;
-  const closingMinutes = closeHour * 60 + closeMin;
+  let current = new Date();
+  current.setHours(openHour, openMin, 0, 0);
 
-  // Generate slots based on total duration
-  const interval = totalDuration;
+  const end = new Date();
+  end.setHours(closeHour, closeMin, 0, 0);
 
-  for (
-    let startMinutes = openingMinutes;
-    startMinutes < closingMinutes;
-    startMinutes += interval
-  ) {
-    const endMinutes = startMinutes + totalDuration;
+  while (current < end) {
+    allSlots.push(current.toTimeString().slice(0, 5)); // "HH:MM"
+    current = new Date(current.getTime() + interval * 60000);
+  }
 
-    // Only include slots that end before or at closing time
-    if (endMinutes <= closingMinutes) {
-      const startHour = Math.floor(startMinutes / 60);
-      const startMin = startMinutes % 60;
-      const endHour = Math.floor(endMinutes / 60);
-      const endMin = endMinutes % 60;
+  // Group slots into blocks based on service duration
+  for (let i = 0; i <= allSlots.length - blocksNeeded; i++) {
+    const needed = allSlots.slice(i, i + blocksNeeded);
+    const startTime = needed[0];
 
-      const startTime = `${startHour.toString().padStart(2, "0")}:${startMin
-        .toString()
-        .padStart(2, "0")}`;
-      const endTime = `${endHour.toString().padStart(2, "0")}:${endMin
-        .toString()
-        .padStart(2, "0")}`;
+    // Calculate proper end time by adding the duration to the start time
+    const [startHour, startMin] = startTime.split(":").map(Number);
+    const slotEndTime = new Date();
+    slotEndTime.setHours(startHour, startMin, 0, 0);
+    slotEndTime.setMinutes(slotEndTime.getMinutes() + totalDuration);
+    const endTime = slotEndTime.toTimeString().slice(0, 5);
 
-      // Check if this slot overlaps with any booked time
-      const isBooked = bookedTimes.some((bookedTime) => {
-        return startTime === bookedTime;
-      });
+    // Check if this slot overlaps with any booked time
+    const isBooked = bookedTimes.some((bookedTime) => {
+      // Check if any of the time blocks in this slot are booked
+      return needed.includes(bookedTime);
+    });
 
-      slots.push({
-        start: startTime,
-        end: endTime,
-        isBooked,
-      });
-    }
+    slots.push({
+      start: startTime,
+      end: endTime,
+      isBooked,
+    });
   }
 
   return slots;
@@ -203,17 +205,62 @@ export default function CustomerPortal() {
     if (
       selectedServiceDetails.totalDuration > 0 &&
       bookingForm.date &&
-      isWeekday(bookingForm.date)
+      isWeekday(bookingForm.date) &&
+      selectedSalon
     ) {
+      // Get the salon's operating hours for the selected day
+      const selectedDate = new Date(bookingForm.date);
+      const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const dayNames = [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+      ] as const;
+      const dayName = dayNames[dayOfWeek];
+
+      // Default operating hours
+      let openingTime = "09:00";
+      let closingTime = "18:00";
+
+      // Use salon's operating hours if available
+      if (
+        selectedSalon.operatingHours &&
+        selectedSalon.operatingHours[dayName]
+      ) {
+        const dayHours = selectedSalon.operatingHours[dayName];
+        // Check if the salon is closed on this day
+        if (dayHours.closed) {
+          // Salon is closed, generate no slots
+          setGeneratedSlots([]);
+          return;
+        } else if (dayHours.open && dayHours.close) {
+          // Use specified open/close times
+          openingTime = dayHours.open;
+          closingTime = dayHours.close;
+        }
+        // If open/close times are not specified but not closed, use defaults
+      }
+
       const slots = generateTimeSlots(
         selectedServiceDetails.totalDuration,
-        bookedTimes
+        bookedTimes,
+        openingTime,
+        closingTime
       );
       setGeneratedSlots(slots);
     } else {
       setGeneratedSlots([]);
     }
-  }, [selectedServiceDetails.totalDuration, bookingForm.date, bookedTimes]);
+  }, [
+    selectedServiceDetails.totalDuration,
+    bookingForm.date,
+    bookedTimes,
+    selectedSalon,
+  ]);
 
   React.useEffect(() => {
     fetchSalons();
@@ -806,8 +853,72 @@ export default function CustomerPortal() {
                     ) : (
                       <>
                         <p className="text-sm text-muted-foreground">
-                          Working hours: 9:00 AM – 6:00 PM • Duration:{" "}
-                          {formatDuration(selectedServiceDetails.totalDuration)}
+                          {(() => {
+                            // Get the salon's operating hours for the selected day
+                            let openingTime = "9:00 AM";
+                            let closingTime = "6:00 PM";
+
+                            if (bookingForm.date && selectedSalon) {
+                              const selectedDate = new Date(bookingForm.date);
+                              const dayOfWeek = selectedDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+                              const dayNames = [
+                                "sunday",
+                                "monday",
+                                "tuesday",
+                                "wednesday",
+                                "thursday",
+                                "friday",
+                                "saturday",
+                              ] as const;
+                              const dayName = dayNames[dayOfWeek];
+
+                              // Use salon's operating hours if available
+                              if (
+                                selectedSalon.operatingHours &&
+                                selectedSalon.operatingHours[dayName]
+                              ) {
+                                const dayHours =
+                                  selectedSalon.operatingHours[dayName];
+                                // Check if the salon is closed on this day
+                                if (dayHours.closed) {
+                                  // Salon is closed, but we still need to show some working hours for display
+                                  openingTime = "Closed";
+                                  closingTime = "";
+                                } else if (dayHours.open && dayHours.close) {
+                                  // Convert 24-hour format to 12-hour format for display
+                                  const formatTime = (timeStr: string) => {
+                                    const [hours, minutes] = timeStr
+                                      .split(":")
+                                      .map(Number);
+                                    const period = hours >= 12 ? "PM" : "AM";
+                                    const displayHours = hours % 12 || 12;
+                                    return `${displayHours}:${minutes
+                                      .toString()
+                                      .padStart(2, "0")} ${period}`;
+                                  };
+
+                                  openingTime = formatTime(dayHours.open);
+                                  closingTime = formatTime(dayHours.close);
+                                } else {
+                                  // If open/close times are not specified but not closed, use defaults
+                                  openingTime = "9:00 AM";
+                                  closingTime = "6:00 PM";
+                                }
+                              } else {
+                                // If no operating hours specified for this day, use defaults
+                                openingTime = "9:00 AM";
+                                closingTime = "6:00 PM";
+                              }
+                            }
+
+                            const workingHoursText = closingTime
+                              ? `Working hours: ${openingTime} – ${closingTime}`
+                              : `Working hours: ${openingTime}`;
+
+                            return `${workingHoursText} • Duration: ${formatDuration(
+                              selectedServiceDetails.totalDuration
+                            )}`;
+                          })()}
                         </p>
                         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 max-h-56 overflow-y-auto p-2 border rounded-lg">
                           {generatedSlots.map((slot, index) => (
@@ -824,7 +935,7 @@ export default function CustomerPortal() {
                               }
                               className={`p-3 text-sm rounded-lg border transition-all ${
                                 slot.isBooked
-                                  ? "bg-muted/70 text-muted-foreground/50 cursor-not-allowed border-muted line-through opacity-60"
+                                  ? "bg-destructive/10 text-destructive border-destructive/30 cursor-not-allowed opacity-70"
                                   : bookingForm.time === slot.start
                                   ? "bg-primary text-primary-foreground border-primary shadow-md"
                                   : "bg-background hover:bg-muted border-border hover:border-primary/50"
@@ -835,15 +946,14 @@ export default function CustomerPortal() {
                                   : `Book ${slot.start} – ${slot.end}`
                               }
                             >
-                              <span className="font-medium">{slot.start}</span>
-                              <span className="text-xs opacity-80">
-                                {" "}
+                              <div className="font-medium">{slot.start}</div>
+                              <div className="text-xs opacity-80">
                                 – {slot.end}
-                              </span>
+                              </div>
                               {slot.isBooked && (
-                                <span className="block text-xs mt-1">
+                                <div className="text-xs mt-1 font-medium">
                                   Booked
-                                </span>
+                                </div>
                               )}
                             </button>
                           ))}
