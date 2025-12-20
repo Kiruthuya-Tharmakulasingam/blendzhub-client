@@ -79,11 +79,13 @@ export default function LoginPage() {
       // No need to do anything here - the redirect happens in AuthContext
     } catch (err: unknown) {
       console.error("Login error:", err);
-      const errorMessage = err && typeof err === 'object' && 'response' in err 
-        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-        : err && typeof err === 'object' && 'message' in err
-        ? String((err as { message?: unknown }).message)
-        : "Login failed";
+      const errorMessage =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : err && typeof err === "object" && "message" in err
+          ? String((err as { message?: unknown }).message)
+          : "Login failed";
       setError(errorMessage || "Login failed");
     } finally {
       setIsSubmitting(false);
@@ -108,12 +110,12 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-col bg-background font-sans home-theme">
       <Navbar />
       <main className="flex-1 flex items-center justify-center p-4 relative">
-        <div 
+        <div
           className="absolute inset-0 opacity-5"
           style={{
             backgroundImage: "url('/background-pattern.svg')",
             backgroundRepeat: "repeat",
-            backgroundSize: "200px 200px"
+            backgroundSize: "200px 200px",
           }}
         />
         <Card className="w-full max-w-md relative z-10">
@@ -172,6 +174,15 @@ export default function LoginPage() {
                 {isSubmitting ? "Logging in..." : "Login"}
               </Button>
             </form>
+
+            <div className="mt-4 text-center">
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm text-foreground hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
           </CardContent>
 
           <CardFooter className="flex justify-center">

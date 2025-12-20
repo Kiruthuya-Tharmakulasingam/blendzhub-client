@@ -1,6 +1,17 @@
 import apiClient from "@/lib/apiClient";
 import Cookies from "js-cookie";
-import { LoginCredentials, RegisterCustomerData, RegisterOwnerData, User, Customer, Owner } from "@/types/user";
+import {
+  LoginCredentials,
+  RegisterCustomerData,
+  RegisterOwnerData,
+  User,
+  Customer,
+  Owner,
+} from "@/types/user";
+import {
+  ForgotPasswordFormData,
+  ResetPasswordFormData,
+} from "@/lib/validations/auth.schema";
 
 export interface AuthResponse {
   success: boolean;
@@ -16,22 +27,54 @@ export interface AuthResponse {
 
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>("/auth/login", credentials);
+    const response = await apiClient.post<AuthResponse>(
+      "/auth/login",
+      credentials
+    );
     return response.data;
   },
 
   register: async (data: RegisterCustomerData): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>("/auth/register/customer", data);
+    const response = await apiClient.post<AuthResponse>(
+      "/auth/register/customer",
+      data
+    );
     return response.data;
   },
 
-  registerCustomer: async (data: RegisterCustomerData): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>("/auth/register/customer", data);
+  registerCustomer: async (
+    data: RegisterCustomerData
+  ): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>(
+      "/auth/register/customer",
+      data
+    );
     return response.data;
   },
 
   registerOwner: async (data: RegisterOwnerData): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>("/auth/register/owner", data);
+    const response = await apiClient.post<AuthResponse>(
+      "/auth/register/owner",
+      data
+    );
+    return response.data;
+  },
+
+  forgotPassword: async (
+    data: ForgotPasswordFormData
+  ): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>(
+      "/auth/forgot-password",
+      data
+    );
+    return response.data;
+  },
+
+  resetPassword: async (data: ResetPasswordFormData): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>(
+      "/auth/reset-password",
+      data
+    );
     return response.data;
   },
 
@@ -50,7 +93,7 @@ export const authService = {
       const response = await apiClient.get<AuthResponse>("/auth/me", {
         validateStatus: (status) => status < 500, // Don't treat 401 as error
       });
-      
+
       // Handle 401 gracefully - this is expected when user is not authenticated
       if (response.status === 401) {
         // Clear invalid token
@@ -60,7 +103,7 @@ export const authService = {
           message: "Not authenticated",
         } as AuthResponse;
       }
-      
+
       return response.data;
     } catch (error: unknown) {
       // This catch block should rarely be hit due to validateStatus,
