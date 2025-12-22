@@ -413,11 +413,12 @@ export default function CustomerPortal() {
             : bookingForm.notes,
       });
 
-      if (response.success) {
-        toast.success("Appointment booked successfully!");
+      if (response.success && response.data) {
+        toast.success("Booking created! Redirecting to payment...");
         setIsBookingModalOpen(false);
         resetBookingForm();
-        router.push("/dashboard/customer/appointments");
+        // Redirect to payment page
+        router.push(`/payment?bookingId=${response.data._id}`);
       }
     } catch (error: unknown) {
       const apiError = error as {

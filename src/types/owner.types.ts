@@ -47,7 +47,12 @@ export interface Appointment {
   date: string;
   time: string;
   amount: number;
-  status: "pending" | "accepted" | "rejected" | "in-progress" | "completed" | "cancelled" | "no-show";
+  status: "pending" | "pending_payment" | "accepted" | "rejected" | "in-progress" | "completed" | "cancelled" | "no-show" | "expired";
+  paymentStatus?: "pending" | "paid" | "failed" | "refunded";
+  stripePaymentId?: string;
+  paymentAmount?: number;
+  paidAt?: string;
+  paymentExpiresAt?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -30,6 +30,8 @@ import {
   CalendarClock,
   Bell,
   MessageSquare,
+  CreditCard,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -64,12 +66,19 @@ interface Appointment {
   date: string;
   status:
     | "pending"
+    | "pending_payment"
     | "accepted"
     | "rejected"
     | "in-progress"
     | "completed"
     | "cancelled"
-    | "no-show";
+    | "no-show"
+    | "expired";
+  paymentStatus?: "pending" | "paid" | "failed" | "refunded";
+  stripePaymentId?: string;
+  paymentAmount?: number;
+  paidAt?: string;
+  paymentExpiresAt?: string;
   notes?: string;
   createdAt: string;
 }
@@ -737,6 +746,68 @@ export default function MyAppointmentsPage() {
                                 />
                               </TableCell>
                               <TableCell className="text-right">
+                                {/* Payment Pending - Show Pay Now Button */}
+                                {safeAppointment.status === "pending_payment" && (
+                                  <div className="flex flex-col items-end gap-2">
+                                    <Button
+                                      size="sm"
+                                      onClick={() => {
+                                        window.location.href = `/payment?bookingId=${safeAppointment._id}`;
+                                      }}
+                                      className="bg-primary hover:bg-primary/90"
+                                    >
+                                      <CreditCard className="h-4 w-4 mr-1" />
+                                      Pay Now
+                                    </Button>
+                                    <div className="text-xs text-muted-foreground">
+                                      {safeAppointment.paymentExpiresAt && (
+                                        <>
+                                          Expires:{" "}
+                                          {new Date(
+                                            safeAppointment.paymentExpiresAt
+                                          ).toLocaleTimeString()}
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                                {/* Payment Failed - Show Retry Button */}
+                                {safeAppointment.paymentStatus === "failed" && (
+                                  <div className="flex flex-col items-end gap-2">
+                                    <div className="text-sm text-destructive font-medium">
+                                      Payment Failed
+                                    </div>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        window.location.href = `/payment?bookingId=${safeAppointment._id}`;
+                                      }}
+                                    >
+                                      Retry Payment
+                                    </Button>
+                                  </div>
+                                )}
+                                {/* Expired Booking */}
+                                {safeAppointment.status === "expired" && (
+                                  <div className="text-sm text-muted-foreground text-right">
+                                    Booking expired
+                                  </div>
+                                )}
+                                {/* Show payment badge for paid bookings */}
+                                {safeAppointment.paymentStatus === "paid" && (
+                                  <div className="flex flex-col items-end gap-1 mb-2">
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-500">
+                                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                                      Paid
+                                    </span>
+                                    {safeAppointment.paymentAmount && (
+                                      <span className="text-xs text-muted-foreground">
+                                        Rs. {safeAppointment.paymentAmount.toLocaleString()}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
                                 {safeAppointment.status === "pending" && (
                                   <div className="text-sm text-muted-foreground text-right">
                                     Waiting for salon confirmation
