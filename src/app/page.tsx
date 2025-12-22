@@ -158,12 +158,10 @@ export default function Home() {
             </>
           }
           image={{
-            src:
-              process.env.NEXT_PUBLIC_HERO_IMAGE_URL ||
-              "https://res.cloudinary.com/dzu243cya/image/upload/v1765204576/blendzhub/hero-salon-image.jpg",
-            alt: "Modern salon interior",
+            src: "/salon_hero_bg.png",
+            alt: "Luxury modern salon interior with warm golden lighting and elegant design",
           }}
-          background="gradient"
+          background="image"
         />
 
         {/* Salons Section */}

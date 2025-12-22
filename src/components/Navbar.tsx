@@ -34,27 +34,43 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="flex w-full items-center justify-between px-8 py-4 bg-background shadow-sm border-b border-border sticky top-0 z-50">
-      <Link href={isAuthenticated && user?.role === "customer" ? "/dashboard/customer" : "/"} className="flex items-center gap-2 z-50">
+    <nav className="flex w-full items-center justify-between px-8 py-2 bg-background shadow-sm border-b border-border sticky top-0 z-50">
+      <Link
+        href={
+          isAuthenticated && user?.role === "customer"
+            ? "/dashboard/customer"
+            : "/"
+        }
+        className="flex items-center gap-2 z-50"
+      >
         <Image
           src="/noBgColor.png"
           alt="BlendzHub Logo"
-          width={60}
-          height={60}
-          className="h-14 w-auto"
+          width={64}
+          height={64}
+          className="h-16 w-auto"
           style={{ width: "auto", height: "auto" }}
           priority
         />
-        <span className="text-2xl font-bold text-foreground">BlendzHub</span>
       </Link>
 
       {/* Desktop Navigation */}
       <div className="hidden md:flex gap-4 items-center">
-        <Link href={isAuthenticated && user?.role === "customer" ? "/dashboard/customer" : "/"}>
-          <Button variant="ghost" className="text-primary">Home</Button>
+        <Link
+          href={
+            isAuthenticated && user?.role === "customer"
+              ? "/dashboard/customer"
+              : "/"
+          }
+        >
+          <Button variant="ghost" className="text-primary">
+            Home
+          </Button>
         </Link>
         <Link href="/about">
-          <Button variant="ghost" className="text-primary">About Us</Button>
+          <Button variant="ghost" className="text-primary">
+            About Us
+          </Button>
         </Link>
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
@@ -90,10 +106,17 @@ export default function Navbar() {
         ) : (
           <>
             <Link href="/auth/register/owner">
-              <Button variant="ghost" className="text-primary">Become an Owner</Button>
+              <Button variant="ghost" className="text-primary">
+                Become an Owner
+              </Button>
             </Link>
             <SignUpModal>
-              <Button variant="outline" className="text-primary border-primary hover:bg-primary hover:text-primary-foreground">Sign Up</Button>
+              <Button
+                variant="outline"
+                className="text-primary border-primary hover:bg-primary hover:text-primary-foreground"
+              >
+                Sign Up
+              </Button>
             </SignUpModal>
             <SignInModal>
               <Button variant="default">Sign In</Button>
@@ -104,10 +127,10 @@ export default function Navbar() {
 
       {/* Mobile Menu Toggle */}
       <div className="md:hidden z-50">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggleMenu} 
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleMenu}
           aria-label="Toggle menu"
           className="text-foreground hover:bg-accent hover:text-accent-foreground"
         >
@@ -121,7 +144,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300"
           onClick={closeMenu}
           aria-hidden="true"
@@ -138,26 +161,42 @@ export default function Navbar() {
           {isAuthenticated ? (
             <>
               <div className="flex flex-col gap-2 pb-4 border-b border-border">
-                <span className="text-lg font-semibold">Welcome, {user?.name}</span>
-                <span className="text-sm text-muted-foreground capitalize">{user?.role}</span>
+                <span className="text-lg font-semibold">
+                  Welcome, {user?.name}
+                </span>
+                <span className="text-sm text-muted-foreground capitalize">
+                  {user?.role}
+                </span>
               </div>
-              
+
               {user?.role === "customer" ? (
                 <>
                   <Link href="/dashboard/customer" onClick={closeMenu}>
-                    <Button variant="outline" className="w-full justify-start h-12 text-base">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start h-12 text-base"
+                    >
                       <LayoutDashboard className="mr-3 h-5 w-5" />
                       Home
                     </Button>
                   </Link>
-                  <Link href="/dashboard/customer/appointments" onClick={closeMenu}>
-                    <Button variant="ghost" className="w-full justify-start h-12 text-base text-primary">
+                  <Link
+                    href="/dashboard/customer/appointments"
+                    onClick={closeMenu}
+                  >
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start h-12 text-base text-primary"
+                    >
                       <Calendar className="mr-3 h-5 w-5" />
                       My Appointments
                     </Button>
                   </Link>
                   <Link href="/dashboard/customer/profile" onClick={closeMenu}>
-                    <Button variant="ghost" className="w-full justify-start h-12 text-base text-primary">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start h-12 text-base text-primary"
+                    >
                       <User className="mr-3 h-5 w-5" />
                       My Profile
                     </Button>
@@ -165,15 +204,18 @@ export default function Navbar() {
                 </>
               ) : (
                 <Link href={`/dashboard/${user?.role}`} onClick={closeMenu}>
-                  <Button variant="outline" className="w-full justify-start h-12 text-base">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-12 text-base"
+                  >
                     <LayoutDashboard className="mr-3 h-5 w-5" />
                     Dashboard
                   </Button>
                 </Link>
               )}
-              
-              <Button 
-                variant="ghost" 
+
+              <Button
+                variant="ghost"
                 onClick={() => {
                   logout();
                   closeMenu();
@@ -187,24 +229,33 @@ export default function Navbar() {
           ) : (
             <>
               <Link href="/about" onClick={closeMenu}>
-                <Button variant="ghost" className="w-full justify-start h-12 text-base text-foreground">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-12 text-base text-foreground"
+                >
                   About Us
                 </Button>
               </Link>
               <Link href="/auth/register/owner" onClick={closeMenu}>
-                <Button variant="ghost" className="w-full justify-start h-12 text-base text-primary">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start h-12 text-base text-primary"
+                >
                   Become an Owner
                 </Button>
               </Link>
-              
+
               <div onClick={closeMenu}>
                 <SignUpModal>
-                  <Button variant="outline" className="w-full justify-start h-12 text-base text-primary border-primary hover:bg-primary hover:text-primary-foreground">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-12 text-base text-primary border-primary hover:bg-primary hover:text-primary-foreground"
+                  >
                     Sign Up
                   </Button>
                 </SignUpModal>
               </div>
-              
+
               <div onClick={closeMenu}>
                 <SignInModal>
                   <Button variant="default" className="w-full h-12 text-base">
