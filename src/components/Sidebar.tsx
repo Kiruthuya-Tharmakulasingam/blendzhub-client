@@ -18,15 +18,24 @@ import {
   Store,
   TrendingUp,
   X,
+  CreditCard,
 } from "lucide-react";
 
 interface SidebarProps {
   role: "admin" | "owner" | "customer";
   isOpen?: boolean;
   onClose?: () => void;
+  activeSection?: string;
+  onSectionChange?: (section: string) => void;
 }
 
-export default function Sidebar({ role, isOpen = true, onClose }: SidebarProps) {
+export default function Sidebar({ 
+  role, 
+  isOpen = true, 
+  onClose,
+  activeSection,
+  onSectionChange
+}: SidebarProps) {
   const pathname = usePathname();
   const { logout, user } = useAuth();
 
@@ -46,6 +55,7 @@ export default function Sidebar({ role, isOpen = true, onClose }: SidebarProps) 
     { href: "/dashboard/owner/equipment", label: "Equipment", icon: Armchair },
     { href: "/dashboard/owner/analytics", label: "Analytics", icon: TrendingUp },
     { href: "/dashboard/owner/feedbacks", label: "Feedbacks", icon: MessageSquare },
+    { href: "/dashboard/owner/subscription", label: "Subscription", icon: CreditCard },
     { href: "/dashboard/owner/salon", label: "My Salon", icon: Store },
     { href: "/dashboard/owner/profile", label: "Profile", icon: Users },
   ];
@@ -120,20 +130,38 @@ export default function Sidebar({ role, isOpen = true, onClose }: SidebarProps) 
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">
           {links.map((link) => {
             const Icon = link.icon;
-            const isActive = pathname === link.href;
+            const isSectionLink = role === "owner" && onSectionChange;
+            const sectionName = link.label.toLowerCase();
+            const isActive = isSectionLink 
+              ? activeSection === sectionName 
+              : pathname === link.href;
+
+            const content = (
+              <Button
+                variant={isActive ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start",
+                  isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
+                )}
+                onClick={() => {
+                  if (isSectionLink) {
+                    onSectionChange(sectionName);
+                  }
+                  handleLinkClick();
+                }}
+              >
+                <Icon className="mr-2 h-4 w-4" />
+                {link.label}
+              </Button>
+            );
+
+            if (isSectionLink) {
+              return <div key={link.href}>{content}</div>;
+            }
 
             return (
               <Link key={link.href} href={link.href} onClick={handleLinkClick}>
-                <Button
-                  variant={isActive ? "secondary" : "ghost"}
-                  className={cn(
-                    "w-full justify-start",
-                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground"
-                  )}
-                >
-                  <Icon className="mr-2 h-4 w-4" />
-                  {link.label}
-                </Button>
+                {content}
               </Link>
             );
           })}

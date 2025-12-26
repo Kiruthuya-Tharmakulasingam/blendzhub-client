@@ -11,9 +11,16 @@ import Image from "next/image";
 interface DashboardLayoutProps {
   children: React.ReactNode;
   role: "admin" | "owner" | "customer";
+  activeSection?: string;
+  onSectionChange?: (section: string) => void;
 }
 
-export default function DashboardLayout({ children, role }: DashboardLayoutProps) {
+export default function DashboardLayout({ 
+  children, 
+  role,
+  activeSection,
+  onSectionChange
+}: DashboardLayoutProps) {
   const { user } = useAuth();
   const isCustomer = role === "customer";
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -47,6 +54,8 @@ export default function DashboardLayout({ children, role }: DashboardLayoutProps
         role={role} 
         isOpen={sidebarOpen} 
         onClose={() => setSidebarOpen(false)} 
+        activeSection={activeSection}
+        onSectionChange={onSectionChange}
       />
       <main className="flex-1 overflow-y-auto h-screen">
         {/* Mobile Header - only visible on mobile */}
