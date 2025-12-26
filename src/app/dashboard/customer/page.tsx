@@ -503,7 +503,7 @@ export default function CustomerPortal() {
                 "https://res.cloudinary.com/dzu243cya/image/upload/v1765204576/blendzhub/hero-salon-image.jpg",
               alt: "Modern salon interior",
             }}
-            background="gradient"
+            background="image"
           />
 
           {/* Salons Section */}
